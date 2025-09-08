@@ -132,3 +132,12 @@ variable "routing_rule" {
   description = "Routing rules for the website configuration."
   default     = []
 }
+
+###########
+# Lifecycle Configuration
+###########
+variable "lifecycle_config" {
+  description = "Set to a non-empty string to enable the lifecycle configuration for the S3 bucket."
+  type        = string
+  default     = ""
+}
