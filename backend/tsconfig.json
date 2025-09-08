@@ -1,0 +1,23 @@
+{
+    "compilerOptions": {
+      "target": "ES2020",
+      "module": "commonjs",
+      "outDir": "dist",
+      "rootDir": ".",
+      "esModuleInterop": true,
+      "strict": true,
+      "skipLibCheck": true,
+      "baseUrl": ".",
+    },
+    "include": [
+      "api_gateway/**/*",
+      "chart_generator/**/*",
+      "listening_history_aggregator/**/*",
+      "listening_history_ingestor/**/*",
+      "playlist_manager/**/*",
+    ],
+    "exclude": [
+      "dist",
+      "build"
+    ]
+}
