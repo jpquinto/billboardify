@@ -111,3 +111,40 @@ resource "aws_s3_bucket_website_configuration" "website_configuration" {
     }
   }
 }
+
+###########
+# Lifecycle Configuration
+###########
+
+# Create the lifecycle policy only if the `lifecycle_config` variable is set
+resource "aws_s3_bucket_lifecycle_configuration" "lifecycle" {
+  count = var.lifecycle_config != "" ? 1 : 0
+
+  bucket = aws_s3_bucket.s3.id
+
+  rule {
+    id     = "charts-to-infrequent-access"
+    status = "Enabled"
+
+    filter {
+      prefix = "charts/"
+    }
+
+    # Transition objects older than 1 year to the STANDARD_IA storage class
+    transition {
+      days          = 365
+      storage_class = "STANDARD_IA"
+    }
+  }
+}
+
+# The user requested an "infrequent access bucket," so we'll create it
+# here. Note: This bucket is separate and objects are not automatically
+# moved to it by the lifecycle policy above. That would require a separate process.
+resource "aws_s3_bucket" "infrequent_access_bucket" {
+  count = var.lifecycle_config != "" ? 1 : 0
+
+  bucket = "${module.label_bucket.id}-infrequent-access"
+
+  tags = module.label_bucket.tags
+}
