@@ -1,3 +1,11 @@
+data "aws_secretsmanager_secret_version" "spotify_api_secrets" {
+  secret_id = "SpotifyAPICreds"
+}
+
+locals {
+  spotify_secrets = jsondecode(data.aws_secretsmanager_secret_version.spotify_api_secrets.secret_string)
+}
+
 module "listening_history_ingestor_lambda" {
   source  = "./modules/lambda"
   context = module.null_label.context
@@ -19,6 +27,11 @@ module "listening_history_ingestor_lambda" {
   environment_variables = {
     REGION : var.aws_region
     AWS_ACCOUNT_ID : local.account_id
+    INGESTION_STATUS_TABLE_NAME : module.status_timestamps_table.name
+    RECENT_LISTENING_HISTORY_TABLE_NAME : module.recent_listening_history_table.name
+    SPOTIFY_REFRESH_TOKEN = local.spotify_secrets.SPOTIFY_REFRESH_TOKEN
+    SPOTIFY_CLIENT_ID     = local.spotify_secrets.SPOTIFY_CLIENT_ID
+    SPOTIFY_CLIENT_SECRET = local.spotify_secrets.SPOTIFY_CLIENT_SECRET
   }
 }
 
@@ -33,8 +46,18 @@ resource "aws_iam_policy" "listening_history_ingestor_policy" {
         Effect = "Allow",
         Action = [
           "dynamodb:PutItem",
+          "dynamodb:BatchWriteItem",
         ],
         Resource = module.recent_listening_history_table.arn
+      },
+      {
+        Effect = "Allow",
+        Action = [
+          "dynamodb:GetItem",
+          "dynamodb:PutItem",
+          "dynamodb:UpdateItem"
+        ],
+        Resource = module.status_timestamps_table.arn
       }
     ]
   })
