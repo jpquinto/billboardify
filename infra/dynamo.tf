@@ -40,3 +40,31 @@ module "status_timestamps_table" {
     }
   ]
 }
+
+module "song_history_table" {
+  source  = "./modules/dynamodb_table"
+  context = module.null_label.context
+
+  name = "song-history"
+
+  billing_mode = "PAY_PER_REQUEST"
+
+  hash_key  = "artist_id"
+  range_key = "track_id"
+
+  attributes = [
+    {
+      name = "artist_id"
+      type = "S"
+    },
+    {
+      name = "track_id"
+      type = "S"
+    }
+    // Other attributes:
+    // track_name
+    // album_cover_url
+    // artist_name
+    // play_count
+  ]
+}
