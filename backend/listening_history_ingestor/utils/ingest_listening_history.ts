@@ -1,4 +1,3 @@
-import { DynamoDBClient, GetItemCommand } from "@aws-sdk/client-dynamodb";
 import { ListeningHistoryItem } from "listening_history_ingestor/handler";
 
 // These should be set as environment variables on your Lambda function
@@ -85,6 +84,7 @@ export const ingestRecentListeningData = async (
         playedAt: item.played_at,
         artistId: item.track.artists[0]?.id,
         albumId: item.track.album.id,
+        albumCoverUrl: item.track.album.images[0]?.url,
       })
     );
 
