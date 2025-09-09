@@ -14,6 +14,7 @@ export interface ListeningHistoryItem {
   playedAt: string;
   artistId?: string;
   albumId?: string;
+  albumCoverUrl?: string;
 }
 
 export const handler = async () => {
