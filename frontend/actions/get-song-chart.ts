@@ -1,0 +1,48 @@
+"use server";
+
+import { SongChart } from "@/types/chart-data";
+import axios from "axios";
+
+const BACKEND_API_URL = process.env.BACKEND_API_URL!;
+
+export const getSongChart = async (timestamp: string): Promise<SongChart> => {
+  try {
+    const response = await axios.get(`${BACKEND_API_URL}/get-song-chart`, {
+      params: {
+        timestamp: timestamp,
+      },
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    // Transform the response to match your interface
+    const data = response.data;
+
+    return {
+      timestamp: data.timestamp,
+      chart: data.chart,
+      totalEntries: data.total_entries, // Note: API returns total_entries, interface expects totalEntries
+    };
+  } catch (error) {
+    console.error("Error fetching chart:", error);
+
+    if (axios.isAxiosError(error)) {
+      if (error.response?.status === 404) {
+        throw new Error(`Chart not found for timestamp: ${timestamp}`);
+      } else if (error.response?.status === 400) {
+        throw new Error(`Invalid timestamp format: ${timestamp}`);
+      } else if (error.response?.status === 403) {
+        throw new Error("Access denied to chart data");
+      } else {
+        throw new Error(
+          `Failed to fetch chart: ${
+            error.response?.data?.error || error.message
+          }`
+        );
+      }
+    }
+
+    throw new Error("Network error occurred while fetching chart");
+  }
+};
