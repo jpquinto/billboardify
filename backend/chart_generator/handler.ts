@@ -1,0 +1,122 @@
+import { ListeningHistoryDynamoDBItem } from "./types";
+import {
+  aggregateListeningHistory,
+  calculateChartPointsFromListeningHistory,
+} from "./utils/aggregate_songs";
+import {
+  calculateSongChart,
+  SongChartData,
+} from "./utils/calculate_song_chart";
+import { fetchListeningHistory } from "./utils/fetch_listening_history";
+import { getLastChartGenerationTimestamp } from "./utils/get_last_chart_generation_timestamp";
+import { updateLastChartGenerationTimestamp } from "./utils/update_last_chart_generation_timestamp";
+import { uploadChart } from "./utils/upload_chart";
+
+export const handler = async () => {
+  console.log("Chart Generator Handler Triggered");
+
+  // Step 1. Get last chart generation timestamp
+  let lastChartGenerationTimestamp: string | null = null;
+  try {
+    lastChartGenerationTimestamp = await getLastChartGenerationTimestamp();
+  } catch (error: any) {
+    console.error("Error getting last chart generation timestamp:", error);
+    throw new Error(error);
+  }
+
+  if (!lastChartGenerationTimestamp) {
+    console.log("No previous chart generation timestamp found.");
+    return;
+  }
+
+  // Step 2. Fetch new data since last timestamp for aggregation
+  let listeningHistory: ListeningHistoryDynamoDBItem[] | null = null;
+  const lastGenerationDate = new Date(lastChartGenerationTimestamp);
+  const threeWeeksInMillis = 3 * 7 * 24 * 60 * 60 * 1000;
+  const cutoffDate = new Date(
+    lastGenerationDate.getTime() - threeWeeksInMillis
+  );
+  const cutoffTimestamp = cutoffDate.toISOString();
+  try {
+    listeningHistory = await fetchListeningHistory(cutoffTimestamp);
+  } catch (error: any) {
+    console.error("Error fetching listening history:", error);
+    throw new Error(error);
+  }
+
+  if (!listeningHistory || listeningHistory.length === 0) {
+    console.log("No new listening history to process for charts.");
+    return;
+  }
+
+  console.log(listeningHistory);
+
+  // Step 3. Aggregate song data to update plays since last chart generation
+  const aggregatedListeningHistory = aggregateListeningHistory(
+    lastChartGenerationTimestamp,
+    listeningHistory
+  );
+
+  console.log("Aggregated Listening History: ", aggregatedListeningHistory);
+
+  // Step 4. Calculate current chart points from last three week listening history
+  const currentChartPointData =
+    calculateChartPointsFromListeningHistory(listeningHistory);
+
+  console.log("Current Chart Point Data: ", currentChartPointData);
+
+  // Step 5. Generate chart data
+  const chartTimestamp = new Date().toISOString();
+
+  let chart: SongChartData[] = [];
+  try {
+    chart = await calculateSongChart(
+      aggregatedListeningHistory,
+      currentChartPointData,
+      chartTimestamp
+    );
+  } catch (error: any) {
+    console.error("Error calculating song chart:", error);
+    throw new Error(error);
+  }
+
+  console.log("Chart generated: ", chart);
+
+  if (chart.length === 0) {
+    console.log("No chart data generated.");
+    return;
+  }
+
+  const top100Chart: SongChartData[] = [];
+  const top100TrackIds = new Set<string>();
+
+  for (const song of chart) {
+    if (song.position <= 100) {
+      top100Chart.push(song);
+      top100TrackIds.add(song.track_id);
+    }
+  }
+
+  console.log(`Top 100 chart entries: ${top100Chart.length}`);
+  console.log(`Top 100 track IDs: ${top100TrackIds.size}`);
+
+  // Step 5. Upload JSON file to chart storage (S3)
+  let s3Key = "";
+  try {
+    s3Key = await uploadChart(top100Chart, chartTimestamp);
+  } catch (error: any) {
+    console.error("Error uploading chart JSON file:", error);
+    throw new Error(error);
+  }
+
+  // Step 6. Update song info from last chart that didn't make it to this chart
+  // Step 7. Update last chart generation timestamp
+  //   try {
+  //     await updateLastChartGenerationTimestamp();
+  //   } catch (error: any) {
+  //     console.error("Error updating chart generation timestamp:", error);
+  //     throw new Error(error);
+  //   }
+
+  // Step 7. Aggregation Flow
+};
