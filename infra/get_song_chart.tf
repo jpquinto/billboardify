@@ -33,7 +33,7 @@ resource "aws_iam_policy" "get_song_chart_policy" {
       {
         Effect = "Allow",
         Action = [
-          "s3:PutObject"
+          "s3:GetObject"
         ],
         Resource = "${module.song_chart_history_bucket.bucket_arn}/*"
       }
