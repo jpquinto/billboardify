@@ -3,6 +3,7 @@ import "./globals.css";
 import { Inter } from "next/font/google";
 import { Navbar } from "@/components/navbar";
 import { ThemeProvider } from "@/components/theme-provider";
+import { ControlBar } from "@/components/control-bar";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -45,6 +46,7 @@ export default function RootLayout({
         >
           <div className="pt-[100px] flex flex-col min-h-[100dvh] max-w-[100dvw] overflow-x-hidden relative">
             <Navbar />
+            <ControlBar />
             {children}
           </div>
         </ThemeProvider>

@@ -9,7 +9,7 @@ export const SongChartEntry = (entry: SongChartEntryType) => {
       return <span className="text-green-500 text-xs">▲</span>;
     } else if (entry.position_adjustment === "down") {
       return <span className="text-red-500 text-xs">▼</span>;
-    } else if (entry.position_adjustment === "new") {
+    } else if (entry.position_adjustment === "0") {
       return <span className="text-blue-500 text-xs font-semibold">NEW</span>;
     } else {
       return <span className="text-gray-400 text-xs">—</span>;
@@ -21,7 +21,10 @@ export const SongChartEntry = (entry: SongChartEntryType) => {
   };
 
   return (
-    <div className="flex items-center gap-4 p-4 border-b border-gray-200 hover:bg-gray-50 transition-colors">
+    <section
+      className="flex items-center gap-4 p-4 border-b border-gray-200 hover:bg-gray-50 transition-colors"
+      id={entry.position.toString()}
+    >
       {/* Position */}
       <div className="flex items-center gap-2 min-w-[60px]">
         <span className="text-2xl font-bold text-gray-900">
@@ -77,6 +80,6 @@ export const SongChartEntry = (entry: SongChartEntryType) => {
           </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 };
