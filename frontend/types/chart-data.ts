@@ -14,7 +14,29 @@ export interface SongChartEntry {
 }
 
 export interface SongChart {
-  timestamp: string;
-  chart: SongChartEntry[];
-  totalEntries: number;
+  chartData: SongChartEntry[];
+  chartSummary: {
+    most_charted_artists: {
+      artist_id: string;
+      artist_name: string;
+      chart_appearances: number;
+    }[];
+    most_recently_streamed_songs: {
+      track_id: string;
+      track_name: string;
+      artist_name: string;
+      recent_plays: number;
+    }[];
+    biggest_debuts: {
+      track_id: string;
+      track_name: string;
+      artist_name: string;
+      debut_position: number;
+    }[];
+    total_unique_tracks_streamed: number;
+  };
+  banners: {
+    banner_url: string;
+    artist_name: string;
+  };
 }

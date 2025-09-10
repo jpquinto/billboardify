@@ -9,25 +9,32 @@ import { BannerScroller } from "../ui/banner-scroller";
 import { ChartHeader } from "../chart-header";
 import { LogoSeparator } from "../ui/logo-separator";
 
-export const SongChart = (chart: SongChartType) => {
+export const SongChart = ({
+  chartData,
+  timestamp,
+}: {
+  chartData: SongChartType;
+  timestamp: string;
+}) => {
+  const { chartData: chartEntries, chartSummary, banners } = chartData;
   return (
     <div className="flex justify-center flex-col mx-auto px-4 pt-30">
       <ChartHeader
         title={"My Hot 100"}
         logo={"/sphere-logo.png"}
-        timestamp={chart.timestamp}
-        totalEntries={chart.totalEntries}
+        timestamp={timestamp}
+        totalEntries={chartEntries.length}
       />
 
       <section className="relative max-w-8xl" id="1">
         <BannerScroller
           banners={["/banner.webp", "/ive.webp", "/kehlani.webp"]}
         />
-        <FirstPlaceChartEntry {...chart.chart[0]} />
-        <SecondPlaceChartEntry {...chart.chart[1]} />
-        <SecondPlaceChartEntry {...chart.chart[2]} />
+        <FirstPlaceChartEntry {...chartEntries[0]} />
+        <SecondPlaceChartEntry {...chartEntries[1]} />
+        <SecondPlaceChartEntry {...chartEntries[2]} />
         <div className="pt-5">
-          {chart.chart.slice(3, 40).map((entry) => (
+          {chartEntries.slice(3, 40).map((entry) => (
             <TopTenChartEntry key={entry.track_id} {...entry} />
           ))}
         </div>
@@ -52,7 +59,7 @@ export const SongChart = (chart: SongChartType) => {
 
           {/* Chart Entries */}
           <div className="divide-y divide-gray-200">
-            {chart.chart.slice(40).map((entry) => (
+            {chartEntries.slice(40).map((entry) => (
               <SongChartEntry key={entry.track_id} {...entry} />
             ))}
           </div>

@@ -115,7 +115,10 @@ export default function Hot100() {
   return (
     <main className="flex-1">
       <ChartProgressBar />
-      <SongChart {...latestChartData} />
+      <SongChart
+        chartData={latestChartData}
+        timestamp={chartTimestampsList[0]}
+      />
     </main>
   );
 }
