@@ -4,9 +4,9 @@ import { useEffect, useState } from "react";
 import { SongChart } from "@/components/song-chart/song-chart";
 import { SongChart as SongChartType } from "@/types/chart-data";
 import { getSongChart } from "@/actions/get-song-chart";
-import { ChartProgressBar } from "@/components/chart-progress-bar";
+import { ArtistChart } from "@/components/artist-chart/artist-chart";
 
-export default function Hot100() {
+export default function Artist25() {
   const [chartData, setChartData] = useState<SongChartType | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -16,7 +16,7 @@ export default function Hot100() {
       try {
         setLoading(true);
         // Hardcoded timestamp - replace with dynamic date as needed
-        const timestamp = "2025-09-09T23:36:55.952Z";
+        const timestamp = "2025-09-09T16:21:37.003Z";
         const data = await getSongChart(timestamp);
         setChartData(data);
       } catch (err) {
@@ -89,8 +89,7 @@ export default function Hot100() {
 
   return (
     <main className="flex-1">
-      <ChartProgressBar />
-      <SongChart {...chartData} />
+      <ArtistChart {...chartData} />
     </main>
   );
 }

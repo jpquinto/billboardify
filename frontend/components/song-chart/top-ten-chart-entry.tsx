@@ -1,18 +1,17 @@
 "use client";
-
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { SongChartEntry as SongChartEntryType } from "@/types/chart-data";
 import { LiquidGlassContainer } from "../ui/liquid-glass-container";
-import Image from "next/image";
 
-export const SecondPlaceChartEntry = (entry: SongChartEntryType) => {
+export const TopTenChartEntry = (entry: SongChartEntryType) => {
   const getPositionChangeIcon = () => {
     if (entry.position_adjustment === "up") {
       return <span className="text-green-500 text-xl">▲</span>;
     } else if (entry.position_adjustment === "down") {
       return <span className="text-red-500 text-xl">▼</span>;
-    } else if (entry.position_adjustment === "debut") {
-      return <span className="text-blue-500 text-xl font-semibold">NEW</span>;
+    } else if (entry.position_adjustment === "DEBUT") {
+      return <span className="text-blue-500 text-base font-semibold">NEW</span>;
     } else {
       return <span className="text-gray-400 text-xl">—</span>;
     }
@@ -22,14 +21,51 @@ export const SecondPlaceChartEntry = (entry: SongChartEntryType) => {
     return new Intl.NumberFormat().format(num);
   };
 
+  const [isVisible, setIsVisible] = useState(false);
+  const componentRef = useRef(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setIsVisible(true);
+            observer.unobserve(entry.target); // Stop observing once it's visible
+          }
+        });
+      },
+      {
+        threshold: 0.1, // Trigger when 10% of the component is visible
+      }
+    );
+
+    if (componentRef.current) {
+      observer.observe(componentRef.current);
+    }
+
+    return () => {
+      if (componentRef.current) {
+        observer.unobserve(componentRef.current);
+      }
+    };
+  }, []);
+
   return (
-    <div className="py-5">
+    <section
+      ref={componentRef}
+      className="pb-5 transition-all"
+      style={{
+        transform: isVisible ? "scale(1)" : "scale(0.9)",
+        transition: "transform 0.5s ease-out, opacity 0.5s ease-out",
+      }}
+      id={entry.position.toString()}
+    >
       <LiquidGlassContainer>
         <div className="max-w-8xl mx-auto min-w-6xl w-full flex items-center gap-8 p-4 border-gray-200 transition-colors">
           {/* Position */}
           <div className="flex items-center gap-2 min-w-[60px]">
             {getPositionChangeIcon()}
-            <span className="text-8xl font-bold text-gray-900">
+            <span className="text-5xl font-bold text-gray-900">
               {entry.position}
             </span>
           </div>
@@ -39,19 +75,19 @@ export const SecondPlaceChartEntry = (entry: SongChartEntryType) => {
             <img
               src={entry.album_cover}
               alt={`${entry.album_name} cover`}
-              className="w-30 h-30 rounded object-cover"
+              className="w-20 h-20 rounded object-cover"
             />
           </div>
 
           {/* Track & Artist Info */}
           <div className="flex-1 min-w-0">
             <Link href={`/track/${entry.track_id}`} className="group">
-              <h3 className="font-semibold text-gray-900 truncate transition-colors text-5xl tracking-tighter pb-3">
-                {entry.track_name.length > 25
-                  ? entry.track_name.slice(0, 25) + "..."
+              <h3 className="font-semibold text-gray-900 truncate group-hover:text-blue-600 transition-colors text-4xl tracking-tighter pb-2">
+                {entry.track_name.length > 30
+                  ? entry.track_name.slice(0, 30) + "..."
                   : entry.track_name}
               </h3>
-              <p className="text-2xl text-gray-900 truncate font-bold">
+              <p className="text-xl text-gray-900 truncate font-bold">
                 {entry.artist_name.length > 45
                   ? entry.artist_name.slice(0, 45) + "..."
                   : entry.artist_name}
@@ -89,6 +125,6 @@ export const SecondPlaceChartEntry = (entry: SongChartEntryType) => {
           </div>
         </div>
       </LiquidGlassContainer>
-    </div>
+    </section>
   );
 };
