@@ -14,7 +14,7 @@
       "chart_generator/**/*",
       "listening_history_aggregator/**/*",
       "listening_history_ingestor/**/*",
-      "song_chart_playlist_generator/**/*",
+      "song_chart_playlist_generator/**/*"
     ],
     "exclude": [
       "dist",

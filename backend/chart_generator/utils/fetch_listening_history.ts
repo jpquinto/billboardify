@@ -6,7 +6,7 @@ import {
 } from "@aws-sdk/client-dynamodb";
 import { ListeningHistoryDynamoDBItem } from "chart_generator/types";
 
-const { RECENT_LISTENING_HISTORY_TABLE_NAME } = process.env;
+const { LISTENING_HISTORY_TABLE_NAME } = process.env;
 const DYNAMODB_CLIENT = new DynamoDBClient({});
 
 export const fetchListeningHistory = async (
@@ -18,7 +18,7 @@ export const fetchListeningHistory = async (
 
   do {
     const params: QueryCommandInput = {
-      TableName: RECENT_LISTENING_HISTORY_TABLE_NAME,
+      TableName: LISTENING_HISTORY_TABLE_NAME,
       KeyConditionExpression: "user_id = :user_id AND #ts > :timestamp",
       ExpressionAttributeNames: {
         "#ts": "timestamp",
