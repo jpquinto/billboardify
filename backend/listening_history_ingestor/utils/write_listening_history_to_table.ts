@@ -6,7 +6,7 @@ import {
 
 import { ListeningHistoryItem } from "listening_history_ingestor/handler";
 
-const { RECENT_LISTENING_HISTORY_TABLE_NAME } = process.env;
+const { LISTENING_HISTORY_TABLE_NAME } = process.env;
 const DYNAMODB_CLIENT = new DynamoDBClient({});
 const BATCH_SIZE = 25; // DynamoDB BatchWriteItem limit
 
@@ -17,18 +17,39 @@ const BATCH_SIZE = 25; // DynamoDB BatchWriteItem limit
 export const writeListeningHistoryToTable = async (
   listeningHistory: ListeningHistoryItem[]
 ): Promise<void> => {
-  if (!RECENT_LISTENING_HISTORY_TABLE_NAME) {
-    throw new Error("RECENT_LISTENING_HISTORY_TABLE_NAME is not set");
+  if (!LISTENING_HISTORY_TABLE_NAME) {
+    throw new Error("LISTENING_HISTORY_TABLE_NAME is not set");
   }
 
-  const ttlInSeconds = Math.floor(
-    new Date().setMonth(new Date().getMonth() + 1) / 1000
+  // Filter out items without album cover URLs
+  const itemsWithCovers = listeningHistory.filter((item) => {
+    const hasValidCover =
+      item.albumCoverUrl &&
+      item.albumCoverUrl !== "unknown" &&
+      item.albumCoverUrl.trim() !== "";
+
+    if (!hasValidCover) {
+      console.log(
+        `Skipping item without album cover: ${item.trackName} by ${item.artistName}`
+      );
+    }
+
+    return hasValidCover;
+  });
+
+  if (itemsWithCovers.length === 0) {
+    console.log("No items with album covers to write to DynamoDB.");
+    return;
+  }
+
+  console.log(
+    `Filtered ${listeningHistory.length} items down to ${itemsWithCovers.length} items with album covers.`
   );
 
-  // Split the listening history into chunks of 25 items or less
+  // Split the filtered listening history into chunks of 25 items or less
   const chunks = [];
-  for (let i = 0; i < listeningHistory.length; i += BATCH_SIZE) {
-    chunks.push(listeningHistory.slice(i, i + BATCH_SIZE));
+  for (let i = 0; i < itemsWithCovers.length; i += BATCH_SIZE) {
+    chunks.push(itemsWithCovers.slice(i, i + BATCH_SIZE));
   }
 
   // Process each chunk in parallel
@@ -46,14 +67,13 @@ export const writeListeningHistoryToTable = async (
           album_id: { S: item.albumId ?? "unknown" },
           album_cover_url: { S: item.albumCoverUrl ?? "unknown" },
           ingested_at: { S: new Date().toISOString() },
-          ttl: { N: ttlInSeconds.toString() },
         },
       },
     }));
 
     const params: BatchWriteItemCommandInput = {
       RequestItems: {
-        [RECENT_LISTENING_HISTORY_TABLE_NAME]: putRequests,
+        [LISTENING_HISTORY_TABLE_NAME]: putRequests,
       },
     };
 
