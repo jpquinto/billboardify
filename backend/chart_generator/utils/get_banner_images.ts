@@ -26,7 +26,6 @@ export const scrapeBanners = async (
 
   try {
     const executablePath = await chromium.executablePath();
-    console.log("Chromium executable path:", executablePath);
 
     // Launch Puppeteer browser with @sparticuz/chromium
     browser = await puppeteer.launch({
@@ -58,9 +57,9 @@ export const scrapeBanners = async (
 
         // Set user agent and viewport
         await page.setUserAgent(
-          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
         );
-        await page.setViewport({ width: 1920, height: 1080 });
+        await page.setViewport({ width: 2560, height: 1440 });
 
         // Set extra HTTP headers
         await page.setExtraHTTPHeaders({
@@ -118,7 +117,7 @@ export const scrapeBanners = async (
         }
 
         // Wait for content to load
-        await new Promise((resolve) => setTimeout(resolve, 5000));
+        await new Promise((resolve) => setTimeout(resolve, 8000));
 
         // Check if we got an error page
         const hasError = (await page.$("text=Something went wrong")) !== null;
