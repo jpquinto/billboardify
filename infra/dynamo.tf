@@ -1,8 +1,8 @@
-module "recent_listening_history_table" {
+module "listening_history_table" {
   source  = "./modules/dynamodb_table"
   context = module.null_label.context
 
-  name = "recent-listening-history"
+  name = "listening-history"
 
   billing_mode = "PAY_PER_REQUEST"
 
@@ -19,8 +19,6 @@ module "recent_listening_history_table" {
       type = "S"
     }
   ]
-  ttl_enabled   = true
-  ttl_attribute = "ttl"
 }
 
 module "status_timestamps_table" {
