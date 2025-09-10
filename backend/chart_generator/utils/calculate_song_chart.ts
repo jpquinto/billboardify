@@ -1,3 +1,4 @@
+import { SongChartData } from "chart_generator/types";
 import { CurrentChartPointData } from "./aggregate_songs";
 import {
   DynamoDBClient,
@@ -9,21 +10,6 @@ import {
 
 const DYNAMODB_CLIENT = new DynamoDBClient({});
 const { SONG_HISTORY_TABLE_NAME } = process.env;
-
-export interface SongChartData {
-  position: number;
-  track_id: string;
-  track_name: string;
-  peak: number;
-  last_week: number | null;
-  weeks_on_chart: number;
-  position_adjustment: string;
-  artist_name: string;
-  album_name: string;
-  album_cover: string;
-  plays_since_last_week: number;
-  points: number;
-}
 
 export const calculateSongChart = async (
   recentListeningHistory: Map<string, number>,
@@ -176,6 +162,8 @@ export const getAndUpdateChartEntry = async (
     weeks_on_chart: weeksOnChart,
     position_adjustment: positionAdjustment,
     artist_name: entry.artist_name,
+    artist_id: entry.artist_id,
+    album_id: entry.album_id,
     album_name: entry.album_name,
     album_cover: entry.album_cover_url,
     plays_since_last_week: recent_play_count,
