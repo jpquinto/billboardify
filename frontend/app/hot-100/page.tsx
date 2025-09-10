@@ -5,20 +5,45 @@ import { SongChart } from "@/components/song-chart/song-chart";
 import { SongChart as SongChartType } from "@/types/chart-data";
 import { getSongChart } from "@/actions/get-song-chart";
 import { ChartProgressBar } from "@/components/chart-progress-bar";
+import { listSongCharts } from "@/actions/list-song-charts";
 
 export default function Hot100() {
-  const [chartData, setChartData] = useState<SongChartType | null>(null);
+  const [chartTimestampsList, setChartTimestampsList] = useState<string[]>([]);
+  const [latestChartData, setlatestChartData] = useState<SongChartType | null>(
+    null
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchChartData = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true);
-        // Hardcoded timestamp - replace with dynamic date as needed
-        const timestamp = "2025-09-09T23:36:55.952Z";
-        const data = await getSongChart(timestamp);
-        setChartData(data);
+        setError(null);
+
+        // Step 1: List charts to get the latest timestamp
+        const chartsData = await listSongCharts();
+
+        if (chartsData.charts.length === 0) {
+          setError("No charts available");
+          setLoading(false);
+          return;
+        }
+
+        if (!chartsData.charts[0].timestamp) {
+          setError("Invalid chart data");
+          setLoading(false);
+          return;
+        }
+
+        setChartTimestampsList(
+          chartsData.charts.map((chart) => chart.timestamp)
+        );
+        const timestamp = chartsData.charts[0].timestamp;
+
+        // Step 2: Fetch the actual chart data using the timestamp
+        const chartData = await getSongChart(timestamp);
+        setlatestChartData(chartData);
       } catch (err) {
         setError(
           err instanceof Error ? err.message : "Failed to load chart data"
@@ -28,7 +53,7 @@ export default function Hot100() {
       }
     };
 
-    fetchChartData();
+    fetchData();
   }, []);
 
   if (loading) {
@@ -75,7 +100,7 @@ export default function Hot100() {
     );
   }
 
-  if (!chartData) {
+  if (!latestChartData) {
     return (
       <main className="flex-1">
         <div className="max-w-6xl mx-auto px-4 py-8">
@@ -90,7 +115,7 @@ export default function Hot100() {
   return (
     <main className="flex-1">
       <ChartProgressBar />
-      <SongChart {...chartData} />
+      <SongChart {...latestChartData} />
     </main>
   );
 }
