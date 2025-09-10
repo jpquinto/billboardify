@@ -9,25 +9,30 @@ import { SecondPlaceChartEntry } from "../song-chart/second-place-chart-entry";
 import { TopTenChartEntry } from "../song-chart/top-ten-chart-entry";
 import { SongChartEntry } from "../song-chart/song-chart-entry";
 
-export const ArtistChart = (chart: SongChartType) => {
+export const ArtistChart = ({
+  chartData,
+  timestamp,
+}: {
+  chartData: SongChartType;
+  timestamp: string;
+}) => {
+  const { chartData: chartEntries, chartSummary, banners } = chartData;
   return (
     <div className="flex justify-center flex-col mx-auto px-4 pt-30">
       <ChartHeader
         title={"My Artist 25"}
         logo={"/artist-chart-logo.png"}
-        timestamp={chart.timestamp}
-        totalEntries={chart.totalEntries}
+        timestamp={timestamp}
+        totalEntries={chartEntries.length}
       />
 
       <div className="relative max-w-8xl">
-        <BannerScroller
-          banners={["/banner.webp", "/ive.webp", "/kehlani.webp"]}
-        />
-        <FirstPlaceChartEntry {...chart.chart[0]} />
-        <SecondPlaceChartEntry {...chart.chart[1]} />
-        <SecondPlaceChartEntry {...chart.chart[2]} />
+        <BannerScroller banners={banners.map((banner) => banner.banner_url)} />
+        <FirstPlaceChartEntry {...chartEntries[0]} />
+        <SecondPlaceChartEntry {...chartEntries[1]} />
+        <SecondPlaceChartEntry {...chartEntries[2]} />
         <div className="pt-5">
-          {chart.chart.slice(3, 40).map((entry) => (
+          {chartEntries.slice(3, 40).map((entry) => (
             <TopTenChartEntry key={entry.track_id} {...entry} />
           ))}
         </div>
@@ -49,7 +54,7 @@ export const ArtistChart = (chart: SongChartType) => {
           </div>
 
           <div className="divide-y divide-gray-200">
-            {chart.chart.slice(40).map((entry) => (
+            {chartEntries.slice(40).map((entry) => (
               <SongChartEntry key={entry.track_id} {...entry} />
             ))}
           </div>
