@@ -14,6 +14,7 @@ export interface SongChartEntry {
 }
 
 export interface SongChart {
+  timestamp: string;
   chartData: SongChartEntry[];
   chartSummary: {
     most_charted_artists: {
@@ -38,5 +39,5 @@ export interface SongChart {
   banners: {
     banner_url: string;
     artist_name: string;
-  };
+  }[];
 }

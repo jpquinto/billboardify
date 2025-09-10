@@ -27,9 +27,7 @@ export const SongChart = ({
       />
 
       <section className="relative max-w-8xl" id="1">
-        <BannerScroller
-          banners={["/banner.webp", "/ive.webp", "/kehlani.webp"]}
-        />
+        <BannerScroller banners={banners.map((banner) => banner.banner_url)} />
         <FirstPlaceChartEntry {...chartEntries[0]} />
         <SecondPlaceChartEntry {...chartEntries[1]} />
         <SecondPlaceChartEntry {...chartEntries[2]} />

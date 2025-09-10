@@ -117,7 +117,7 @@ export default function Hot100() {
       <ChartProgressBar />
       <SongChart
         chartData={latestChartData}
-        timestamp={chartTimestampsList[0]}
+        timestamp={latestChartData.timestamp}
       />
     </main>
   );

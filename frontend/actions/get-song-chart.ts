@@ -20,9 +20,10 @@ export const getSongChart = async (timestamp: string): Promise<SongChart> => {
     const data = response.data;
 
     return {
-      chartData: data.chart_data,
-      chartSummary: data.chart_summary,
-      banners: data.banners,
+      timestamp: data.timestamp,
+      chartData: data.chart.chart_data,
+      chartSummary: data.chart.chart_summary,
+      banners: data.chart.banners,
     };
   } catch (error) {
     console.error("Error fetching chart:", error);
