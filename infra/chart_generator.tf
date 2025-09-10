@@ -1,3 +1,7 @@
+data "aws_lambda_layer_version" "spotify_sparticuz" {
+  layer_name = "spotify-sparticuz-layer"
+}
+
 module "chart_generator_lambda" {
   source  = "./modules/lambda"
   context = module.null_label.context
@@ -7,12 +11,14 @@ module "chart_generator_lambda" {
   source_dir      = "${path.root}/../backend/dist/chart_generator"
   build_path      = "${path.root}/../backend/build/chart_generator/chart_generator.zip"
   runtime         = "nodejs20.x"
-  memory          = 256
+  memory          = 1536
   time_limit      = 60
   deployment_type = "zip"
   zip_project     = true
 
   layers = [
+    data.aws_lambda_layer_version.spotify_sparticuz.arn,
+    module.browser_lambda_layer.layer_arn,
     module.shared_lambda_layer.layer_arn,
   ]
 
