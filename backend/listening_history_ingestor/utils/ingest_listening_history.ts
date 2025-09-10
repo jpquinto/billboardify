@@ -1,6 +1,5 @@
 import { ListeningHistoryItem } from "listening_history_ingestor/handler";
 
-// These should be set as environment variables on your Lambda function
 const { SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, SPOTIFY_REFRESH_TOKEN } =
   process.env;
 
