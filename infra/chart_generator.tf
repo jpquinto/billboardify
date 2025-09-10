@@ -26,7 +26,7 @@ module "chart_generator_lambda" {
     REGION : var.aws_region
     AWS_ACCOUNT_ID : local.account_id
     INGESTION_STATUS_TABLE_NAME : module.status_timestamps_table.name
-    RECENT_LISTENING_HISTORY_TABLE_NAME : module.recent_listening_history_table.name
+    LISTENING_HISTORY_TABLE_NAME : module.listening_history_table.name
     SONG_HISTORY_TABLE_NAME : module.song_history_table.name
     SONG_CHART_HISTORY_BUCKET_NAME : module.song_chart_history_bucket.bucket_name
   }
@@ -44,7 +44,7 @@ resource "aws_iam_policy" "chart_generator_policy" {
         Action = [
           "dynamodb:Query"
         ],
-        Resource = module.recent_listening_history_table.arn
+        Resource = module.listening_history_table.arn
       },
       {
         Effect = "Allow",
