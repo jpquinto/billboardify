@@ -1,13 +1,12 @@
-import { ListeningHistoryDynamoDBItem } from "./types";
+import { Banner, ListeningHistoryDynamoDBItem, SongChartData } from "./types";
 import {
   aggregateListeningHistory,
   calculateChartPointsFromListeningHistory,
 } from "./utils/aggregate_songs";
-import {
-  calculateSongChart,
-  SongChartData,
-} from "./utils/calculate_song_chart";
+import { calculateSongChart } from "./utils/calculate_song_chart";
 import { fetchListeningHistory } from "./utils/fetch_listening_history";
+import { generateSummary } from "./utils/generate_chart_summary";
+import { scrapeBanners } from "./utils/get_banner_images";
 import { getLastChartGenerationTimestamp } from "./utils/get_last_chart_generation_timestamp";
 import { updateLastChartGenerationTimestamp } from "./utils/update_last_chart_generation_timestamp";
 import { uploadChart } from "./utils/upload_chart";
@@ -100,10 +99,52 @@ export const handler = async () => {
   console.log(`Top 100 chart entries: ${top100Chart.length}`);
   console.log(`Top 100 track IDs: ${top100TrackIds.size}`);
 
+  // Step 5. Generate chart summary
+  const chartSummary = await generateSummary(top100Chart, chart.length);
+
+  // Step 6. Get banner images to display on chart page
+  let banners: Banner[] = [];
+  try {
+    const artists: { artist_id: string; artist_name: string }[] = [];
+    artists.push({
+      artist_id: top100Chart[0].artist_id,
+      artist_name: top100Chart[0].artist_name,
+    });
+
+    if (chartSummary.most_charted_artists.length > 0) {
+      // Get the ID of the artist already in the array to avoid duplication
+      const existingArtistId = artists[0].artist_id;
+
+      let addedCount = 0;
+      for (const most_charted_artist of chartSummary.most_charted_artists) {
+        if (
+          most_charted_artist.artist_id !== existingArtistId &&
+          addedCount < 2
+        ) {
+          artists.push({
+            artist_id: most_charted_artist.artist_id,
+            artist_name: most_charted_artist.artist_name,
+          });
+          addedCount++;
+        }
+      }
+    }
+
+    banners = await scrapeBanners({ artists });
+  } catch (error: any) {
+    console.error("Error fetching banner images:", error);
+    // Continue without banners
+  }
+
   // Step 5. Upload JSON file to chart storage (S3)
   let s3Key = "";
   try {
-    s3Key = await uploadChart(top100Chart, chartTimestamp);
+    s3Key = await uploadChart(
+      top100Chart,
+      chartSummary,
+      banners,
+      chartTimestamp
+    );
   } catch (error: any) {
     console.error("Error uploading chart JSON file:", error);
     throw new Error(error);

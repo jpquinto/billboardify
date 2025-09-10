@@ -25,10 +25,43 @@ const EXCLUDE_PATTERNS = [
   /nodemon/,
   /concurrently/,
 
-  // Large packages that might not be needed
-  /puppeteer/,
-  /chrome-aws-lambda/,
+  // Large development/build tools
+  /^esbuild$/,
+  /^rollup/,
+  /^vite$/,
+  /^parcel/,
+  /^@rollup/,
+  /^@webpack/,
+  /^playwright-core/,
+  /^playwright-aws-lambda/,
+  /^@sparticuz\/chromium/,
+  /^chrome-aws-lambda/,
+  /^puppeteer-core/,
+
+  // Documentation generators
+  /^jsdoc/,
+  /^typedoc/,
+
+  // Linting/formatting
+  /^@typescript-eslint/,
+  /^eslint-/,
+  /^@prettier/,
+
+  // Testing utilities (keep only if actually used in Lambda)
+  /^mocha$/,
+  /^chai$/,
+  /^sinon$/,
+  /^nyc$/,
+  /^c8$/,
+
+  // Large optional dependencies
+  /^fsevents$/,
+  /^@esbuild/,
+  /^@swc/,
 ];
+
+// Essential packages to always include (even if they match exclude patterns)
+const FORCE_INCLUDE = ["aws-sdk"];
 
 // File patterns to exclude when copying
 const EXCLUDE_FILES = [
@@ -43,6 +76,13 @@ const EXCLUDE_FILES = [
   "LICENSE*",
   "LICENCE*",
   "*.log",
+  "tsconfig.json",
+  ".eslintrc*",
+  ".prettierrc*",
+  "jest.config.*",
+  "webpack.config.*",
+  "rollup.config.*",
+  "vite.config.*",
 ];
 
 // Directory patterns to exclude
@@ -58,12 +98,26 @@ const EXCLUDE_DIRS = [
   "example",
   "coverage",
   ".nyc_output",
-  "bench",
-  "benchmark",
   ".git",
+  ".github",
+  ".vscode",
+  "types", // TypeScript types
+  "@types",
+  "demo",
+  "demos",
+  "fonts",
+  "css",
+  "scss",
+  "sass",
+  "less",
 ];
 
 function shouldExcludePackage(packageName) {
+  // Force include essential packages
+  if (FORCE_INCLUDE.some((pkg) => packageName.includes(pkg))) {
+    return false;
+  }
+
   return EXCLUDE_PATTERNS.some((pattern) => pattern.test(packageName));
 }
 
@@ -88,6 +142,7 @@ async function copyNodeModulesOptimized(src, dest) {
   const packages = await fs.readdir(src);
   let excludedCount = 0;
   let includedCount = 0;
+  let totalSaved = 0;
 
   for (const pkg of packages) {
     const srcPath = path.join(src, pkg);
@@ -96,9 +151,10 @@ async function copyNodeModulesOptimized(src, dest) {
 
     if (!stat.isDirectory()) continue;
 
+    // Regular AWS SDK - include but optimize
     if (pkg === "aws-sdk") {
-      console.log(`✅ Forcing full inclusion of: ${pkg}`);
-      await fs.copy(srcPath, destPath);
+      console.log(`✅ Including (optimized): ${pkg}`);
+      await copyPackageOptimized(srcPath, destPath);
       includedCount++;
       continue;
     }
@@ -119,21 +175,6 @@ async function copyNodeModulesOptimized(src, dest) {
 
         const scopedSrcPath = path.join(srcPath, scopedPkg);
         const scopedDestPath = path.join(destOrgDir, scopedPkg);
-
-        // Special case for @corkvision packages
-        if (pkg === "@corkvision") {
-          console.log(`✅ Forcing inclusion of: ${fullPkgName}`);
-          await fs.copy(scopedSrcPath, scopedDestPath, {
-            overwrite: true,
-            filter: (src, dest) => {
-              // This filter is intentionally loose to include everything
-              const basename = path.basename(src);
-              return !shouldExcludeDir(basename);
-            },
-          });
-          includedCount++;
-          continue;
-        }
 
         await copyPackageOptimized(scopedSrcPath, scopedDestPath);
         includedCount++;
@@ -179,6 +220,32 @@ async function copyPackageOptimized(src, dest) {
   }
 }
 
+async function getDirectorySize(dirPath) {
+  let totalSize = 0;
+  const items = await fs.readdir(dirPath);
+
+  for (const item of items) {
+    const itemPath = path.join(dirPath, item);
+    const stat = await fs.stat(itemPath);
+
+    if (stat.isDirectory()) {
+      totalSize += await getDirectorySize(itemPath);
+    } else {
+      totalSize += stat.size;
+    }
+  }
+
+  return totalSize;
+}
+
+function formatBytes(bytes) {
+  if (bytes === 0) return "0 Bytes";
+  const k = 1024;
+  const sizes = ["Bytes", "KB", "MB", "GB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+}
+
 async function buildLayer() {
   console.log("🧹 Cleaning previous build...");
   await fs.remove(layerRoot);
@@ -207,7 +274,15 @@ async function buildLayer() {
   }
 
   // Check layer size before zipping
-  console.log("📊 Layer optimized and ready for zipping");
+  const layerSize = await getDirectorySize(layerRoot);
+  console.log(`📊 Layer size: ${formatBytes(layerSize)}`);
+
+  if (layerSize > 250 * 1024 * 1024) {
+    // 250MB limit
+    console.warn(
+      `⚠️ Layer is ${formatBytes(layerSize)}, close to 250MB limit!`
+    );
+  }
 
   console.log("📦 Creating zip file...");
   const output = fs.createWriteStream(zipPath);
@@ -215,7 +290,9 @@ async function buildLayer() {
 
   return new Promise((resolve, reject) => {
     output.on("close", () => {
+      const zipSize = fs.statSync(zipPath).size;
       console.log(`✅ Layer zip created at: ${zipPath}`);
+      console.log(`📊 Zip size: ${formatBytes(zipSize)}`);
       console.log("🎉 Layer build completed successfully!");
       resolve();
     });
