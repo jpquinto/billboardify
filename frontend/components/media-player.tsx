@@ -7,6 +7,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { LiquidGlassContainer } from "./ui/liquid-glass-container";
 import { usePathname } from "next/navigation";
+import { getAccessToken } from "@/actions/get-access-token";
 
 export default function MediaPlayer() {
   const [playbackState, setPlaybackState] =
@@ -21,11 +22,11 @@ export default function MediaPlayer() {
       setError(null);
 
       // Get fresh access token if needed
-      let token = "";
-      //   if (!token) {
-      //     token = await getAccessToken(REFRESH_TOKEN, CLIENT_ID, CLIENT_SECRET);
-      //     setAccessToken(token);
-      //   }
+      let token = accessToken;
+      if (!token) {
+        token = await getAccessToken();
+        setAccessToken(token);
+      }
 
       const state = await getCurrentlyPlaying(token);
       setPlaybackState(state);
@@ -36,21 +37,17 @@ export default function MediaPlayer() {
       );
 
       // Try to refresh token on auth error
-      //   if (err instanceof Error && err.message.includes("401")) {
-      //     try {
-      //       const newToken = await getAccessToken(
-      //         REFRESH_TOKEN,
-      //         CLIENT_ID,
-      //         CLIENT_SECRET
-      //       );
-      //       setAccessToken(newToken);
-      //       const state = await getCurrentlyPlaying(newToken);
-      //       setPlaybackState(state);
-      //       setError(null);
-      //     } catch (refreshErr) {
-      //       setError("Authentication failed");
-      //     }
-      //   }
+      if (err instanceof Error && err.message.includes("401")) {
+        try {
+          const newToken = await getAccessToken();
+          setAccessToken(newToken);
+          const state = await getCurrentlyPlaying(newToken);
+          setPlaybackState(state);
+          setError(null);
+        } catch (refreshErr) {
+          setError("Authentication failed");
+        }
+      }
     } finally {
       setLoading(false);
     }
@@ -135,7 +132,7 @@ export default function MediaPlayer() {
 
     return (
       <div className="flex bg-gradient-to-t from-white to-transparent">
-        <LiquidGlassContainer className="p-6 rounded-lg flex items-start justify-start border-none shadow-none">
+        <LiquidGlassContainer className="p-6 rounded-lg flex items-start justify-end border-none shadow-none">
           <div className="flex min-w-[30rem] pb-[10px]">
             {/* Album Cover */}
             <div className="relative w-16 h-16 flex-shrink-0">
@@ -208,13 +205,17 @@ export default function MediaPlayer() {
             </div>
           </div>
           {/* Progress Bar */}
-          <div
-            className="absolute bottom-0 left-0 h-1 mx-2 mb-[6px] rounded-full transition-all duration-2000 ease-linear overflow-hidden"
-            style={{
-              width: `calc(${progressPercent}% - 16px)`,
-              background: progressBarBackground,
-            }}
-          />
+          <div className="absolute bottom-0 w-full left-0 h-1 mx-2 mb-[6px]">
+            <div className="relative" style={{ width: `calc(100% - 16px)` }}>
+              <div
+                className="h-1 rounded-full transition-all duration-2000 ease-linear "
+                style={{
+                  width: `${progressPercent}%`,
+                  background: progressBarBackground,
+                }}
+              ></div>
+            </div>
+          </div>
         </LiquidGlassContainer>
       </div>
     );

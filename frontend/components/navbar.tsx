@@ -13,8 +13,6 @@ export const Navbar = () => {
   useEffect(() => {
     const handleScroll = () => {
       const scrollTop = window.scrollY;
-      const docHeight =
-        document.documentElement.scrollHeight - window.innerHeight;
 
       setScrolled(scrollTop > 0);
     };
@@ -90,7 +88,7 @@ export const Navbar = () => {
               "hidden md:flex items-center justify-center transition-opacity duration-500",
               scrolled ? "opacity-100" : "opacity-0"
             )}
-            href="#"
+            href="/"
             role="button"
           >
             <Image
