@@ -1,6 +1,4 @@
-data "aws_lambda_layer_version" "spotify_sparticuz" {
-  layer_name = "spotify-sparticuz-layer"
-}
+
 
 module "chart_generator_lambda" {
   source  = "./modules/lambda"
@@ -28,7 +26,11 @@ module "chart_generator_lambda" {
     INGESTION_STATUS_TABLE_NAME : module.status_timestamps_table.name
     LISTENING_HISTORY_TABLE_NAME : module.listening_history_table.name
     SONG_HISTORY_TABLE_NAME : module.song_history_table.name
+    ARTIST_HISTORY_TABLE_NAME : module.artist_history_table.name
     SONG_CHART_HISTORY_BUCKET_NAME : module.song_chart_history_bucket.bucket_name
+    SPOTIFY_REFRESH_TOKEN = local.spotify_secrets.SPOTIFY_REFRESH_TOKEN
+    SPOTIFY_CLIENT_ID     = local.spotify_secrets.SPOTIFY_CLIENT_ID
+    SPOTIFY_CLIENT_SECRET = local.spotify_secrets.SPOTIFY_CLIENT_SECRET
   }
 }
 
@@ -62,7 +64,10 @@ resource "aws_iam_policy" "chart_generator_policy" {
           "dynamodb:PutItem",
           "dynamodb:UpdateItem"
         ],
-        Resource = module.song_history_table.arn
+        Resource = [
+          module.song_history_table.arn,
+          module.artist_history_table.arn
+        ]
       },
       {
         Effect = "Allow",
