@@ -1,6 +1,6 @@
 module "song_chart_history_bucket" {
   source = "./modules/s3_bucket"
-  name   = "song-chart-history-bucket"
+  name   = "chart-history-bucket"
 
   context = module.null_label.context
 

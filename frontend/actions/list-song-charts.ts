@@ -41,8 +41,6 @@ export const listSongCharts = async (
     // Transform the response to match your interface
     const data = response.data;
 
-    console.log(data.charts);
-
     return {
       totalCount: data.total_count,
       charts: data.charts,
