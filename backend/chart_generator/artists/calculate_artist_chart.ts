@@ -41,6 +41,7 @@ export const calculateArtistChartPointsFromListeningHistory = (
       artistDetails.set(item.artist_id, {
         artist_id: item.artist_id,
         artist_name: getFirstArtist(item.artist_name),
+        genre: item.genre,
       });
     }
   }

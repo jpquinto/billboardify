@@ -46,6 +46,7 @@ export const calculateSongChartPointsFromListeningHistory = (
         album_id: item.album_id!,
         album_cover_url: item.album_cover_url!,
         position: 0, // Placeholder, will be set later
+        genre: item.genre,
       });
     }
   }

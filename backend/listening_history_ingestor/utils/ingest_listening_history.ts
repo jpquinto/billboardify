@@ -1,4 +1,5 @@
 import { ListeningHistoryItem } from "listening_history_ingestor/handler";
+import { getSongGenre } from "./get_song_genre";
 
 const getAccessToken = require("/opt/nodejs/get_access_token").default;
 
@@ -36,9 +37,20 @@ export const ingestRecentListeningData = async (
 
     const data = await response.json();
 
-    // Step 3: Map the response to our data model
-    const listeningItems: ListeningHistoryItem[] = data.items.map(
-      (item: any) => ({
+    const foundGenres: Record<string, string> = {}; // Cache by track_id
+    const foundGenresByArtist: Record<string, string> = {}; // Cache by artist_id
+
+    // Step 3: Map the response to our data model with genres
+    const listeningItems: ListeningHistoryItem[] = [];
+
+    for (const item of data.items) {
+      console.log(
+        `Processing track: ${item.track.name} by ${item.track.artists
+          .map((artist: any) => artist.name)
+          .join(", ")}`
+      );
+      // Create the base listening item
+      const listeningItem: ListeningHistoryItem = {
         trackId: item.track.id,
         trackName: item.track.name,
         artistName: item.track.artists
@@ -49,8 +61,33 @@ export const ingestRecentListeningData = async (
         artistId: item.track.artists[0]?.id,
         albumId: item.track.album.id,
         albumCoverUrl: item.track.album.images[0]?.url,
-      })
-    );
+      };
+
+      // Get the genre using our optimized helper function
+      if (listeningItem.artistId) {
+        try {
+          const genre = await getSongGenre(
+            listeningItem.trackId,
+            listeningItem.artistId,
+            accessToken,
+            foundGenres,
+            foundGenresByArtist
+          );
+
+          listeningItem.genre = genre;
+        } catch (error) {
+          console.error(
+            `Failed to get genre for track ${listeningItem.trackId}:`,
+            error
+          );
+          listeningItem.genre = null;
+        }
+      } else {
+        listeningItem.genre = null;
+      }
+
+      listeningItems.push(listeningItem);
+    }
 
     console.log(`Successfully ingested ${listeningItems.length} new tracks.`);
     return listeningItems;

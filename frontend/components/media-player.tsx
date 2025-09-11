@@ -132,7 +132,7 @@ export default function MediaPlayer() {
 
     return (
       <div className="flex bg-gradient-to-t from-white to-transparent">
-        <LiquidGlassContainer className="p-6 rounded-lg flex items-start justify-end border-none shadow-none">
+        <LiquidGlassContainer className="p-6 rounded-lg flex items-start justify-center 2xl:justify-end border-none shadow-none">
           <div className="flex min-w-[30rem] pb-[10px]">
             {/* Album Cover */}
             <div className="relative w-16 h-16 flex-shrink-0">

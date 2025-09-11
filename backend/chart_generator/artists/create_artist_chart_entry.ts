@@ -64,6 +64,9 @@ export const getAndUpdateArtistChartEntry = async (
   let artistImageUrl: string | null = null;
   let artistBannerUrl: string | null = null;
 
+  // Determine if this artist should be marked as "charted" (position <= 25)
+  const isCharted = position <= 25;
+
   if (existingItem) {
     artistBannerUrl = existingItem.banner_url?.S || null;
 
@@ -89,7 +92,7 @@ export const getAndUpdateArtistChartEntry = async (
 
     playCount += existingPlayCount;
     lastWeekPosition = existingCurrentPosition;
-    weeksOnChart = existingWeeksOnChart + 1;
+    weeksOnChart = isCharted ? existingWeeksOnChart + 1 : existingWeeksOnChart;
     peakPosition = Math.min(existingPeakPosition, position);
   }
 
@@ -105,9 +108,6 @@ export const getAndUpdateArtistChartEntry = async (
       artistImageUrl = null;
     }
   }
-
-  // Determine if this artist should be marked as "charted" (position <= 25)
-  const isCharted = position <= 25;
 
   // Step 3. Update DynamoDB with new artist data
   let updateExpression =
@@ -131,6 +131,10 @@ export const getAndUpdateArtistChartEntry = async (
   // Only set last_week_position if we have a value for it
   if (lastWeekPosition !== null) {
     updateExpression += ", #last_week_position = :last_week_position";
+  }
+
+  if (entry.genre) {
+    updateExpression += ", #genre = if_not_exists(#genre, :genre)";
   }
 
   const expressionAttributeNames: Record<string, string> = {
@@ -167,6 +171,11 @@ export const getAndUpdateArtistChartEntry = async (
     };
   }
 
+  if (entry.genre) {
+    expressionAttributeNames["#genre"] = "genre";
+    expressionAttributeValues[":genre"] = { S: entry.genre };
+  }
+
   const updateItemParams: UpdateItemCommandInput = {
     TableName: ARTIST_HISTORY_TABLE_NAME,
     Key: {
@@ -192,5 +201,6 @@ export const getAndUpdateArtistChartEntry = async (
     total_points: entry.points,
     artist_image_url: artistImageUrl,
     banner_url: artistBannerUrl,
+    genre: entry.genre,
   };
 };
