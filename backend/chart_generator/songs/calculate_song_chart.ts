@@ -1,5 +1,4 @@
-import { SongChartData } from "chart_generator/types";
-import { CurrentChartPointData } from "./aggregate_songs";
+import { CurrentChartPointData, SongChartData } from "../types";
 import {
   DynamoDBClient,
   GetItemCommand,

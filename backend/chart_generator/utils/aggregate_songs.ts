@@ -1,6 +1,4 @@
-import { ListeningHistoryDynamoDBItem } from "chart_generator/types";
-
-const { SONG_HISTORY_TABLE } = process.env;
+import { CurrentChartPointData, ListeningHistoryDynamoDBItem } from "../types";
 
 export const aggregateListeningHistory = (
   lastChartGenerationTimestamp: string,
@@ -22,18 +20,6 @@ export const aggregateListeningHistory = (
 
   return songPlayCounts;
 };
-
-export interface CurrentChartPointData {
-  position: number;
-  track_id: string;
-  points: number;
-  track_name: string;
-  artist_name: string;
-  album_name: string;
-  artist_id: string;
-  album_id: string;
-  album_cover_url: string;
-}
 
 export const calculateChartPointsFromListeningHistory = (
   listeningHistory: ListeningHistoryDynamoDBItem[]

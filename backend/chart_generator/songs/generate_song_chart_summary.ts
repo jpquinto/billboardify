@@ -1,23 +1,26 @@
-import { ChartSummary, SongChartData } from "chart_generator/types";
+import { SongChartSummary, SongChartData } from "chart_generator/types";
+import { getFirstArtist } from "../utils/utils";
 
-export const generateSummary = async (
+export const generateSongChartSummary = async (
   hot100Data: SongChartData[],
   total_unique_tracks_streamed: number
-): Promise<ChartSummary> => {
+): Promise<SongChartSummary> => {
   const artistCounts = new Map<
     string,
     { artist_id: string; artist_name: string; count: number }
   >();
 
   hot100Data.forEach((song) => {
+    const firstArtistName = getFirstArtist(song.artist_name);
+
     const existing = artistCounts.get(song.artist_id) || {
       artist_id: song.artist_id,
-      artist_name: song.artist_name,
+      artist_name: firstArtistName,
       count: 0,
     };
     artistCounts.set(song.artist_id, {
       artist_id: song.artist_id,
-      artist_name: song.artist_name,
+      artist_name: firstArtistName,
       count: existing.count + 1,
     });
   });

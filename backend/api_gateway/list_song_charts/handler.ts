@@ -43,7 +43,7 @@ export const handler = async (
     // List objects in S3 bucket under the "me/" prefix
     const listObjectsParams: ListObjectsV2CommandInput = {
       Bucket: SONG_CHART_HISTORY_BUCKET_NAME,
-      Prefix: "me/",
+      Prefix: "me/songs/",
       MaxKeys: limit,
     };
 
