@@ -8,7 +8,6 @@ import Image from "next/image";
 
 export const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
-  const [scrollPercent, setScrollPercent] = useState(0);
   const pathname = usePathname();
 
   useEffect(() => {
@@ -16,9 +15,7 @@ export const Navbar = () => {
       const scrollTop = window.scrollY;
       const docHeight =
         document.documentElement.scrollHeight - window.innerHeight;
-      const scrollPercentage = scrollTop / docHeight;
 
-      setScrollPercent(scrollPercentage);
       setScrolled(scrollTop > 0);
     };
 
