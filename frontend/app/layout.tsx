@@ -4,6 +4,7 @@ import { Inter } from "next/font/google";
 import { Navbar } from "@/components/navbar";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ControlBar } from "@/components/control-bar";
+import SpotifyNowPlaying from "@/components/media-player";
 
 const inter = Inter({
   subsets: ["latin"],

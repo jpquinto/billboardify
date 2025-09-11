@@ -26,7 +26,7 @@ export const FirstPlaceArtistChartEntry = (entry: ArtistChartEntryType) => {
   };
 
   return (
-    <div className="pt-[20rem] pb-20">
+    <div className="pt-[10rem] pb-20">
       <LiquidGlassContainer className="scale-[1.04] hover:scale-[1.08] transition-all">
         <div className="mx-auto min-w-6xl w-full flex flex-col justify-center items-center gap-8 p-4 border-gray-200 transition-colors">
           <LiquidGlassContainer
