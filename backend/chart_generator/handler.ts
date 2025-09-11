@@ -1,8 +1,8 @@
 import { Banner, ListeningHistoryDynamoDBItem, SongChartData } from "./types";
 import {
   aggregateListeningHistory,
-  calculateChartPointsFromListeningHistory,
-} from "./utils/aggregate_songs";
+  calculateSongChartPointsFromListeningHistory,
+} from "./songs/aggregate_songs";
 import { calculateSongChart } from "./songs/calculate_song_chart";
 import { fetchListeningHistory } from "./utils/fetch_listening_history";
 import { generateSongChartSummary } from "./songs/generate_song_chart_summary";
@@ -56,9 +56,9 @@ export const handler = async () => {
 
   // Step 4. Calculate current chart points from last three week listening history
   const currentChartPointData =
-    calculateChartPointsFromListeningHistory(listeningHistory);
+    calculateSongChartPointsFromListeningHistory(listeningHistory);
 
-  console.log("Current Chart Point Data: ", currentChartPointData);
+  console.log("Current Song Chart Point Data: ", currentChartPointData);
 
   // Step 5. Generate song chart data
   const chartTimestamp = new Date().toISOString();
@@ -74,8 +74,6 @@ export const handler = async () => {
     console.error("Error calculating song chart:", error);
     throw new Error(error);
   }
-
-  console.log("Chart generated: ", chart);
 
   if (chart.length === 0) {
     console.log("No chart data generated.");
@@ -103,47 +101,41 @@ export const handler = async () => {
 
   // Step 6. Get banner images to display on chart pages
   let banners: Banner[] = [];
+  // try {
+  //   const artists: { artist_id: string; artist_name: string }[] = [];
+  //   artists.push({
+  //     artist_id: top100Chart[0].artist_id,
+  //     artist_name: top100Chart[0].artist_name,
+  //   });
+
+  //   if (chartSummary.most_charted_artists.length > 0) {
+  //     // Get the ID of the artist already in the array to avoid duplication
+  //     const existingArtistId = artists[0].artist_id;
+
+  //     let addedCount = 0;
+  //     for (const most_charted_artist of chartSummary.most_charted_artists) {
+  //       if (
+  //         most_charted_artist.artist_id !== existingArtistId &&
+  //         addedCount < 2
+  //       ) {
+  //         artists.push({
+  //           artist_id: most_charted_artist.artist_id,
+  //           artist_name: most_charted_artist.artist_name,
+  //         });
+  //         addedCount++;
+  //       }
+  //     }
+  //   }
+
+  //   banners = await scrapeBanners({ artists });
+  // } catch (error: any) {
+  //   console.error("Error fetching banner images:", error);
+  //   // Continue without banners
+  // }
+
+  // Step 5. Upload JSON file to song chart storage (S3)
   try {
-    const artists: { artist_id: string; artist_name: string }[] = [];
-    artists.push({
-      artist_id: top100Chart[0].artist_id,
-      artist_name: top100Chart[0].artist_name,
-    });
-
-    if (chartSummary.most_charted_artists.length > 0) {
-      // Get the ID of the artist already in the array to avoid duplication
-      const existingArtistId = artists[0].artist_id;
-
-      let addedCount = 0;
-      for (const most_charted_artist of chartSummary.most_charted_artists) {
-        if (
-          most_charted_artist.artist_id !== existingArtistId &&
-          addedCount < 2
-        ) {
-          artists.push({
-            artist_id: most_charted_artist.artist_id,
-            artist_name: most_charted_artist.artist_name,
-          });
-          addedCount++;
-        }
-      }
-    }
-
-    banners = await scrapeBanners({ artists });
-  } catch (error: any) {
-    console.error("Error fetching banner images:", error);
-    // Continue without banners
-  }
-
-  // Step 5. Upload JSON file to chart storage (S3)
-  let s3Key = "";
-  try {
-    s3Key = await uploadSongChart(
-      top100Chart,
-      chartSummary,
-      banners,
-      chartTimestamp
-    );
+    await uploadSongChart(top100Chart, chartSummary, banners, chartTimestamp);
   } catch (error: any) {
     console.error("Error uploading chart JSON file:", error);
     throw new Error(error);
