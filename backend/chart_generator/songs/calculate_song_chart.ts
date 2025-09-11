@@ -10,6 +10,7 @@ import {
 const DYNAMODB_CLIENT = new DynamoDBClient({});
 const { SONG_HISTORY_TABLE_NAME } = process.env;
 
+// Go through each song in the current chart point data and calculate its new chart entry
 export const calculateSongChart = async (
   recentListeningHistory: Map<string, number>,
   chartPointData: CurrentChartPointData[],
@@ -36,6 +37,7 @@ export const calculateSongChart = async (
   return chartEntries;
 };
 
+// Fetch existing song data, calculate new metrics, update DynamoDB, and return updated chart entry
 export const getAndUpdateChartEntry = async (
   entry: CurrentChartPointData,
   position: number,
@@ -59,15 +61,15 @@ export const getAndUpdateChartEntry = async (
   let lastWeekPosition: number | null = null;
   let weeksOnChart = 1;
   let peakPosition = position;
-  let positionAdjustment = "DEBUT";
 
   if (existingItem) {
     // If the song exists, calculate the new metrics
     const existingPlayCount = existingItem.play_count?.N
       ? parseInt(existingItem.play_count.N)
       : 0;
-    const existingLastWeekPosition = existingItem.last_week_position?.N
-      ? parseInt(existingItem.last_week_position.N)
+    // Get the current position from database - this becomes last week's position
+    const existingCurrentPosition = existingItem.position?.N
+      ? parseInt(existingItem.position.N)
       : null;
     const existingWeeksOnChart = existingItem.weeks_on_chart?.N
       ? parseInt(existingItem.weeks_on_chart.N)
@@ -77,21 +79,16 @@ export const getAndUpdateChartEntry = async (
       : position;
 
     playCount += existingPlayCount;
-    lastWeekPosition = existingLastWeekPosition;
+    lastWeekPosition = existingCurrentPosition;
     weeksOnChart = existingWeeksOnChart + 1;
     peakPosition = Math.min(existingPeakPosition, position);
-
-    const adjustment = lastWeekPosition ? lastWeekPosition - position : "DEBUT";
-    if (typeof adjustment === "number") {
-      positionAdjustment = adjustment > 0 ? `+${adjustment}` : `${adjustment}`;
-    }
   }
 
   // Determine if this song should be marked as "charted" (position <= 100)
   const isCharted = position <= 100;
 
   // Step 3. Update DynamoDB with new song data
-  const updateExpression =
+  let updateExpression =
     "SET #play_count = :total_plays, " +
     "#peak_position = :peak_position, " +
     "#weeks_on_chart = :weeks_on_chart, " +
@@ -99,12 +96,21 @@ export const getAndUpdateChartEntry = async (
     "#track_name = if_not_exists(#track_name, :track_name), " +
     "#artist_name = if_not_exists(#artist_name, :artist_name), " +
     "#album_name = if_not_exists(#album_name, :album_name), " +
-    "#album_cover_url = if_not_exists(#album_cover_url, :album_cover_url)" +
-    (entry.album_id
-      ? ", #album_id = if_not_exists(#album_id, :album_id)"
-      : "") +
-    // Only set last_week_position if the song is actually charting (top 100)
-    (isCharted ? ", #last_week_position = :current_position" : "");
+    "#album_cover_url = if_not_exists(#album_cover_url, :album_cover_url)";
+
+  // Only set position if the song is in the top 100
+  if (isCharted) {
+    updateExpression += ", #position = :current_position";
+  }
+
+  if (entry.album_id) {
+    updateExpression += ", #album_id = if_not_exists(#album_id, :album_id)";
+  }
+
+  // Only set last_week_position if we have a value for it
+  if (lastWeekPosition !== null) {
+    updateExpression += ", #last_week_position = :last_week_position";
+  }
 
   const expressionAttributeNames: Record<string, string> = {
     "#play_count": "play_count",
@@ -128,14 +134,22 @@ export const getAndUpdateChartEntry = async (
     ":album_cover_url": { S: entry.album_cover_url },
   };
 
+  // Only add position-related attributes if the song is in the top 100
+  if (isCharted) {
+    expressionAttributeNames["#position"] = "position";
+    expressionAttributeValues[":current_position"] = { N: position.toString() };
+  }
+
   if (entry.album_id) {
     expressionAttributeNames["#album_id"] = "album_id";
     expressionAttributeValues[":album_id"] = { S: entry.album_id };
   }
 
-  if (isCharted) {
+  if (lastWeekPosition !== null) {
     expressionAttributeNames["#last_week_position"] = "last_week_position";
-    expressionAttributeValues[":current_position"] = { N: position.toString() };
+    expressionAttributeValues[":last_week_position"] = {
+      N: lastWeekPosition.toString(),
+    };
   }
 
   const updateItemParams: UpdateItemCommandInput = {
@@ -149,7 +163,7 @@ export const getAndUpdateChartEntry = async (
     ExpressionAttributeValues: expressionAttributeValues,
   };
 
-  // await DYNAMODB_CLIENT.send(new UpdateItemCommand(updateItemParams));
+  await DYNAMODB_CLIENT.send(new UpdateItemCommand(updateItemParams));
 
   // Step 4. Return chart entry
   return {
@@ -159,7 +173,6 @@ export const getAndUpdateChartEntry = async (
     peak: peakPosition,
     last_week: lastWeekPosition,
     weeks_on_chart: weeksOnChart,
-    position_adjustment: positionAdjustment,
     artist_name: entry.artist_name,
     artist_id: entry.artist_id,
     album_id: entry.album_id,

@@ -1,3 +1,4 @@
+// Represents a single listening history entry stored in DynamoDB
 export interface ListeningHistoryDynamoDBItem {
   user_id: "me";
   timestamp: string;
@@ -11,6 +12,7 @@ export interface ListeningHistoryDynamoDBItem {
   album_cover_url: string;
 }
 
+// Represents an entry in the song history DynamoDB table
 export interface AggregatedListeningHistorySong {
   user_id: "me";
   track_id: string;
@@ -18,7 +20,6 @@ export interface AggregatedListeningHistorySong {
   play_count: number;
   album_name: string;
   artist_name: string;
-  discovered_at: string;
   artist_id: string;
   album_id: string;
   album_cover_url: string;
@@ -28,6 +29,7 @@ export interface AggregatedListeningHistorySong {
   last_week_position?: number;
 }
 
+// Represents the calculation for a song for a specific chart week
 export interface CurrentChartPointData {
   position: number;
   track_id: string;
@@ -40,6 +42,7 @@ export interface CurrentChartPointData {
   album_cover_url: string;
 }
 
+// Represents a single song entry in the generated song chart
 export interface SongChartData {
   position: number;
   track_id: string;
@@ -47,7 +50,6 @@ export interface SongChartData {
   peak: number;
   last_week: number | null;
   weeks_on_chart: number;
-  position_adjustment: string;
   artist_id: string;
   artist_name: string;
   album_id: string;
@@ -102,3 +104,12 @@ export interface Banner {
   banner_url: string;
   artist_name: string;
 }
+
+// Represents the entire file for a song chart, including chart data, summary, and banners
+export interface SongChartFile {
+  chart_data: SongChartData[];
+  chart_summary: SongChartSummary;
+  banners: Banner[];
+}
+
+export type ChartFile = SongChartFile;

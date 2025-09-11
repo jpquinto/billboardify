@@ -1,5 +1,7 @@
 import { CurrentChartPointData, ListeningHistoryDynamoDBItem } from "../types";
 
+// Aggregate listening history to count plays for each song since the last chart generation
+// This does not calculate points, just raw play counts since the last chart generation
 export const aggregateListeningHistory = (
   lastChartGenerationTimestamp: string,
   listeningHistory: ListeningHistoryDynamoDBItem[]
@@ -21,7 +23,8 @@ export const aggregateListeningHistory = (
   return songPlayCounts;
 };
 
-export const calculateChartPointsFromListeningHistory = (
+// Calculate chart points based on listening history over the last three weeks
+export const calculateSongChartPointsFromListeningHistory = (
   listeningHistory: ListeningHistoryDynamoDBItem[]
 ): CurrentChartPointData[] => {
   const songPoints = new Map<string, number>();

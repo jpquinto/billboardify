@@ -9,6 +9,7 @@ import { ListeningHistoryDynamoDBItem } from "chart_generator/types";
 const { LISTENING_HISTORY_TABLE_NAME } = process.env;
 const DYNAMODB_CLIENT = new DynamoDBClient({});
 
+// Fetch listening history items from DynamoDB since the given cutoff timestamp
 export const fetchListeningHistory = async (
   cutoffTimestamp: string
 ): Promise<ListeningHistoryDynamoDBItem[]> => {
