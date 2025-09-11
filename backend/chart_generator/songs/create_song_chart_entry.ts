@@ -115,6 +115,10 @@ export const getAndUpdateChartEntry = async (
     updateExpression += ", #last_week_position = :last_week_position";
   }
 
+  if (entry.genre) {
+    updateExpression += ", #genre = if_not_exists(#genre, :genre)";
+  }
+
   const expressionAttributeNames: Record<string, string> = {
     "#play_count": "play_count",
     "#peak_position": "peak_position",
@@ -155,6 +159,11 @@ export const getAndUpdateChartEntry = async (
     };
   }
 
+  if (entry.genre) {
+    expressionAttributeNames["#genre"] = "genre";
+    expressionAttributeValues[":genre"] = { S: entry.genre };
+  }
+
   const updateItemParams: UpdateItemCommandInput = {
     TableName: SONG_HISTORY_TABLE_NAME,
     Key: {
@@ -183,5 +192,6 @@ export const getAndUpdateChartEntry = async (
     album_cover: entry.album_cover_url,
     plays_since_last_week: recent_play_count,
     points: entry.points,
+    genre: entry.genre,
   };
 };

@@ -10,6 +10,7 @@ export interface ListeningHistoryDynamoDBItem {
   artist_id: string;
   album_id: string;
   album_cover_url: string;
+  genre?: string;
 }
 
 // Represents an entry in the song history DynamoDB table
@@ -27,6 +28,7 @@ export interface AggregatedListeningHistorySong {
   peak_position?: number;
   weeks_on_chart?: number;
   last_week_position?: number;
+  genre?: string;
 }
 
 export interface AggregatedListeningHistoryArtist {
@@ -39,6 +41,7 @@ export interface AggregatedListeningHistoryArtist {
   last_week_position?: number;
   artist_image_url?: string;
   banner_url?: string;
+  genre?: string;
 }
 
 // Represents the calculation for a song for a specific chart week
@@ -52,6 +55,7 @@ export interface CurrentSongChartPointData {
   artist_id: string;
   album_id: string;
   album_cover_url: string;
+  genre?: string;
 }
 
 // Represents the calculation for an artist for a specific chart week
@@ -60,6 +64,7 @@ export interface CurrentArtistChartPointData {
   points: number;
   artist_id: string;
   artist_name: string;
+  genre?: string;
 }
 
 // Represents a single song entry in the generated song chart
@@ -77,6 +82,7 @@ export interface SongChartData {
   album_cover: string;
   plays_since_last_week: number;
   points: number;
+  genre?: string | null;
 }
 
 // Represents a single artist entry in the artist chart
@@ -92,6 +98,7 @@ export interface ArtistChartData {
   total_points: number;
   artist_image_url: string | null;
   banner_url: string | null;
+  genre?: string | null;
 }
 
 // Summary information about the generated song chart
@@ -118,6 +125,14 @@ export interface SongChartSummary {
   }[];
   // Total number of unique tracks streamed in the last week
   total_unique_tracks_streamed: number;
+  genre_summary: {
+    unique_genres: number;
+    top_genres: {
+      genre: string;
+      number_of_songs: number;
+      recent_plays: number;
+    }[];
+  };
 }
 
 // Represents a single artist banner image

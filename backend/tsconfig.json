@@ -16,7 +16,8 @@
       "listening_history_ingestor/**/*",
       "song_chart_playlist_generator/**/*",
       "reset_chart_data/**/*",
-      "layers/**/*"
+      "layers/**/*",
+      "ingest_genres/**/*"
     ],
     "exclude": [
       "dist",
