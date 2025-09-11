@@ -1,8 +1,9 @@
 import { SongChart } from "./types";
 import { generatePlaylist } from "./utils/generate_playlist";
-import { getAccessToken } from "./utils/get_access_token";
 import { getSongChart } from "./utils/get_latest_chart";
 import { getOrCreatePlaylist } from "./utils/get_playlist";
+
+const getAccessToken = require("/opt/nodejs/get_access_token").default;
 
 export const handler = async () => {
   console.log("Playlist Manager Handler Triggered");

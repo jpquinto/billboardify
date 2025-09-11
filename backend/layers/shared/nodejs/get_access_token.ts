@@ -5,7 +5,7 @@ const { SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, SPOTIFY_REFRESH_TOKEN } =
  * Gets a new Spotify access token using the refresh token.
  * @returns The new access token string.
  */
-export const getAccessToken = async (): Promise<string> => {
+const getAccessToken = async (): Promise<string> => {
   if (!SPOTIFY_CLIENT_ID || !SPOTIFY_CLIENT_SECRET || !SPOTIFY_REFRESH_TOKEN) {
     throw new Error("Missing Spotify API environment variables.");
   }
@@ -34,3 +34,5 @@ export const getAccessToken = async (): Promise<string> => {
   const data = await response.json();
   return data.access_token;
 };
+
+export default getAccessToken;

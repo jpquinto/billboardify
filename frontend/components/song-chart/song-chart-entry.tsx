@@ -11,9 +11,9 @@ export const SongChartEntry = (entry: SongChartEntryType) => {
 
     const positionAdjustment = entry.position - (entry.last_week || 0);
 
-    if (positionAdjustment > 0) {
+    if (positionAdjustment < 0) {
       return <span className="text-green-500 text-xl">▲</span>;
-    } else if (positionAdjustment < 0) {
+    } else if (positionAdjustment > 0) {
       return <span className="text-red-500 text-xl">▼</span>;
     } else {
       return <span className="text-gray-400 text-xl">—</span>;

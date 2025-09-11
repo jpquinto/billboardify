@@ -31,14 +31,15 @@ module "spotify-project-api" {
       lambda_function_name = module.list_charts_lambda.name
       enable_cors_all      = true
       use_authorizer       = false # TODO: Enable when auth is ready
-      # cache_key_parameters = [
-      #   "method.request.querystring.type",
-      #   "method.request.querystring.limit"
-      # ]
-      # request_parameters = {
-      #   "method.request.querystring.type"  = false
-      #   "method.request.querystring.limit" = false
-      # }
+    },
+    {
+      http_method          = "GET"
+      path                 = "get-access-token"
+      integration_type     = "lambda"
+      lambda_invoke_arn    = module.get_access_token_lambda.invoke_arn
+      lambda_function_name = module.get_access_token_lambda.name
+      enable_cors_all      = true
+      use_authorizer       = false # TODO: Enable when auth is ready
     },
   ]
   authorizer_type = "COGNITO_USER_POOLS"

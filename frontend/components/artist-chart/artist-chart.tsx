@@ -22,7 +22,6 @@ export const ArtistChart = ({
         title={"My Artist 25"}
         logo={"/artist-chart-logo.png"}
         timestamp={timestamp}
-        totalEntries={chartEntries.length}
       />
 
       <div className="relative max-w-8xl">

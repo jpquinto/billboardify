@@ -23,7 +23,6 @@ export const SongChart = ({
         title={"My Hot 100"}
         logo={"/sphere-logo.png"}
         timestamp={timestamp}
-        totalEntries={chartEntries.length}
       />
 
       <section className="relative max-w-8xl" id="1">
