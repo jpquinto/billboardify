@@ -1,10 +1,21 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { LiquidGlassContainer } from "./ui/liquid-glass-container";
 import { cn } from "@/lib/utils";
 
-export const ChartProgressBar = () => {
+interface ChartProgressBarProps {
+  gradient1: string;
+  gradient2: string;
+  gradient3: string;
+  defaultBackground: string;
+}
+
+export const ChartProgressBar = ({
+  gradient1,
+  gradient2,
+  gradient3,
+  defaultBackground,
+}: ChartProgressBarProps) => {
   const [scrollPercent, setScrollPercent] = useState(0);
   const [isLoaded, setIsLoaded] = useState(false);
 
@@ -43,23 +54,20 @@ export const ChartProgressBar = () => {
 
           let widthValue = 8; // w-2 equivalent (8px)
           let opacityValue = 0.6;
-          let bgColor = "bg-pink-400/10";
+          let bgColor = defaultBackground;
 
           if (distance === 0) {
             widthValue = 72; // w-18 equivalent (72px)
             opacityValue = 1;
-            bgColor =
-              "bg-gradient-to-br from-purple-700 via-pink-400 to-amber-400";
+            bgColor = gradient1;
           } else if (distance === 1) {
             widthValue = 40; // w-10 equivalent (40px)
             opacityValue = 0.8;
-            bgColor =
-              "bg-gradient-to-br from-purple-700/50 via-pink-400/50 to-amber-400/50";
+            bgColor = gradient2;
           } else if (distance === 2) {
             widthValue = 24; // w-6 equivalent (24px)
             opacityValue = 0.7;
-            bgColor =
-              "bg-gradient-to-br from-purple-700/20 via-pink-400/20 to-amber-400/20";
+            bgColor = gradient3;
           }
 
           return (

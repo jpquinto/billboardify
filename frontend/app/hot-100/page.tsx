@@ -5,11 +5,12 @@ import { SongChart } from "@/components/song-chart/song-chart";
 import { SongChart as SongChartType } from "@/types/chart-data";
 import { getSongChart } from "@/actions/get-song-chart";
 import { ChartProgressBar } from "@/components/chart-progress-bar";
-import { listSongCharts } from "@/actions/list-song-charts";
+import { listCharts } from "@/actions/list-song-charts";
+import { chartCache } from "@/hooks/useCache";
 
 export default function Hot100() {
   const [chartTimestampsList, setChartTimestampsList] = useState<string[]>([]);
-  const [latestChartData, setlatestChartData] = useState<SongChartType | null>(
+  const [latestChartData, setLatestChartData] = useState<SongChartType | null>(
     null
   );
   const [loading, setLoading] = useState(true);
@@ -21,8 +22,16 @@ export default function Hot100() {
         setLoading(true);
         setError(null);
 
-        // Step 1: List charts to get the latest timestamp
-        const chartsData = await listSongCharts();
+        // Step 1: Check cache first for chart list
+        let chartsData = chartCache.get<{
+          charts: Array<{ timestamp: string }>;
+        }>("charts_list");
+
+        if (!chartsData) {
+          // Cache miss - fetch from API
+          chartsData = await listCharts();
+          chartCache.set("charts_list", chartsData, 0.5); // Cache for 30 minutes
+        }
 
         if (chartsData.charts.length === 0) {
           setError("No charts available");
@@ -39,11 +48,20 @@ export default function Hot100() {
         setChartTimestampsList(
           chartsData.charts.map((chart) => chart.timestamp)
         );
-        const timestamp = chartsData.charts[0].timestamp;
 
-        // Step 2: Fetch the actual chart data using the timestamp
-        const chartData = await getSongChart(timestamp);
-        setlatestChartData(chartData);
+        const timestamp = chartsData.charts[0].timestamp;
+        const cacheKey = `latest_chart_${timestamp}`;
+
+        // Step 2: Check cache for chart data
+        let chartData = chartCache.get<SongChartType>(cacheKey);
+
+        if (!chartData) {
+          // Cache miss - fetch from API
+          chartData = await getSongChart(timestamp);
+          chartCache.set(cacheKey, chartData, 2); // Cache for 2 hours
+        }
+
+        setLatestChartData(chartData);
       } catch (err) {
         setError(
           err instanceof Error ? err.message : "Failed to load chart data"
@@ -114,7 +132,18 @@ export default function Hot100() {
 
   return (
     <main className="flex-1">
-      <ChartProgressBar />
+      <ChartProgressBar
+        gradient1={
+          "bg-gradient-to-br from-purple-700 via-pink-400 to-amber-400"
+        }
+        gradient2={
+          "bg-gradient-to-br from-purple-700/50 via-pink-400/50 to-amber-400/50"
+        }
+        gradient3={
+          "bg-gradient-to-br from-purple-700/20 via-pink-400/20 to-amber-400/20"
+        }
+        defaultBackground={"bg-pink-400/10"}
+      />
       <SongChart
         chartData={latestChartData}
         timestamp={latestChartData.timestamp}

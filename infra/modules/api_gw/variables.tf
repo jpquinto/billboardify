@@ -27,6 +27,8 @@ variable "http_routes" {
     execution_role_arn   = optional(string)
     enable_cors_all      = bool
     use_authorizer       = bool
+    cache_key_parameters = optional(list(string), [])
+    request_parameters   = optional(map(bool))
   }))
 }
 

@@ -12,26 +12,28 @@ interface ChartListItem {
   size?: number;
 }
 
-interface ListSongChartsResponse {
+interface ListChartsResponse {
   totalCount: number;
   charts: ChartListItem[];
   isTruncated: boolean;
   limit: number;
 }
 
-interface ListSongChartsOptions {
+interface ListChartsOptions {
   limit?: number;
+  chartType?: string;
 }
 
-export const listSongCharts = async (
-  options: ListSongChartsOptions = {}
-): Promise<ListSongChartsResponse> => {
+export const listCharts = async (
+  options: ListChartsOptions = {}
+): Promise<ListChartsResponse> => {
   const { limit = 10 } = options;
 
   try {
-    const response = await axios.get(`${BACKEND_API_URL}/list-song-charts`, {
+    const response = await axios.get(`${BACKEND_API_URL}/list-charts`, {
       params: {
         limit,
+        type: options.chartType || "songs",
       },
       headers: {
         "Content-Type": "application/json",
@@ -44,7 +46,7 @@ export const listSongCharts = async (
     return {
       totalCount: data.total_count,
       charts: data.charts,
-      isTruncated: data.is_truncated, // Fixed typo: was "inTruncated"
+      isTruncated: data.is_truncated,
       limit: data.limit,
     };
   } catch (error) {

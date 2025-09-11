@@ -68,3 +68,8 @@ variable "authorizer_type" {
     error_message = "authorizer_type must be one of: NONE, CUSTOM, AWS_IAM, COGNITO_USER_POOLS"
   }
 }
+
+variable "cache_key_parameters" {
+  type    = list(string)
+  default = []
+}
