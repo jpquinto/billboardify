@@ -1,4 +1,4 @@
-import { SongChartSummary, SongChartData } from "chart_generator/types";
+import { SongChartSummary, SongChartData } from "../types";
 import { getFirstArtist } from "../utils/utils";
 
 export const generateSongChartSummary = async (

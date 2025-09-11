@@ -29,8 +29,20 @@ export interface AggregatedListeningHistorySong {
   last_week_position?: number;
 }
 
+export interface AggregatedListeningHistoryArtist {
+  artist_id: string;
+  artist_name: string;
+  play_count: number;
+  last_charted_at?: string;
+  peak_position?: number;
+  weeks_on_chart?: number;
+  last_week_position?: number;
+  artist_image_url?: string;
+  banner_url?: string;
+}
+
 // Represents the calculation for a song for a specific chart week
-export interface CurrentChartPointData {
+export interface CurrentSongChartPointData {
   position: number;
   track_id: string;
   points: number;
@@ -40,6 +52,14 @@ export interface CurrentChartPointData {
   artist_id: string;
   album_id: string;
   album_cover_url: string;
+}
+
+// Represents the calculation for an artist for a specific chart week
+export interface CurrentArtistChartPointData {
+  position: number;
+  points: number;
+  artist_id: string;
+  artist_name: string;
 }
 
 // Represents a single song entry in the generated song chart
@@ -57,6 +77,21 @@ export interface SongChartData {
   album_cover: string;
   plays_since_last_week: number;
   points: number;
+}
+
+// Represents a single artist entry in the artist chart
+export interface ArtistChartData {
+  position: number;
+  artist_id: string;
+  artist_name: string;
+  peak: number;
+  last_charted_at: string;
+  last_week: number | null;
+  weeks_on_chart: number;
+  total_plays_since_last_week: number;
+  total_points: number;
+  artist_image_url: string | null;
+  banner_url: string | null;
 }
 
 // Summary information about the generated song chart
@@ -85,24 +120,12 @@ export interface SongChartSummary {
   total_unique_tracks_streamed: number;
 }
 
-// Represents a single artist entry in the artist chart
-export interface ArtistChartData {
-  position: number;
-  artist_id: string;
-  artist_name: string;
-  peak: number;
-  last_week: number | null;
-  weeks_on_chart: number;
-  position_adjustment: string;
-  total_plays_since_last_week: number;
-  total_points: number;
-  artist_image_url: string | null;
-}
-
 // Represents a single artist banner image
 export interface Banner {
   banner_url: string;
   artist_name: string;
+  chart: string;
+  artist_id: string;
 }
 
 // Represents the entire file for a song chart, including chart data, summary, and banners
@@ -112,4 +135,9 @@ export interface SongChartFile {
   banners: Banner[];
 }
 
-export type ChartFile = SongChartFile;
+export interface ArtistChartFile {
+  chart_data: ArtistChartData[];
+  banners: Banner[];
+}
+
+export type ChartFile = SongChartFile | ArtistChartFile;

@@ -4,19 +4,27 @@ import chromium from "@sparticuz/chromium";
 chromium.setHeadlessMode = "shell";
 chromium.setGraphicsMode = false;
 
-import { Banner } from "chart_generator/types";
+import { Banner } from "../types";
 
 interface ScrapeBannersParams {
   artists: {
     artist_id: string;
     artist_name: string;
+    chart: string;
   }[];
+}
+
+interface ScrapeBannersResponse {
+  banner_url: string;
+  artist_name: string;
+  chart: string;
+  artist_id: string;
 }
 
 export const scrapeBanners = async (
   artists: ScrapeBannersParams
-): Promise<Banner[]> => {
-  const banners: Banner[] = [];
+): Promise<ScrapeBannersResponse[]> => {
+  const banners: ScrapeBannersResponse[] = [];
   let browser;
 
   console.log(`Starting banner scrape for ${artists.artists.length} artists`);
@@ -40,7 +48,7 @@ export const scrapeBanners = async (
 
     // Process artists in order until we have 3 banners
     for (const artistId of artistIds) {
-      if (banners.length >= 3) {
+      if (banners.length >= 6) {
         break; // Stop once we have 3 banners
       }
 
@@ -177,11 +185,15 @@ export const scrapeBanners = async (
 
         if (backgroundImageUrl) {
           console.log(`✅ Artist ${artistId}: Found banner image`);
+          const artistData = artists.artists.find(
+            (artist) => artist.artist_id === artistId
+          );
+          console.log(`✅ Artist ${artistId}: Found banner image`);
           banners.push({
-            artist_name:
-              artists.artists.find((artist) => artist.artist_id === artistId)
-                ?.artist_name || "Unknown Artist",
+            artist_id: artistId,
+            artist_name: artistData?.artist_name || "Unknown Artist",
             banner_url: backgroundImageUrl,
+            chart: artistData?.chart || "Unknown Chart",
           });
         } else {
           console.log(`❌ Artist ${artistId}: No banner image found`);
@@ -210,7 +222,7 @@ export const scrapeBanners = async (
     console.log(
       `Successfully found ${banners.length} banners out of ${Math.min(
         artistIds.length,
-        3
+        6
       )} attempted`
     );
     console.log(banners);

@@ -55,6 +55,8 @@ export const handler = async (
       new ListObjectsV2Command(listObjectsParams)
     );
 
+    console.log("Raw S3 response:", JSON.stringify(s3Response, null, 2));
+
     if (!s3Response.Contents || s3Response.Contents.length === 0) {
       return {
         statusCode: 200,
@@ -72,31 +74,21 @@ export const handler = async (
     }
 
     // Process and sort the chart files
-    const chartList: ChartListItem[] = s3Response.Contents.filter((obj) => {
-      // Filter out non-JSON files and ensure proper format
-      return (
-        obj.Key &&
-        obj.Key.endsWith(".json") &&
-        obj.Key.match(
-          /^me\/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{3})?Z?\.json$/
-        )
-      );
-    })
-      .map((obj) => {
-        // Extract timestamp from the key (remove "me/" prefix and ".json" suffix)
-        const timestamp = obj.Key!.replace(/^me\//, "").replace(/\.json$/, "");
+    const chartList: ChartListItem[] = s3Response.Contents.map((obj) => {
+      const timestamp = obj
+        .Key!.replace(/^me\/songs\//, "")
+        .replace(/\.json$/, "");
 
-        return {
-          timestamp,
-          key: obj.Key!,
-          lastModified: obj.LastModified?.toISOString(),
-          size: obj.Size,
-        };
-      })
-      .sort((a, b) => {
-        // Sort by timestamp in descending order (most recent first)
-        return b.timestamp.localeCompare(a.timestamp);
-      });
+      return {
+        timestamp,
+        key: obj.Key!,
+        lastModified: obj.LastModified?.toISOString(),
+        size: obj.Size,
+      };
+    }).sort((a, b) => {
+      // Sort by timestamp in descending order (most recent first)
+      return b.timestamp.localeCompare(a.timestamp);
+    });
 
     console.log(`Successfully retrieved ${chartList.length} chart entries`);
 
@@ -105,7 +97,7 @@ export const handler = async (
       headers: {
         "Content-Type": "application/json",
         "Access-Control-Allow-Origin": "*",
-        "Cache-Control": "public, max-age=300", // Cache for 5 minutes
+        "Cache-Control": "public, max-age=3600", // Cache for 1 hour
       },
       body: JSON.stringify({
         charts: chartList,

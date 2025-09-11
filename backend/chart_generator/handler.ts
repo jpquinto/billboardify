@@ -1,15 +1,27 @@
-import { Banner, ListeningHistoryDynamoDBItem, SongChartData } from "./types";
 import {
-  aggregateListeningHistory,
-  calculateSongChartPointsFromListeningHistory,
-} from "./songs/aggregate_songs";
-import { calculateSongChart } from "./songs/calculate_song_chart";
+  ArtistChartData,
+  ArtistChartFile,
+  Banner,
+  ListeningHistoryDynamoDBItem,
+  SongChartData,
+  SongChartFile,
+} from "./types";
+import { aggregateSongListeningHistory } from "./songs/aggregate_songs";
+import { createSongChartEntryAndAggregatePlayCounts } from "./songs/create_song_chart_entry";
 import { fetchListeningHistory } from "./utils/fetch_listening_history";
 import { generateSongChartSummary } from "./songs/generate_song_chart_summary";
-import { scrapeBanners } from "./utils/get_banner_images";
+import { scrapeBanners } from "./utils/scrape_banners";
 import { getLastChartGenerationTimestamp } from "./utils/get_last_chart_generation_timestamp";
 import { updateLastChartGenerationTimestamp } from "./utils/update_last_chart_generation_timestamp";
-import { uploadSongChart } from "./songs/upload_song_chart";
+import { calculateSongChartPointsFromListeningHistory } from "./songs/calculate_song_chart_points";
+import { uploadChart } from "./utils/upload_chart";
+import { getArtistsForSongBanners } from "./songs/get_artists_for_song_banners";
+import { aggregateArtistListeningHistory } from "./artists/aggregate_artists";
+import { calculateArtistChartPointsFromListeningHistory } from "./artists/calculate_artist_chart";
+import { createArtistChartEntryAndAggregatePlayCounts } from "./artists/create_artist_chart_entry";
+import { extractBannerUrlsMap } from "./utils/utils";
+import { resolveBanners } from "./utils/resolve_chart_banners";
+import { updateMultipleArtistBanners } from "./artists/update_artist_banners";
 
 export const handler = async () => {
   console.log("Chart Generator Handler Triggered");
@@ -48,26 +60,32 @@ export const handler = async () => {
     return;
   }
 
-  // Step 3. Aggregate song data to update plays since last chart generation
-  const aggregatedListeningHistory = aggregateListeningHistory(
+  // Step 3. Aggregate listening history since last chart generation
+  const aggregatedSongListeningHistory = aggregateSongListeningHistory(
+    lastChartGenerationTimestamp,
+    listeningHistory
+  );
+  const aggregatedArtistListeningHistory = aggregateArtistListeningHistory(
     lastChartGenerationTimestamp,
     listeningHistory
   );
 
   // Step 4. Calculate current chart points from last three week listening history
-  const currentChartPointData =
+  const currentSongChartPointData =
     calculateSongChartPointsFromListeningHistory(listeningHistory);
+  const currentArtistChartPointData =
+    calculateArtistChartPointsFromListeningHistory(listeningHistory);
 
-  console.log("Current Song Chart Point Data: ", currentChartPointData);
+  console.log("Current Artist Chart Point Data: ", currentArtistChartPointData);
 
-  // Step 5. Generate song chart data
+  // Step 5. Generate chart entries and update DynamoDB
   const chartTimestamp = new Date().toISOString();
 
-  let chart: SongChartData[] = [];
+  let songChart: SongChartData[] = [];
   try {
-    chart = await calculateSongChart(
-      aggregatedListeningHistory,
-      currentChartPointData,
+    songChart = await createSongChartEntryAndAggregatePlayCounts(
+      aggregatedSongListeningHistory,
+      currentSongChartPointData,
       chartTimestamp
     );
   } catch (error: any) {
@@ -75,67 +93,92 @@ export const handler = async () => {
     throw new Error(error);
   }
 
-  if (chart.length === 0) {
+  if (songChart.length === 0) {
     console.log("No chart data generated.");
     return;
   }
 
-  const top100Chart: SongChartData[] = [];
-  const top100TrackIds = new Set<string>();
-
-  for (const song of chart) {
-    if (song.position <= 100) {
-      top100Chart.push(song);
-      top100TrackIds.add(song.track_id);
-    }
+  let artistChart: ArtistChartData[] = [];
+  try {
+    artistChart = await createArtistChartEntryAndAggregatePlayCounts(
+      aggregatedArtistListeningHistory,
+      currentArtistChartPointData,
+      chartTimestamp
+    );
+  } catch (error: any) {
+    console.error("Error calculating artist chart:", error);
+    throw new Error(error);
   }
 
-  console.log(`Top 100 chart entries: ${top100Chart.length}`);
-  console.log(`Top 100 track IDs: ${top100TrackIds.size}`);
+  const top100Chart = songChart.slice(0, 100);
+  const artist25Chart = artistChart.slice(0, 25);
 
-  // Step 5. Generate chart summary
-  const chartSummary = await generateSongChartSummary(
+  console.log(`Top 100 chart entries: ${top100Chart.length}`);
+
+  // Step 5. Generate chart summaries
+  const songChartSummary = await generateSongChartSummary(
     top100Chart,
-    chart.length
+    songChart.length
   );
 
   // Step 6. Get banner images to display on chart pages
-  let banners: Banner[] = [];
-  // try {
-  //   const artists: { artist_id: string; artist_name: string }[] = [];
-  //   artists.push({
-  //     artist_id: top100Chart[0].artist_id,
-  //     artist_name: top100Chart[0].artist_name,
-  //   });
+  let scrapedBanners: Banner[] = [];
+  let songChartBanners: Banner[] = [];
+  let artistChartBanners: Banner[] = [];
 
-  //   if (chartSummary.most_charted_artists.length > 0) {
-  //     // Get the ID of the artist already in the array to avoid duplication
-  //     const existingArtistId = artists[0].artist_id;
+  const existingBanners = extractBannerUrlsMap(artistChart);
 
-  //     let addedCount = 0;
-  //     for (const most_charted_artist of chartSummary.most_charted_artists) {
-  //       if (
-  //         most_charted_artist.artist_id !== existingArtistId &&
-  //         addedCount < 2
-  //       ) {
-  //         artists.push({
-  //           artist_id: most_charted_artist.artist_id,
-  //           artist_name: most_charted_artist.artist_name,
-  //         });
-  //         addedCount++;
-  //       }
-  //     }
-  //   }
+  try {
+    const bannerResult = await resolveBanners({
+      top100Chart,
+      songChartSummary,
+      artist25Chart,
+      existingBanners,
+    });
 
-  //   banners = await scrapeBanners({ artists });
-  // } catch (error: any) {
-  //   console.error("Error fetching banner images:", error);
-  //   // Continue without banners
-  // }
+    scrapedBanners = bannerResult.scrapedBanners;
+    songChartBanners = bannerResult.songChartBanners;
+    artistChartBanners = bannerResult.artistChartBanners;
+  } catch (error: any) {
+    console.error("Error fetching banner images:", error);
+    // Continue without banners
+  }
+
+  if (scrapedBanners.length > 0) {
+    try {
+      // Extract artist_id from the scraped banners - you'll need to ensure this is available
+      const bannersToUpdate = scrapedBanners.map((banner) => ({
+        artist_id: banner.artist_id,
+        banner_url: banner.banner_url,
+      }));
+
+      await updateMultipleArtistBanners(bannersToUpdate);
+      console.log(
+        `✅ Successfully updated ${scrapedBanners.length} artist banners in database`
+      );
+    } catch (error: any) {
+      console.error("Error updating artist banners in database:", error);
+      // Continue without updating - the banners are still available for this chart generation
+    }
+  }
 
   // Step 5. Upload JSON file to song chart storage (S3)
   try {
-    await uploadSongChart(top100Chart, chartSummary, banners, chartTimestamp);
+    await uploadChart(
+      {
+        chart_data: top100Chart,
+        chart_summary: songChartSummary,
+        banners: songChartBanners,
+      } as SongChartFile,
+      `me/songs/${chartTimestamp}.json`
+    );
+    await uploadChart(
+      {
+        chart_data: artist25Chart,
+        banners: artistChartBanners,
+      } as ArtistChartFile,
+      `me/artists/${chartTimestamp}.json`
+    );
   } catch (error: any) {
     console.error("Error uploading chart JSON file:", error);
     throw new Error(error);
