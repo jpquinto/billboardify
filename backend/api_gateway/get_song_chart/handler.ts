@@ -60,7 +60,7 @@ export const handler = async (
 
     // Construct S3 key
     const userId = "me";
-    const s3Key = `${userId}/${timestamp}.json`;
+    const s3Key = `${userId}/songs/${timestamp}.json`;
 
     console.log(`Fetching chart from S3: ${s3Key}`);
 

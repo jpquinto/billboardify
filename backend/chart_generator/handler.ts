@@ -3,13 +3,13 @@ import {
   aggregateListeningHistory,
   calculateChartPointsFromListeningHistory,
 } from "./utils/aggregate_songs";
-import { calculateSongChart } from "./utils/calculate_song_chart";
+import { calculateSongChart } from "./songs/calculate_song_chart";
 import { fetchListeningHistory } from "./utils/fetch_listening_history";
-import { generateSummary } from "./utils/generate_chart_summary";
+import { generateSongChartSummary } from "./songs/generate_song_chart_summary";
 import { scrapeBanners } from "./utils/get_banner_images";
 import { getLastChartGenerationTimestamp } from "./utils/get_last_chart_generation_timestamp";
 import { updateLastChartGenerationTimestamp } from "./utils/update_last_chart_generation_timestamp";
-import { uploadChart } from "./utils/upload_chart";
+import { uploadSongChart } from "./songs/upload_song_chart";
 
 export const handler = async () => {
   console.log("Chart Generator Handler Triggered");
@@ -48,15 +48,11 @@ export const handler = async () => {
     return;
   }
 
-  console.log(listeningHistory);
-
   // Step 3. Aggregate song data to update plays since last chart generation
   const aggregatedListeningHistory = aggregateListeningHistory(
     lastChartGenerationTimestamp,
     listeningHistory
   );
-
-  console.log("Aggregated Listening History: ", aggregatedListeningHistory);
 
   // Step 4. Calculate current chart points from last three week listening history
   const currentChartPointData =
@@ -64,7 +60,7 @@ export const handler = async () => {
 
   console.log("Current Chart Point Data: ", currentChartPointData);
 
-  // Step 5. Generate chart data
+  // Step 5. Generate song chart data
   const chartTimestamp = new Date().toISOString();
 
   let chart: SongChartData[] = [];
@@ -100,9 +96,12 @@ export const handler = async () => {
   console.log(`Top 100 track IDs: ${top100TrackIds.size}`);
 
   // Step 5. Generate chart summary
-  const chartSummary = await generateSummary(top100Chart, chart.length);
+  const chartSummary = await generateSongChartSummary(
+    top100Chart,
+    chart.length
+  );
 
-  // Step 6. Get banner images to display on chart page
+  // Step 6. Get banner images to display on chart pages
   let banners: Banner[] = [];
   try {
     const artists: { artist_id: string; artist_name: string }[] = [];
@@ -139,7 +138,7 @@ export const handler = async () => {
   // Step 5. Upload JSON file to chart storage (S3)
   let s3Key = "";
   try {
-    s3Key = await uploadChart(
+    s3Key = await uploadSongChart(
       top100Chart,
       chartSummary,
       banners,
@@ -152,12 +151,10 @@ export const handler = async () => {
 
   // Step 6. Update song info from last chart that didn't make it to this chart
   // Step 7. Update last chart generation timestamp
-  //   try {
-  //     await updateLastChartGenerationTimestamp();
-  //   } catch (error: any) {
-  //     console.error("Error updating chart generation timestamp:", error);
-  //     throw new Error(error);
-  //   }
-
-  // Step 7. Aggregation Flow
+  try {
+    await updateLastChartGenerationTimestamp(chartTimestamp);
+  } catch (error: any) {
+    console.error("Error updating chart generation timestamp:", error);
+    throw new Error(error);
+  }
 };

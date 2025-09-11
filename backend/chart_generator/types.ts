@@ -28,6 +28,18 @@ export interface AggregatedListeningHistorySong {
   last_week_position?: number;
 }
 
+export interface CurrentChartPointData {
+  position: number;
+  track_id: string;
+  points: number;
+  track_name: string;
+  artist_name: string;
+  album_name: string;
+  artist_id: string;
+  album_id: string;
+  album_cover_url: string;
+}
+
 export interface SongChartData {
   position: number;
   track_id: string;
@@ -45,7 +57,8 @@ export interface SongChartData {
   points: number;
 }
 
-export interface ChartSummary {
+// Summary information about the generated song chart
+export interface SongChartSummary {
   // List of the top 10 artists with the most songs on this chart
   most_charted_artists: {
     artist_id: string;
@@ -70,6 +83,21 @@ export interface ChartSummary {
   total_unique_tracks_streamed: number;
 }
 
+// Represents a single artist entry in the artist chart
+export interface ArtistChartData {
+  position: number;
+  artist_id: string;
+  artist_name: string;
+  peak: number;
+  last_week: number | null;
+  weeks_on_chart: number;
+  position_adjustment: string;
+  total_plays_since_last_week: number;
+  total_points: number;
+  artist_image_url: string | null;
+}
+
+// Represents a single artist banner image
 export interface Banner {
   banner_url: string;
   artist_name: string;
