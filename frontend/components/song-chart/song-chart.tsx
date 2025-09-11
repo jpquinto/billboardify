@@ -63,13 +63,6 @@ export const SongChart = ({
           </div>
         </div>
       </div>
-
-      {/* Chart Footer */}
-      <div className="max-w-6xl mt-8 text-center">
-        <p className="text-sm text-gray-500">
-          Chart rankings based on plays, points, and other factors
-        </p>
-      </div>
     </div>
   );
 };

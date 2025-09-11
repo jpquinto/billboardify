@@ -37,6 +37,8 @@ resource "aws_api_gateway_integration" "lambda_integration" {
   depends_on = [
     aws_api_gateway_method.method
   ]
+
+  cache_key_parameters = var.cache_key_parameters
 }
 
 resource "aws_api_gateway_method_response" "response_200" {

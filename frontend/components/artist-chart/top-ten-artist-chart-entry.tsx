@@ -1,10 +1,10 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { SongChartEntry as SongChartEntryType } from "@/types/chart-data";
+import { ArtistChartEntry as ArtistChartEntryType } from "@/types/chart-data";
 import { LiquidGlassContainer } from "../ui/liquid-glass-container";
 
-export const TopTenChartEntry = (entry: SongChartEntryType) => {
+export const TopTenArtistChartEntry = (entry: ArtistChartEntryType) => {
   const getPositionChangeIcon = () => {
     if (!entry.last_week) {
       return <span className="text-blue-500 text-xl font-semibold">NEW</span>;
@@ -77,25 +77,20 @@ export const TopTenChartEntry = (entry: SongChartEntryType) => {
           {/* Album Cover */}
           <div className="flex-shrink-0">
             <img
-              src={entry.album_cover}
-              alt={`${entry.album_name} cover`}
+              src={entry.artist_image_url || "/placeholder-artist.png"}
+              alt={entry.artist_name}
               className="w-20 h-20 rounded object-cover"
             />
           </div>
 
           {/* Track & Artist Info */}
           <div className="flex-1 min-w-0">
-            <Link href={`/track/${entry.track_id}`} className="group">
+            <Link href={`/artist/${entry.artist_id}`} className="group">
               <h3 className="font-semibold text-gray-900 truncate group-hover:bg-gradient-to-br group-hover:from-purple-700 group-hover:via-pink-400 group-hover:to-amber-400 group-hover:bg-clip-text group-hover:text-transparent transition-colors text-4xl tracking-tighter pb-2">
-                {entry.track_name.length > 30
-                  ? entry.track_name.slice(0, 30) + "..."
-                  : entry.track_name}
-              </h3>
-              <p className="text-xl text-gray-900 truncate font-bold">
-                {entry.artist_name.length > 45
-                  ? entry.artist_name.slice(0, 45) + "..."
+                {entry.artist_name.length > 25
+                  ? entry.artist_name.slice(0, 25) + "..."
                   : entry.artist_name}
-              </p>
+              </h3>
             </Link>
           </div>
 
@@ -123,7 +118,7 @@ export const TopTenChartEntry = (entry: SongChartEntryType) => {
             <div className="text-center min-w-[60px]">
               <div className="text-xs text-gray-400 uppercase">Plays</div>
               <div className="font-medium">
-                {formatNumber(entry.plays_since_last_week)}
+                {formatNumber(entry.total_plays_since_last_week)}
               </div>
             </div>
           </div>
