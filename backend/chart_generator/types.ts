@@ -67,6 +67,18 @@ export interface CurrentArtistChartPointData {
   genre?: string;
 }
 
+// Represents the calculation for an album for a specific chart week
+export interface CurrentAlbumChartPointData {
+  position: number;
+  album_id: string;
+  points: number;
+  album_name: string;
+  artist_name: string;
+  artist_id: string;
+  album_cover_url: string;
+  genre?: string;
+}
+
 // Represents a single song entry in the generated song chart
 export interface SongChartData {
   position: number;
@@ -98,6 +110,22 @@ export interface ArtistChartData {
   total_points: number;
   artist_image_url: string | null;
   banner_url: string | null;
+  genre?: string | null;
+}
+
+// Represents a single artist entry in the artist chart
+export interface AlbumChartData {
+  position: number;
+  album_id: string;
+  album_name: string;
+  artist_id: string;
+  artist_name: string;
+  peak: number;
+  last_charted_at: string;
+  last_week: number | null;
+  weeks_on_chart: number;
+  total_plays_since_last_week: number;
+  total_points: number;
   genre?: string | null;
 }
 
@@ -155,4 +183,9 @@ export interface ArtistChartFile {
   banners: Banner[];
 }
 
-export type ChartFile = SongChartFile | ArtistChartFile;
+export interface AlbumChartFile {
+  chart_data: AlbumChartData[];
+  banners: Banner[];
+}
+
+export type ChartFile = SongChartFile | ArtistChartFile | AlbumChartFile;

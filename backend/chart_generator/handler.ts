@@ -1,4 +1,6 @@
 import {
+  AlbumChartData,
+  AlbumChartFile,
   ArtistChartData,
   ArtistChartFile,
   Banner,
@@ -20,6 +22,9 @@ import { createArtistChartEntryAndAggregatePlayCounts } from "./artists/create_a
 import { extractBannerUrlsMap } from "./utils/utils";
 import { resolveBanners } from "./utils/resolve_chart_banners";
 import { updateMultipleArtistBanners } from "./artists/update_artist_banners";
+import { aggregateAlbumListeningHistory } from "./albums/aggregate_albums";
+import { calculateAlbumChartPointsFromListeningHistory } from "./albums/calculate_album_chart";
+import { createAlbumChartEntryAndAggregatePlayCounts } from "./albums/create_album_chart_entry";
 
 export const handler = async () => {
   console.log("Chart Generator Handler Triggered");
@@ -67,12 +72,18 @@ export const handler = async () => {
     lastChartGenerationTimestamp,
     listeningHistory
   );
+  const aggregatedAlbumListeningHistory = aggregateAlbumListeningHistory(
+    lastChartGenerationTimestamp,
+    listeningHistory
+  );
 
   // Step 4. Calculate current chart points from last three week listening history
   const currentSongChartPointData =
     calculateSongChartPointsFromListeningHistory(listeningHistory);
   const currentArtistChartPointData =
     calculateArtistChartPointsFromListeningHistory(listeningHistory);
+  const currentAlbumChartPointData =
+    calculateAlbumChartPointsFromListeningHistory(listeningHistory);
 
   console.log("Current Artist Chart Point Data: ", currentArtistChartPointData);
 
@@ -108,10 +119,21 @@ export const handler = async () => {
     throw new Error(error);
   }
 
+  let albumChart: AlbumChartData[] = [];
+  try {
+    albumChart = await createAlbumChartEntryAndAggregatePlayCounts(
+      aggregatedArtistListeningHistory,
+      currentAlbumChartPointData,
+      chartTimestamp
+    );
+  } catch (error: any) {
+    console.error("Error calculating album chart:", error);
+    throw new Error(error);
+  }
+
   const top100Chart = songChart.slice(0, 100);
   const artist25Chart = artistChart.slice(0, 25);
-
-  console.log(`Top 100 chart entries: ${top100Chart.length}`);
+  const album50Chart = albumChart.slice(0, 50);
 
   // Step 5. Generate chart summaries
   const songChartSummary = await generateSongChartSummary(
@@ -176,6 +198,13 @@ export const handler = async () => {
         banners: artistChartBanners,
       } as ArtistChartFile,
       `me/artists/${chartTimestamp}.json`
+    );
+    await uploadChart(
+      {
+        chart_data: album50Chart,
+        banners: artistChartBanners,
+      } as AlbumChartFile,
+      `me/albums/${chartTimestamp}.json`
     );
   } catch (error: any) {
     console.error("Error uploading chart JSON file:", error);
