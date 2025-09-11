@@ -26,6 +26,8 @@ export const handler = async (
       ? parseInt(event.queryStringParameters.limit)
       : 10; // Default to 10 charts
 
+    const chartType = event.queryStringParameters?.type || "songs"; // Default to "songs"
+
     // Validate limit
     if (limit < 1 || limit > 1000) {
       return {
@@ -43,7 +45,7 @@ export const handler = async (
     // List objects in S3 bucket under the "me/" prefix
     const listObjectsParams: ListObjectsV2CommandInput = {
       Bucket: SONG_CHART_HISTORY_BUCKET_NAME,
-      Prefix: "me/songs/",
+      Prefix: `me/${chartType}/`,
       MaxKeys: limit,
     };
 
@@ -76,7 +78,7 @@ export const handler = async (
     // Process and sort the chart files
     const chartList: ChartListItem[] = s3Response.Contents.map((obj) => {
       const timestamp = obj
-        .Key!.replace(/^me\/songs\//, "")
+        .Key!.replace(new RegExp(`^me/${chartType}/`), "")
         .replace(/\.json$/, "");
 
       return {
@@ -107,7 +109,7 @@ export const handler = async (
       }),
     };
   } catch (error: any) {
-    console.error("Error listing song charts:", error);
+    console.error("Error listing charts:", error);
 
     // Handle specific S3 errors
     if (error.name === "AccessDenied" || error.Code === "AccessDenied") {

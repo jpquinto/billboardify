@@ -8,19 +8,6 @@ import {
 const S3_CLIENT = new S3Client({});
 const { SONG_CHART_HISTORY_BUCKET_NAME } = process.env;
 
-interface SongChartData {
-  position: number;
-  track_id: string;
-  track_name: string;
-  peak: number;
-  last_week: number | null;
-  weeks_on_chart: number;
-  position_adjustment: string;
-  artist_name: string;
-  album_name: string;
-  album_cover: string;
-}
-
 export const handler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
@@ -29,6 +16,7 @@ export const handler = async (
   try {
     // Extract timestamp from query parameters
     const timestamp = event.queryStringParameters?.timestamp;
+    const chartType = event.queryStringParameters?.type || "songs"; // Default to "songs"
 
     if (!timestamp) {
       return {
@@ -60,7 +48,7 @@ export const handler = async (
 
     // Construct S3 key
     const userId = "me";
-    const s3Key = `${userId}/songs/${timestamp}.json`;
+    const s3Key = `${userId}/${chartType}/${timestamp}.json`;
 
     console.log(`Fetching chart from S3: ${s3Key}`);
 
@@ -89,7 +77,7 @@ export const handler = async (
 
     // Read and parse the chart data
     const chartDataString = await s3Response.Body.transformToString();
-    const chartData: SongChartData[] = JSON.parse(chartDataString);
+    const chartData = JSON.parse(chartDataString);
 
     console.log(
       `Successfully retrieved chart with ${chartData.length} entries`
@@ -105,7 +93,6 @@ export const handler = async (
       body: JSON.stringify({
         timestamp,
         chart: chartData,
-        total_entries: chartData.length,
       }),
     };
   } catch (error: any) {

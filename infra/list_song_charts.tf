@@ -1,11 +1,11 @@
-module "list_song_charts_lambda" {
+module "list_charts_lambda" {
   source  = "./modules/lambda"
   context = module.null_label.context
 
-  name            = "list-song-charts-lambda"
+  name            = "list-charts-lambda"
   handler         = "handler.handler"
-  source_dir      = "${path.root}/../backend/dist/api_gateway/list_song_charts"
-  build_path      = "${path.root}/../backend/build/api_gateway/list_song_charts/list_song_charts.zip"
+  source_dir      = "${path.root}/../backend/dist/api_gateway/list_charts"
+  build_path      = "${path.root}/../backend/build/api_gateway/list_charts/list_charts.zip"
   runtime         = "nodejs20.x"
   memory          = 256
   time_limit      = 60
@@ -23,9 +23,9 @@ module "list_song_charts_lambda" {
   }
 }
 
-resource "aws_iam_policy" "list_song_charts_policy" {
-  name        = "list-song-charts-policy"
-  description = "Allows the list song charts Lambda to read from S3."
+resource "aws_iam_policy" "list_charts_policy" {
+  name        = "list-charts-policy"
+  description = "Allows the list charts Lambda to read from S3."
 
   policy = jsonencode({
     Version = "2012-10-17",
@@ -41,7 +41,7 @@ resource "aws_iam_policy" "list_song_charts_policy" {
   })
 }
 
-resource "aws_iam_role_policy_attachment" "list_song_charts_attach" {
-  role       = module.list_song_charts_lambda.role_name
-  policy_arn = aws_iam_policy.list_song_charts_policy.arn
+resource "aws_iam_role_policy_attachment" "list_charts_attach" {
+  role       = module.list_charts_lambda.role_name
+  policy_arn = aws_iam_policy.list_charts_policy.arn
 }
