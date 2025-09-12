@@ -22,6 +22,7 @@ module "listening_history_ingestor_lambda" {
     AWS_ACCOUNT_ID : local.account_id
     INGESTION_STATUS_TABLE_NAME : module.status_timestamps_table.name
     LISTENING_HISTORY_TABLE_NAME : module.listening_history_table.name
+    ARTIST_HISTORY_TABLE_NAME : module.artist_history_table.name
     SPOTIFY_REFRESH_TOKEN = local.spotify_secrets.SPOTIFY_REFRESH_TOKEN
     SPOTIFY_CLIENT_ID     = local.spotify_secrets.SPOTIFY_CLIENT_ID
     SPOTIFY_CLIENT_SECRET = local.spotify_secrets.SPOTIFY_CLIENT_SECRET
@@ -50,7 +51,9 @@ resource "aws_iam_policy" "listening_history_ingestor_policy" {
           "dynamodb:PutItem",
           "dynamodb:UpdateItem"
         ],
-        Resource = module.status_timestamps_table.arn
+        Resource = [module.status_timestamps_table.arn,
+          module.artist_history_table.arn
+        ]
       }
     ]
   })

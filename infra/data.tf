@@ -5,3 +5,7 @@ data "aws_secretsmanager_secret_version" "spotify_api_secrets" {
 locals {
   spotify_secrets = jsondecode(data.aws_secretsmanager_secret_version.spotify_api_secrets.secret_string)
 }
+
+data "aws_lambda_layer_version" "spotify_sparticuz" {
+  layer_name = "spotify-sparticuz-layer"
+}

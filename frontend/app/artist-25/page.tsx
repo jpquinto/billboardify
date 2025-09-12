@@ -1,17 +1,17 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { SongChart } from "@/components/song-chart/song-chart";
-import { SongChart as SongChartType } from "@/types/chart-data";
-import { getSongChart } from "@/actions/get-song-chart";
+import { ArtistChart as ArtistChartType } from "@/types/chart-data";
 import { ArtistChart } from "@/components/artist-chart/artist-chart";
-import { listSongCharts } from "@/actions/list-song-charts";
+import { listCharts } from "@/actions/list-song-charts";
+import { getArtistChart } from "@/actions/get-artist-chart";
+import { ChartProgressBar } from "@/components/chart-progress-bar";
+import { chartCache } from "@/hooks/useCache";
 
 export default function Artist25() {
   const [chartTimestampsList, setChartTimestampsList] = useState<string[]>([]);
-  const [latestChartData, setlatestChartData] = useState<SongChartType | null>(
-    null
-  );
+  const [latestChartData, setLatestChartData] =
+    useState<ArtistChartType | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -21,8 +21,18 @@ export default function Artist25() {
         setLoading(true);
         setError(null);
 
-        // Step 1: List charts to get the latest timestamp
-        const chartsData = await listSongCharts();
+        // Step 1: Check cache for charts list
+        let chartsData = chartCache.get<{
+          charts: Array<{ timestamp: string }>;
+        }>("artist-charts-list");
+
+        if (!chartsData) {
+          // Cache miss - fetch from API
+          chartsData = await listCharts({
+            chartType: "artists",
+          });
+          chartCache.set("artist-charts-list", chartsData);
+        }
 
         if (chartsData.charts.length === 0) {
           setError("No charts available");
@@ -30,7 +40,8 @@ export default function Artist25() {
           return;
         }
 
-        if (!chartsData.charts[0].timestamp) {
+        const timestamp = chartsData.charts[0].timestamp;
+        if (!timestamp) {
           setError("Invalid chart data");
           setLoading(false);
           return;
@@ -39,11 +50,18 @@ export default function Artist25() {
         setChartTimestampsList(
           chartsData.charts.map((chart) => chart.timestamp)
         );
-        const timestamp = chartsData.charts[0].timestamp;
 
-        // Step 2: Fetch the actual chart data using the timestamp
-        const chartData = await getSongChart(timestamp);
-        setlatestChartData(chartData);
+        // Step 2: Check cache for chart data
+        const cacheKey = `artist-chart-${timestamp}`;
+        let chartData = chartCache.get<ArtistChartType>(cacheKey);
+
+        if (!chartData) {
+          // Cache miss - fetch from API
+          chartData = await getArtistChart(timestamp);
+          chartCache.set(cacheKey, chartData);
+        }
+
+        setLatestChartData(chartData);
       } catch (err) {
         setError(
           err instanceof Error ? err.message : "Failed to load chart data"
@@ -114,6 +132,18 @@ export default function Artist25() {
 
   return (
     <main className="flex-1">
+      <ChartProgressBar
+        gradient1={
+          "bg-gradient-to-br from-blue-700 via-cyan-500 to-emerald-300"
+        }
+        gradient2={
+          "bg-gradient-to-br from-blue-700/50 via-cyan-500/50 to-emerald-300/50"
+        }
+        gradient3={
+          "bg-gradient-to-br from-blue-700/20 via-cyan-500/20 to-emerald-300/20"
+        }
+        defaultBackground={"bg-cyan-500/10"}
+      />
       <ArtistChart
         chartData={latestChartData}
         timestamp={latestChartData.timestamp}

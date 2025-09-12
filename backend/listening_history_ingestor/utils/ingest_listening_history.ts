@@ -1,41 +1,7 @@
 import { ListeningHistoryItem } from "listening_history_ingestor/handler";
+import { getSongGenre } from "./get_song_genre";
 
-const { SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, SPOTIFY_REFRESH_TOKEN } =
-  process.env;
-
-/**
- * Gets a new Spotify access token using the refresh token.
- * @returns The new access token string.
- */
-const getAccessToken = async (): Promise<string> => {
-  if (!SPOTIFY_CLIENT_ID || !SPOTIFY_CLIENT_SECRET || !SPOTIFY_REFRESH_TOKEN) {
-    throw new Error("Missing Spotify API environment variables.");
-  }
-
-  const authString = Buffer.from(
-    `${SPOTIFY_CLIENT_ID}:${SPOTIFY_CLIENT_SECRET}`
-  ).toString("base64");
-
-  const response = await fetch("https://accounts.spotify.com/api/token", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-      Authorization: `Basic ${authString}`,
-    },
-    body: new URLSearchParams({
-      grant_type: "refresh_token",
-      refresh_token: SPOTIFY_REFRESH_TOKEN,
-    }),
-  });
-
-  if (!response.ok) {
-    const error = await response.text();
-    throw new Error(`Failed to refresh token: ${response.status} - ${error}`);
-  }
-
-  const data = await response.json();
-  return data.access_token;
-};
+const getAccessToken = require("/opt/nodejs/get_access_token").default;
 
 /**
  * Ingests recent listening data from the Spotify API.
@@ -71,9 +37,20 @@ export const ingestRecentListeningData = async (
 
     const data = await response.json();
 
-    // Step 3: Map the response to our data model
-    const listeningItems: ListeningHistoryItem[] = data.items.map(
-      (item: any) => ({
+    const foundGenres: Record<string, string> = {}; // Cache by track_id
+    const foundGenresByArtist: Record<string, string> = {}; // Cache by artist_id
+
+    // Step 3: Map the response to our data model with genres
+    const listeningItems: ListeningHistoryItem[] = [];
+
+    for (const item of data.items) {
+      console.log(
+        `Processing track: ${item.track.name} by ${item.track.artists
+          .map((artist: any) => artist.name)
+          .join(", ")}`
+      );
+      // Create the base listening item
+      const listeningItem: ListeningHistoryItem = {
         trackId: item.track.id,
         trackName: item.track.name,
         artistName: item.track.artists
@@ -84,8 +61,33 @@ export const ingestRecentListeningData = async (
         artistId: item.track.artists[0]?.id,
         albumId: item.track.album.id,
         albumCoverUrl: item.track.album.images[0]?.url,
-      })
-    );
+      };
+
+      // Get the genre using our optimized helper function
+      if (listeningItem.artistId) {
+        try {
+          const genre = await getSongGenre(
+            listeningItem.trackId,
+            listeningItem.artistId,
+            accessToken,
+            foundGenres,
+            foundGenresByArtist
+          );
+
+          listeningItem.genre = genre;
+        } catch (error) {
+          console.error(
+            `Failed to get genre for track ${listeningItem.trackId}:`,
+            error
+          );
+          listeningItem.genre = null;
+        }
+      } else {
+        listeningItem.genre = null;
+      }
+
+      listeningItems.push(listeningItem);
+    }
 
     console.log(`Successfully ingested ${listeningItems.length} new tracks.`);
     return listeningItems;

@@ -4,15 +4,9 @@ interface ChartHeaderProps {
   title: string;
   logo: string;
   timestamp: string;
-  totalEntries: number;
 }
 
-export const ChartHeader = ({
-  title,
-  logo,
-  timestamp,
-  totalEntries,
-}: ChartHeaderProps) => {
+export const ChartHeader = ({ title, logo, timestamp }: ChartHeaderProps) => {
   const formatDate = (timestamp: string) => {
     return new Date(timestamp).toLocaleDateString("en-US", {
       weekday: "long",
@@ -23,7 +17,7 @@ export const ChartHeader = ({
   };
   return (
     <div className="mx-auto min-w-6xl mb-8">
-      <div className="flex gap-4">
+      <div className="flex gap-4 justify-center">
         <Image
           src={logo}
           alt="Logo"
@@ -35,11 +29,10 @@ export const ChartHeader = ({
           {title}
         </h1>
       </div>
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 tracking-tighter">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-center gap-2 tracking-tighter">
         <p className="text-lg text-gray-900">
           Chart dated {formatDate(timestamp)}
         </p>
-        <p className="text-sm text-gray-500">{totalEntries} total entries</p>
       </div>
     </div>
   );

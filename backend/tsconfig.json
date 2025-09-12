@@ -14,7 +14,10 @@
       "chart_generator/**/*",
       "listening_history_aggregator/**/*",
       "listening_history_ingestor/**/*",
-      "song_chart_playlist_generator/**/*"
+      "song_chart_playlist_generator/**/*",
+      "reset_chart_data/**/*",
+      "layers/**/*",
+      "ingest_genres/**/*"
     ],
     "exclude": [
       "dist",

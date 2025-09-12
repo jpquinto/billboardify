@@ -20,10 +20,9 @@ export const SongChart = ({
   return (
     <div className="flex justify-center flex-col mx-auto px-4 pt-30">
       <ChartHeader
-        title={"My Hot 100"}
+        title={"Hot 100"}
         logo={"/sphere-logo.png"}
         timestamp={timestamp}
-        totalEntries={chartEntries.length}
       />
 
       <section className="relative max-w-8xl" id="1">
@@ -62,13 +61,6 @@ export const SongChart = ({
             ))}
           </div>
         </div>
-      </div>
-
-      {/* Chart Footer */}
-      <div className="max-w-6xl mt-8 text-center">
-        <p className="text-sm text-gray-500">
-          Chart rankings based on plays, points, and other factors
-        </p>
       </div>
     </div>
   );

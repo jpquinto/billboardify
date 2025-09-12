@@ -26,6 +26,8 @@ export const handler = async (
       ? parseInt(event.queryStringParameters.limit)
       : 10; // Default to 10 charts
 
+    const chartType = event.queryStringParameters?.type || "songs"; // Default to "songs"
+
     // Validate limit
     if (limit < 1 || limit > 1000) {
       return {
@@ -43,7 +45,7 @@ export const handler = async (
     // List objects in S3 bucket under the "me/" prefix
     const listObjectsParams: ListObjectsV2CommandInput = {
       Bucket: SONG_CHART_HISTORY_BUCKET_NAME,
-      Prefix: "me/songs/",
+      Prefix: `me/${chartType}/`,
       MaxKeys: limit,
     };
 
@@ -54,6 +56,8 @@ export const handler = async (
     const s3Response = await S3_CLIENT.send(
       new ListObjectsV2Command(listObjectsParams)
     );
+
+    console.log("Raw S3 response:", JSON.stringify(s3Response, null, 2));
 
     if (!s3Response.Contents || s3Response.Contents.length === 0) {
       return {
@@ -72,31 +76,21 @@ export const handler = async (
     }
 
     // Process and sort the chart files
-    const chartList: ChartListItem[] = s3Response.Contents.filter((obj) => {
-      // Filter out non-JSON files and ensure proper format
-      return (
-        obj.Key &&
-        obj.Key.endsWith(".json") &&
-        obj.Key.match(
-          /^me\/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{3})?Z?\.json$/
-        )
-      );
-    })
-      .map((obj) => {
-        // Extract timestamp from the key (remove "me/" prefix and ".json" suffix)
-        const timestamp = obj.Key!.replace(/^me\//, "").replace(/\.json$/, "");
+    const chartList: ChartListItem[] = s3Response.Contents.map((obj) => {
+      const timestamp = obj
+        .Key!.replace(new RegExp(`^me/${chartType}/`), "")
+        .replace(/\.json$/, "");
 
-        return {
-          timestamp,
-          key: obj.Key!,
-          lastModified: obj.LastModified?.toISOString(),
-          size: obj.Size,
-        };
-      })
-      .sort((a, b) => {
-        // Sort by timestamp in descending order (most recent first)
-        return b.timestamp.localeCompare(a.timestamp);
-      });
+      return {
+        timestamp,
+        key: obj.Key!,
+        lastModified: obj.LastModified?.toISOString(),
+        size: obj.Size,
+      };
+    }).sort((a, b) => {
+      // Sort by timestamp in descending order (most recent first)
+      return b.timestamp.localeCompare(a.timestamp);
+    });
 
     console.log(`Successfully retrieved ${chartList.length} chart entries`);
 
@@ -105,7 +99,7 @@ export const handler = async (
       headers: {
         "Content-Type": "application/json",
         "Access-Control-Allow-Origin": "*",
-        "Cache-Control": "public, max-age=300", // Cache for 5 minutes
+        "Cache-Control": "public, max-age=3600", // Cache for 1 hour
       },
       body: JSON.stringify({
         charts: chartList,
@@ -115,7 +109,7 @@ export const handler = async (
       }),
     };
   } catch (error: any) {
-    console.error("Error listing song charts:", error);
+    console.error("Error listing charts:", error);
 
     // Handle specific S3 errors
     if (error.name === "AccessDenied" || error.Code === "AccessDenied") {

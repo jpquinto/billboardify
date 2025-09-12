@@ -1,5 +1,3 @@
-import { getAccessToken } from "./get_access_token";
-
 const SPOTIFY_API_BASE = "https://api.spotify.com/v1";
 
 /**
@@ -69,8 +67,6 @@ export const createPlaylist = async (
   console.log(`Creating playlist: ${playlistName}`);
 
   try {
-    const accessToken = await getAccessToken();
-
     // First, get the current user's ID
     const userResponse = await fetch(`${SPOTIFY_API_BASE}/me`, {
       headers: {

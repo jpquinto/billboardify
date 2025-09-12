@@ -5,14 +5,18 @@ import { SongChartEntry as SongChartEntryType } from "@/types/chart-data";
 
 export const SongChartEntry = (entry: SongChartEntryType) => {
   const getPositionChangeIcon = () => {
-    if (entry.position_adjustment === "up") {
-      return <span className="text-green-500 text-xs">▲</span>;
-    } else if (entry.position_adjustment === "down") {
-      return <span className="text-red-500 text-xs">▼</span>;
-    } else if (entry.position_adjustment === "0") {
-      return <span className="text-blue-500 text-xs font-semibold">NEW</span>;
+    if (!entry.last_week) {
+      return <span className="text-blue-500 text-xl font-semibold">NEW</span>;
+    }
+
+    const positionAdjustment = entry.position - (entry.last_week || 0);
+
+    if (positionAdjustment < 0) {
+      return <span className="text-green-500 text-xl">▲</span>;
+    } else if (positionAdjustment > 0) {
+      return <span className="text-red-500 text-xl">▼</span>;
     } else {
-      return <span className="text-gray-400 text-xs">—</span>;
+      return <span className="text-gray-400 text-xl">—</span>;
     }
   };
 

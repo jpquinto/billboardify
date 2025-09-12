@@ -8,17 +8,12 @@ import Image from "next/image";
 
 export const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
-  const [scrollPercent, setScrollPercent] = useState(0);
   const pathname = usePathname();
 
   useEffect(() => {
     const handleScroll = () => {
       const scrollTop = window.scrollY;
-      const docHeight =
-        document.documentElement.scrollHeight - window.innerHeight;
-      const scrollPercentage = scrollTop / docHeight;
 
-      setScrollPercent(scrollPercentage);
       setScrolled(scrollTop > 0);
     };
 
@@ -47,11 +42,11 @@ export const Navbar = () => {
     },
     {
       label: "albums",
-      href: "/albums-50",
+      href: "/charts/albums-50",
       logo: "/album-chart-logo.png",
       logoText: "ALBUMS 50",
-      labelColor: "text-blue-400",
-      topBarColor: "from-blue-400/70",
+      labelColor: "text-orange-400",
+      topBarColor: "from-red-400/70",
     },
   ];
 
@@ -93,7 +88,7 @@ export const Navbar = () => {
               "hidden md:flex items-center justify-center transition-opacity duration-500",
               scrolled ? "opacity-100" : "opacity-0"
             )}
-            href="#"
+            href="/"
             role="button"
           >
             <Image

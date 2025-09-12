@@ -44,7 +44,7 @@ export const BannerScroller = ({ banners }: { banners: string[] }) => {
   return (
     <div
       className="fixed top-[50%] left-0 w-full flex items-start justify-center"
-      style={{ transform: `translateY(${scrollY * -0.3}px)` }}
+      style={{ transform: `translateY(${scrollY * -0.27 - 70}px)` }}
     >
       <div
         className="absolute inset-0 z-10 w-full h-full scale-x-[1.02]"

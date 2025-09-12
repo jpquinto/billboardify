@@ -1,31 +1,17 @@
-import { CurrentChartPointData, ListeningHistoryDynamoDBItem } from "../types";
+import {
+  CurrentSongChartPointData,
+  ListeningHistoryDynamoDBItem,
+} from "../types";
 
-export const aggregateListeningHistory = (
-  lastChartGenerationTimestamp: string,
+// Calculate chart points based on listening history over the last three weeks
+export const calculateSongChartPointsFromListeningHistory = (
   listeningHistory: ListeningHistoryDynamoDBItem[]
-): Map<string, number> => {
-  // Use a map to efficiently count plays for each song
-  const songPlayCounts = new Map<string, number>();
-
-  // Use a number for comparison, then format to string at the end
-  const lastChartTimestampMs = Date.parse(lastChartGenerationTimestamp);
-
-  for (const item of listeningHistory) {
-    // Check if the song was played after the last chart generation
-    if (Date.parse(item.timestamp) > lastChartTimestampMs) {
-      const currentCount = songPlayCounts.get(item.track_id) || 0;
-      songPlayCounts.set(item.track_id, currentCount + 1);
-    }
-  }
-
-  return songPlayCounts;
-};
-
-export const calculateChartPointsFromListeningHistory = (
-  listeningHistory: ListeningHistoryDynamoDBItem[]
-): CurrentChartPointData[] => {
+): CurrentSongChartPointData[] => {
   const songPoints = new Map<string, number>();
-  const songDetails = new Map<string, Omit<CurrentChartPointData, "points">>();
+  const songDetails = new Map<
+    string,
+    Omit<CurrentSongChartPointData, "points">
+  >();
 
   const now = new Date();
   const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
@@ -60,11 +46,12 @@ export const calculateChartPointsFromListeningHistory = (
         album_id: item.album_id!,
         album_cover_url: item.album_cover_url!,
         position: 0, // Placeholder, will be set later
+        genre: item.genre,
       });
     }
   }
 
-  const aggregatedData: CurrentChartPointData[] = [];
+  const aggregatedData: CurrentSongChartPointData[] = [];
   for (const [trackId, points] of songPoints.entries()) {
     const details = songDetails.get(trackId);
     if (details) {

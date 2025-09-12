@@ -7,9 +7,10 @@ const BACKEND_API_URL = process.env.BACKEND_API_URL!;
 
 export const getSongChart = async (timestamp: string): Promise<SongChart> => {
   try {
-    const response = await axios.get(`${BACKEND_API_URL}/get-song-chart`, {
+    const response = await axios.get(`${BACKEND_API_URL}/get-chart`, {
       params: {
         timestamp: timestamp,
+        type: "songs",
       },
       headers: {
         "Content-Type": "application/json",

@@ -1,4 +1,4 @@
-import { SongChartSummary, SongChartData } from "chart_generator/types";
+import { SongChartSummary, SongChartData } from "../types";
 import { getFirstArtist } from "../utils/utils";
 
 export const generateSongChartSummary = async (
@@ -57,10 +57,44 @@ export const generateSongChartSummary = async (
       debut_position: song.position,
     }));
 
+  // Calculate genre summary
+  const genreCounts = new Map<
+    string,
+    { number_of_songs: number; recent_plays: number }
+  >();
+
+  hot100Data.forEach((song) => {
+    if (song.genre) {
+      const existing = genreCounts.get(song.genre) || {
+        number_of_songs: 0,
+        recent_plays: 0,
+      };
+      genreCounts.set(song.genre, {
+        number_of_songs: existing.number_of_songs + 1,
+        recent_plays: existing.recent_plays + song.plays_since_last_week,
+      });
+    }
+  });
+
+  const top_genres = Array.from(genreCounts.entries())
+    .map(([genre, data]) => ({
+      genre,
+      number_of_songs: data.number_of_songs,
+      recent_plays: data.recent_plays,
+    }))
+    .sort((a, b) => b.number_of_songs - a.number_of_songs) // Sort by number of songs
+    .slice(0, 10);
+
+  const genre_summary = {
+    unique_genres: genreCounts.size,
+    top_genres,
+  };
+
   return {
     most_charted_artists,
     most_recently_streamed_songs,
     biggest_debuts,
     total_unique_tracks_streamed,
+    genre_summary,
   };
 };

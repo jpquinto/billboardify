@@ -6,12 +6,16 @@ import { LiquidGlassContainer } from "../ui/liquid-glass-container";
 
 export const FirstPlaceChartEntry = (entry: SongChartEntryType) => {
   const getPositionChangeIcon = () => {
-    if (entry.position_adjustment === "up") {
-      return <span className="text-green-500 text-xl">▲</span>;
-    } else if (entry.position_adjustment === "down") {
-      return <span className="text-red-500 text-xl">▼</span>;
-    } else if (entry.position_adjustment === "new") {
+    if (!entry.last_week) {
       return <span className="text-blue-500 text-xl font-semibold">NEW</span>;
+    }
+
+    const positionAdjustment = entry.position - (entry.last_week || 0);
+
+    if (positionAdjustment < 0) {
+      return <span className="text-green-500 text-xl">▲</span>;
+    } else if (positionAdjustment > 0) {
+      return <span className="text-red-500 text-xl">▼</span>;
     } else {
       return <span className="text-gray-400 text-xl">—</span>;
     }
@@ -22,19 +26,21 @@ export const FirstPlaceChartEntry = (entry: SongChartEntryType) => {
   };
 
   return (
-    <div className="pt-[20rem] pb-20">
-      <LiquidGlassContainer className="scale-[1.04] hover:scale-[1.08] transition-all">
-        <div className="mx-auto min-w-6xl w-full flex flex-col justify-center items-center gap-8 p-4 border-gray-200 transition-colors">
-          <LiquidGlassContainer
-            className="mr-auto flex justify-start w-full"
-            innerClassName="mr-auto flex justify-start w-full px-8 bg-gray-100/30"
-            innerStyle={{
-              boxShadow: `inset 0px -5px 10px -5px #8200db, 
+    <div className="pt-[10rem] pb-20">
+      <LiquidGlassContainer
+        className="scale-[1.04] hover:scale-[1.08] transition-all"
+        innerStyle={{
+          boxShadow: `inset 0px -5px 10px -5px #8200db, 
               inset 0px -6px 7px -3px #fb64b6,
               inset 0px -8px 5px -1px #ffba00,
               0px 4px 12px rgba(0, 0, 0, 0.1),
               0px 2px 6px rgba(255, 255, 255, 0.2)`,
-            }}
+        }}
+      >
+        <div className="mx-auto min-w-6xl w-full flex flex-col justify-center items-center gap-8 p-4 border-gray-200 transition-colors">
+          <LiquidGlassContainer
+            className="mr-auto flex justify-start w-full"
+            innerClassName="mr-auto flex justify-start w-full px-8 bg-gray-100/30"
           >
             <div className="flex items-center w-full gap-8">
               {/* Position */}
@@ -46,13 +52,7 @@ export const FirstPlaceChartEntry = (entry: SongChartEntryType) => {
               </div>
 
               {/* Album Cover */}
-              <div
-                className="flex-shrink-0 rounded-2xl overflow-hidden m-2 relative"
-                style={{
-                  boxShadow: `0px 4px 12px rgba(0, 0, 0, 0.1),
-                    0px 2px 6px rgba(255, 255, 255, 0.2)`,
-                }}
-              >
+              <div className="flex-shrink-0 rounded-2xl overflow-hidden m-2 relative shadow-2xl">
                 <img
                   src={entry.album_cover}
                   alt={`${entry.album_name} cover`}

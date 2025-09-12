@@ -59,10 +59,41 @@ module "song_history_table" {
       name = "track_id"
       type = "S"
     }
-    // Other attributes:
-    // track_name
-    // album_cover_url
-    // artist_name
-    // play_count
+  ]
+}
+
+module "artist_history_table" {
+  source  = "./modules/dynamodb_table"
+  context = module.null_label.context
+
+  name = "artist-history"
+
+  billing_mode = "PAY_PER_REQUEST"
+
+  hash_key = "artist_id"
+
+  attributes = [
+    {
+      name = "artist_id"
+      type = "S"
+    },
+  ]
+}
+
+module "album_history_table" {
+  source  = "./modules/dynamodb_table"
+  context = module.null_label.context
+
+  name = "album-history"
+
+  billing_mode = "PAY_PER_REQUEST"
+
+  hash_key = "album_id"
+
+  attributes = [
+    {
+      name = "album_id"
+      type = "S"
+    },
   ]
 }

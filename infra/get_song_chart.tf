@@ -1,11 +1,11 @@
-module "get_song_chart_lambda" {
+module "get_chart_lambda" {
   source  = "./modules/lambda"
   context = module.null_label.context
 
-  name            = "get-song-chart-lambda"
+  name            = "get-chart-lambda"
   handler         = "handler.handler"
-  source_dir      = "${path.root}/../backend/dist/api_gateway/get_song_chart"
-  build_path      = "${path.root}/../backend/build/api_gateway/get_song_chart/get_song_chart.zip"
+  source_dir      = "${path.root}/../backend/dist/api_gateway/get_chart"
+  build_path      = "${path.root}/../backend/build/api_gateway/get_chart/get_chart.zip"
   runtime         = "nodejs20.x"
   memory          = 256
   time_limit      = 60
@@ -23,9 +23,9 @@ module "get_song_chart_lambda" {
   }
 }
 
-resource "aws_iam_policy" "get_song_chart_policy" {
-  name        = "get-song-chart-policy"
-  description = "Allows the get song chart Lambda to write to the DynamoDB table."
+resource "aws_iam_policy" "get_chart_policy" {
+  name        = "get-chart-policy"
+  description = "Allows the get chart Lambda to write to the DynamoDB table."
 
   policy = jsonencode({
     Version = "2012-10-17",
@@ -41,7 +41,7 @@ resource "aws_iam_policy" "get_song_chart_policy" {
   })
 }
 
-resource "aws_iam_role_policy_attachment" "get_song_chart_attach" {
-  role       = module.get_song_chart_lambda.role_name
-  policy_arn = aws_iam_policy.get_song_chart_policy.arn
+resource "aws_iam_role_policy_attachment" "get_chart_attach" {
+  role       = module.get_chart_lambda.role_name
+  policy_arn = aws_iam_policy.get_chart_policy.arn
 }

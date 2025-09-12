@@ -54,22 +54,31 @@ export const writeListeningHistoryToTable = async (
 
   // Process each chunk in parallel
   const writePromises = chunks.map(async (chunk) => {
-    const putRequests = chunk.map((item) => ({
-      PutRequest: {
-        Item: {
-          user_id: { S: "me" },
-          timestamp: { S: item.playedAt },
-          track_id: { S: item.trackId },
-          track_name: { S: item.trackName },
-          artist_name: { S: item.artistName },
-          album_name: { S: item.albumName },
-          artist_id: { S: item.artistId ?? "unknown" },
-          album_id: { S: item.albumId ?? "unknown" },
-          album_cover_url: { S: item.albumCoverUrl ?? "unknown" },
-          ingested_at: { S: new Date().toISOString() },
+    const putRequests = chunk.map((item) => {
+      const dynamoItem: Record<string, any> = {
+        user_id: { S: "me" },
+        timestamp: { S: item.playedAt },
+        track_id: { S: item.trackId },
+        track_name: { S: item.trackName },
+        artist_name: { S: item.artistName },
+        album_name: { S: item.albumName },
+        artist_id: { S: item.artistId ?? "unknown" },
+        album_id: { S: item.albumId ?? "unknown" },
+        album_cover_url: { S: item.albumCoverUrl ?? "unknown" },
+        ingested_at: { S: new Date().toISOString() },
+      };
+
+      // Only add genre if it exists
+      if (item.genre) {
+        dynamoItem.genre = { S: item.genre };
+      }
+
+      return {
+        PutRequest: {
+          Item: dynamoItem,
         },
-      },
-    }));
+      };
+    });
 
     const params: BatchWriteItemCommandInput = {
       RequestItems: {
