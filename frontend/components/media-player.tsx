@@ -63,9 +63,9 @@ export default function MediaPlayer() {
   }, []);
 
   const paths: any = {
-    "/hot-100":
+    "/charts/hot-100":
       "linear-gradient(to right, #8200db 0%, #fb64b6 50%, #ffba00 100%)",
-    "/artist-25":
+    "/charts/artists-25":
       "linear-gradient(to bottom right, #1d4ed8 0%, #06b6d4 50%, #6ee7b7 100%)",
     "/charts/albums-50":
       "linear-gradient(to bottom right, #B91C1C 0%, #F97316 50%, #FCD34D 100%)",

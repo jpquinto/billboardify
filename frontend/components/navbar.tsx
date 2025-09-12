@@ -26,15 +26,15 @@ export const Navbar = () => {
   const links = [
     {
       label: "songs",
-      href: "/hot-100",
-      logo: "/sphere-logo.png",
+      href: "/charts/hot-100",
+      logo: "/charts/sphere-logo.png",
       logoText: "HOT 100",
       labelColor: "text-purple-700/50",
       topBarColor: "from-pink-400/70",
     },
     {
       label: "artists",
-      href: "/artist-25",
+      href: "/charts/artists-25",
       logo: "/artist-chart-logo.png",
       logoText: "ARTIST 25",
       labelColor: "text-blue-800",
