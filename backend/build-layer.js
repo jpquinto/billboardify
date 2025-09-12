@@ -61,7 +61,7 @@ const EXCLUDE_PATTERNS = [
 ];
 
 // Essential packages to always include (even if they match exclude patterns)
-const FORCE_INCLUDE = ["aws-sdk"];
+const FORCE_INCLUDE = ["aws-sdk", "canvas"];
 
 // File patterns to exclude when copying
 const EXCLUDE_FILES = [

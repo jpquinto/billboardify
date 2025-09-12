@@ -6,6 +6,7 @@ import {
   GetItemCommandInput,
   UpdateItemCommandInput,
 } from "@aws-sdk/client-dynamodb";
+import { generateImageBanner } from "./album_banner";
 
 const DYNAMODB_CLIENT = new DynamoDBClient({});
 const { ALBUM_HISTORY_TABLE_NAME } = process.env;
@@ -60,9 +61,13 @@ export const getAndUpdateAlbumChartEntry = async (
   let lastWeekPosition: number | null = null;
   let weeksOnChart = 1;
   let peakPosition = position;
+  let albumCoverBanner: string | undefined = undefined;
 
   // Determine if this album should be marked as "charted" (position <= 50)
   const isCharted = position <= 50;
+
+  // Check if we need a melting banner (top 20)
+  const needsMeltingBanner = position <= 20;
 
   if (existingItem) {
     // If the album exists, calculate the new metrics
@@ -82,10 +87,29 @@ export const getAndUpdateAlbumChartEntry = async (
       ? parseInt(existingItem.peak_position.N)
       : position;
 
+    // Check for existing banner
+    const existingBanner = existingItem.album_cover_banner?.S;
+
     playCount += existingPlayCount;
     lastWeekPosition = existingCurrentPosition;
     weeksOnChart = isCharted ? existingWeeksOnChart + 1 : existingWeeksOnChart;
     peakPosition = Math.min(existingPeakPosition, position);
+    albumCoverBanner = existingBanner;
+  }
+
+  if (needsMeltingBanner && !albumCoverBanner && entry.album_cover_url) {
+    try {
+      albumCoverBanner = await generateImageBanner(
+        entry.album_id,
+        entry.album_cover_url
+      );
+    } catch (error) {
+      console.error(
+        `❌ Failed to generate banner for ${entry.album_name}:`,
+        error
+      );
+      // Continue without banner - non-critical error
+    }
   }
 
   // Step 3. Update DynamoDB with new album data
@@ -106,6 +130,10 @@ export const getAndUpdateAlbumChartEntry = async (
   // Only set last_week_position if we have a value for it
   if (lastWeekPosition !== null) {
     updateExpression += ", #last_week_position = :last_week_position";
+  }
+
+  if (albumCoverBanner) {
+    updateExpression += ", #album_cover_banner = :album_cover_banner";
   }
 
   if (entry.genre) {
@@ -145,6 +173,12 @@ export const getAndUpdateAlbumChartEntry = async (
     };
   }
 
+  // Add banner attributes if we have a banner
+  if (albumCoverBanner) {
+    expressionAttributeNames["#album_cover_banner"] = "album_cover_banner";
+    expressionAttributeValues[":album_cover_banner"] = { S: albumCoverBanner };
+  }
+
   if (entry.genre) {
     expressionAttributeNames["#genre"] = "genre";
     expressionAttributeValues[":genre"] = { S: entry.genre };
@@ -177,5 +211,6 @@ export const getAndUpdateAlbumChartEntry = async (
     total_points: entry.points,
     genre: entry.genre,
     album_cover_url: entry.album_cover_url,
+    album_cover_banner: albumCoverBanner,
   };
 };

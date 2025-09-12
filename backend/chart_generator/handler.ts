@@ -122,7 +122,7 @@ export const handler = async () => {
   let albumChart: AlbumChartData[] = [];
   try {
     albumChart = await createAlbumChartEntryAndAggregatePlayCounts(
-      aggregatedArtistListeningHistory,
+      aggregatedAlbumListeningHistory,
       currentAlbumChartPointData,
       chartTimestamp
     );

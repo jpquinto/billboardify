@@ -128,6 +128,7 @@ export interface AlbumChartData {
   total_points: number;
   album_cover_url: string;
   genre?: string | null;
+  album_cover_banner?: string | null;
 }
 
 // Summary information about the generated song chart
