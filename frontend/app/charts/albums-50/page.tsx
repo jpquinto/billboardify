@@ -1,16 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { SongChart } from "@/components/song-chart/song-chart";
-import { SongChart as SongChartType } from "@/types/chart-data";
-import { getSongChart } from "@/actions/get-song-chart";
+import { AlbumChart as AlbumChartType } from "@/types/chart-data";
+import { getAlbumChart } from "@/actions/get-album-chart";
 import { ChartProgressBar } from "@/components/chart-progress-bar";
 import { listCharts } from "@/actions/list-song-charts";
 import { chartCache } from "@/hooks/useCache";
+import { AlbumChart } from "@/components/album-chart/album-chart";
 
-export default function Hot100() {
+export default function Albums50() {
   const [chartTimestampsList, setChartTimestampsList] = useState<string[]>([]);
-  const [latestChartData, setLatestChartData] = useState<SongChartType | null>(
+  const [latestChartData, setLatestChartData] = useState<AlbumChartType | null>(
     null
   );
   const [loading, setLoading] = useState(true);
@@ -50,14 +50,14 @@ export default function Hot100() {
         );
 
         const timestamp = chartsData.charts[0].timestamp;
-        const cacheKey = `latest_song_chart_${timestamp}`;
+        const cacheKey = `latest_album_chart_${timestamp}`;
 
         // Step 2: Check cache for chart data
-        let chartData = chartCache.get<SongChartType>(cacheKey);
+        let chartData = chartCache.get<AlbumChartType>(cacheKey);
 
         if (!chartData) {
           // Cache miss - fetch from API
-          chartData = await getSongChart(timestamp);
+          chartData = await getAlbumChart(timestamp);
           chartCache.set(cacheKey, chartData, 2); // Cache for 2 hours
         }
 
@@ -133,18 +133,16 @@ export default function Hot100() {
   return (
     <main className="flex-1">
       <ChartProgressBar
-        gradient1={
-          "bg-gradient-to-br from-purple-700 via-pink-400 to-amber-400"
-        }
+        gradient1={"bg-gradient-to-br from-red-700 via-orange-500 to-amber-200"}
         gradient2={
-          "bg-gradient-to-br from-purple-700/50 via-pink-400/50 to-amber-400/50"
+          "bg-gradient-to-br from-red-700/50 via-orange-500/50 to-amber-200/50"
         }
         gradient3={
-          "bg-gradient-to-br from-purple-700/20 via-pink-400/20 to-amber-400/20"
+          "bg-gradient-to-br from-red-700/20 via-orange-500/20 to-amber-200/20"
         }
-        defaultBackground={"bg-pink-400/10"}
+        defaultBackground={"bg-orange-500/10"}
       />
-      <SongChart
+      <AlbumChart
         chartData={latestChartData}
         timestamp={latestChartData.timestamp}
       />

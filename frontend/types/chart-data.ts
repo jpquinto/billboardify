@@ -10,6 +10,7 @@ export interface SongChartEntry {
   album_cover: string;
   plays_since_last_week: number;
   points: number;
+  genre?: string | null;
 }
 
 export interface SongChart {
@@ -53,6 +54,7 @@ export interface ArtistChartEntry {
   total_points: number;
   artist_image_url: string | null;
   banner_url: string | null;
+  genre?: string | null;
 }
 
 export interface ArtistChart {
@@ -62,4 +64,25 @@ export interface ArtistChart {
     banner_url: string;
     artist_name: string;
   }[];
+}
+
+export interface AlbumChartEntry {
+  position: number;
+  album_id: string;
+  album_name: string;
+  artist_id: string;
+  artist_name: string;
+  peak: number;
+  last_charted_at: string;
+  last_week: number | null;
+  weeks_on_chart: number;
+  total_plays_since_last_week: number;
+  total_points: number;
+  album_cover_url: string;
+  genre?: string | null;
+}
+
+export interface AlbumChart {
+  timestamp: string;
+  chartData: AlbumChartEntry[];
 }

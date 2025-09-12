@@ -113,7 +113,7 @@ export interface ArtistChartData {
   genre?: string | null;
 }
 
-// Represents a single artist entry in the artist chart
+// Represents a single album entry in the artist chart
 export interface AlbumChartData {
   position: number;
   album_id: string;
@@ -126,6 +126,7 @@ export interface AlbumChartData {
   weeks_on_chart: number;
   total_plays_since_last_week: number;
   total_points: number;
+  album_cover_url: string;
   genre?: string | null;
 }
 
