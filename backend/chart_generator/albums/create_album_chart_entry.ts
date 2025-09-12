@@ -176,5 +176,6 @@ export const getAndUpdateAlbumChartEntry = async (
     total_plays_since_last_week: recent_play_count,
     total_points: entry.points,
     genre: entry.genre,
+    album_cover_url: entry.album_cover_url,
   };
 };

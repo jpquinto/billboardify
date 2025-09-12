@@ -1,30 +1,27 @@
 "use server";
 
-import { SongChart } from "@/types/chart-data";
+import { AlbumChart } from "@/types/chart-data";
 import axios from "axios";
 
 const BACKEND_API_URL = process.env.BACKEND_API_URL!;
 
-export const getSongChart = async (timestamp: string): Promise<SongChart> => {
+export const getAlbumChart = async (timestamp: string): Promise<AlbumChart> => {
   try {
     const response = await axios.get(`${BACKEND_API_URL}/get-chart`, {
       params: {
         timestamp: timestamp,
-        type: "songs",
+        type: "albums",
       },
       headers: {
         "Content-Type": "application/json",
       },
     });
 
-    // Transform the response to match your interface
     const data = response.data;
 
     return {
       timestamp: data.timestamp,
       chartData: data.chart.chart_data,
-      chartSummary: data.chart.chart_summary,
-      banners: data.chart.banners,
     };
   } catch (error) {
     console.error("Error fetching chart:", error);

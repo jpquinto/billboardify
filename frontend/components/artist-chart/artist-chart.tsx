@@ -19,7 +19,7 @@ export const ArtistChart = ({
   return (
     <div className="flex justify-center flex-col mx-auto px-4 pt-30">
       <ChartHeader
-        title={"My Artist 25"}
+        title={"Artists 25"}
         logo={"/artist-chart-logo.png"}
         timestamp={timestamp}
       />

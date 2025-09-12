@@ -42,11 +42,11 @@ export const Navbar = () => {
     },
     {
       label: "albums",
-      href: "/albums-50",
+      href: "/charts/albums-50",
       logo: "/album-chart-logo.png",
       logoText: "ALBUMS 50",
-      labelColor: "text-blue-400",
-      topBarColor: "from-blue-400/70",
+      labelColor: "text-orange-400",
+      topBarColor: "from-red-400/70",
     },
   ];
 
