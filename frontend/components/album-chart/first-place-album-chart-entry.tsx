@@ -4,6 +4,7 @@ import Link from "next/link";
 import { AlbumChartEntry as AlbumChartEntryType } from "@/types/chart-data";
 import { LiquidGlassContainer } from "../ui/liquid-glass-container";
 import { ImageGradientTransition } from "../ui/image-gradient";
+import Image from "next/image";
 
 export const FirstPlaceAlbumChartEntry = (entry: AlbumChartEntryType) => {
   const getPositionChangeIcon = () => {
@@ -97,9 +98,9 @@ export const FirstPlaceAlbumChartEntry = (entry: AlbumChartEntryType) => {
           className="absolute top-0 left-0 w-full h-full overflow-hidden"
           style={{ filter: `blur(1px)` }}
         >
-          <ImageGradientTransition
-            imageUrl={entry.album_cover_url}
-            gradientWidth={700}
+          <img
+            src={entry.album_cover_banner || entry.album_cover_url}
+            alt={entry.album_name}
             className="w-full h-full object-cover opacity-30"
           />
         </div>

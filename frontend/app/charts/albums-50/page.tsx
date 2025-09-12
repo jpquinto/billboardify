@@ -25,7 +25,7 @@ export default function Albums50() {
         // Step 1: Check cache first for chart list
         let chartsData = chartCache.get<{
           charts: Array<{ timestamp: string }>;
-        }>("charts_list");
+        }>("albums_charts_list");
 
         if (!chartsData) {
           // Cache miss - fetch from API

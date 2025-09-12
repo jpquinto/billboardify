@@ -48,11 +48,8 @@ export const AlbumChart = ({
             .map((entry) => entry.album_cover_url)}
           gradientWidth={1500}
         /> */}
-        <FirstPlaceAlbumChartEntry {...chartEntries[0]} />
-        <PodiumAlbumChartEntry {...chartEntries[1]} />
-        <PodiumAlbumChartEntry {...chartEntries[2]} />
         <div className="pt-5">
-          {chartEntries.slice(3, 20).map((entry) => (
+          {chartEntries.slice(0, 20).map((entry) => (
             <TopTenAlbumChartEntry key={entry.album_id} {...entry} />
           ))}
         </div>

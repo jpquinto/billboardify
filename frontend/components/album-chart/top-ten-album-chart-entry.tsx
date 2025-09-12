@@ -58,32 +58,31 @@ export const TopTenAlbumChartEntry = (entry: AlbumChartEntryType) => {
   return (
     <section
       ref={componentRef}
-      className="pb-5 transition-all relative"
+      className="pb-5 transition-all relative group"
       style={{
         transform: isVisible ? "scale(1)" : "scale(0.9)",
         transition: "transform 0.5s ease-out, opacity 0.5s ease-out",
       }}
       id={entry.position.toString()}
     >
-      <LiquidGlassContainer innerClassName="relative">
-        <div className="max-w-8xl mx-auto min-w-6xl w-full flex items-center gap-8 p-4 py-10 border-gray-200 transition-colors">
+      <LiquidGlassContainer innerClassName="relative overflow-hidden">
+        <div className="mx-auto min-w-6xl min-h-[15rem] w-full flex items-center gap-8 p-4 z-10 py-10 border-gray-200 transition-colors">
           {/* Position */}
           <div className="flex items-center gap-2 min-w-[60px]">
             {getPositionChangeIcon()}
-            <span className="text-5xl font-bold text-gray-900">
+            <span className="text-8xl font-bold text-gray-900">
               {entry.position}
             </span>
           </div>
-
           {/* Track & Artist Info */}
           <div className="flex-1 min-w-0">
             <Link href={`/track/${entry.album_id}`} className="group">
-              <h3 className="font-semibold text-gray-900 truncate group-hover:bg-gradient-to-br group-hover:from-purple-700 group-hover:via-pink-400 group-hover:to-amber-400 group-hover:bg-clip-text group-hover:text-transparent transition-colors text-4xl tracking-tighter pb-2">
-                {entry.album_name.length > 30
-                  ? entry.album_name.slice(0, 30) + "..."
+              <h3 className="font-semibold text-gray-900 truncate transition-colors text-5xl tracking-tighter pb-3">
+                {entry.album_name.length > 25
+                  ? entry.album_name.slice(0, 25) + "..."
                   : entry.album_name}
               </h3>
-              <p className="text-xl text-gray-900 truncate font-bold">
+              <p className="text-2xl text-gray-900 truncate font-bold">
                 {entry.artist_name.length > 45
                   ? entry.artist_name.slice(0, 45) + "..."
                   : entry.artist_name}
@@ -121,15 +120,16 @@ export const TopTenAlbumChartEntry = (entry: AlbumChartEntryType) => {
           </div>
         </div>
         <div
-          className="absolute top-0 left-0 w-full h-full overflow-hidden"
+          className="absolute top-0 left-0 w-full h-full group-hover:scale-[1.04] transition-all duration-500"
           style={{ filter: `blur(1px)` }}
         >
-          <ImageGradientTransition
-            imageUrl={entry.album_cover_url}
-            gradientWidth={700}
-            className="w-full h-full object-cover opacity-30"
+          <img
+            src={entry.album_cover_banner || entry.album_cover_url}
+            alt={entry.album_name}
+            className="w-full h-full object-cover opacity-70 rounded-xl"
           />
         </div>
+        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-white via-transparent to-white"></div>
       </LiquidGlassContainer>
     </section>
   );

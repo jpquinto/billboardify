@@ -151,9 +151,9 @@ export const ImageGradientTransition: React.FC<
   }
 
   return transitionImageUrl ? (
-    <>
+    <div>
       <img src={transitionImageUrl} alt={alt} className={className} />
       <canvas ref={canvasRef} style={{ display: "none" }} />
-    </>
+    </div>
   ) : null;
 };

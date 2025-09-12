@@ -49,8 +49,8 @@ export const BannerScroller = ({ banners }: { banners: string[] }) => {
       <div
         className="absolute inset-0 z-10 w-full h-full scale-x-[1.02]"
         style={{
-          background: `linear-gradient(to right, rgba(255,255,255,1) 0%, transparent ${50}%, transparent ${
-            100 - 50
+          background: `linear-gradient(to right, rgba(255,255,255,1) 0%, transparent ${70}%, transparent ${
+            100 - 70
           }%, rgba(255,255,255,1) 100%)`,
         }}
       />

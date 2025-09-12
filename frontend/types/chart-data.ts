@@ -80,6 +80,7 @@ export interface AlbumChartEntry {
   total_points: number;
   album_cover_url: string;
   genre?: string | null;
+  album_cover_banner?: string | null;
 }
 
 export interface AlbumChart {
