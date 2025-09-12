@@ -9,3 +9,7 @@ locals {
 data "aws_lambda_layer_version" "spotify_sparticuz" {
   layer_name = "spotify-sparticuz-layer"
 }
+
+data "aws_lambda_layer_version" "spotify_sharp" {
+  layer_name = "spotify-sharp-layer"
+}

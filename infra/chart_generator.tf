@@ -16,6 +16,7 @@ module "chart_generator_lambda" {
 
   layers = [
     data.aws_lambda_layer_version.spotify_sparticuz.arn,
+    data.aws_lambda_layer_version.spotify_sharp.arn,
     module.browser_lambda_layer.layer_arn,
     module.shared_lambda_layer.layer_arn,
   ]
@@ -29,6 +30,7 @@ module "chart_generator_lambda" {
     ARTIST_HISTORY_TABLE_NAME : module.artist_history_table.name
     ALBUM_HISTORY_TABLE_NAME : module.album_history_table.name
     SONG_CHART_HISTORY_BUCKET_NAME : module.song_chart_history_bucket.bucket_name
+    PUBLIC_ASSETS_BUCKET_NAME : module.public_assets_bucket.bucket_name
     SPOTIFY_REFRESH_TOKEN = local.spotify_secrets.SPOTIFY_REFRESH_TOKEN
     SPOTIFY_CLIENT_ID     = local.spotify_secrets.SPOTIFY_CLIENT_ID
     SPOTIFY_CLIENT_SECRET = local.spotify_secrets.SPOTIFY_CLIENT_SECRET
@@ -76,7 +78,8 @@ resource "aws_iam_policy" "chart_generator_policy" {
         Action = [
           "s3:PutObject"
         ],
-        Resource = "${module.song_chart_history_bucket.bucket_arn}/*"
+        Resource = ["${module.song_chart_history_bucket.bucket_arn}/*",
+        "${module.public_assets_bucket.bucket_arn}/*"]
       }
     ]
   })
