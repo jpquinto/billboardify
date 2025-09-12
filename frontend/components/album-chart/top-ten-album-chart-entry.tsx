@@ -121,12 +121,12 @@ export const TopTenAlbumChartEntry = (entry: AlbumChartEntryType) => {
         </div>
         <div
           className="absolute top-0 left-0 w-full h-full group-hover:scale-[1.04] transition-all duration-500"
-          style={{ filter: `blur(1px)` }}
+          style={{ filter: `blur(2px)` }}
         >
           <img
             src={entry.album_cover_banner || entry.album_cover_url}
             alt={entry.album_name}
-            className="w-full h-full object-cover opacity-70 rounded-xl"
+            className="w-full h-full object-cover opacity-50 rounded-xl"
           />
         </div>
         <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-white via-transparent to-white"></div>

@@ -1,11 +1,9 @@
 "use client";
 
 import { ArtistChart as ArtistChartType } from "@/types/chart-data";
-import Image from "next/image";
 import { BannerScroller } from "../ui/banner-scroller";
 import { ChartHeader } from "../chart-header";
 import { FirstPlaceArtistChartEntry } from "./first-place-artist-chart-entry";
-import { PodiumArtistChartEntry } from "./podium-artist-chart-entry";
 import { TopTenArtistChartEntry } from "./top-ten-artist-chart-entry";
 
 export const ArtistChart = ({
@@ -27,10 +25,8 @@ export const ArtistChart = ({
       <div className="relative max-w-8xl">
         <BannerScroller banners={banners.map((banner) => banner.banner_url)} />
         <FirstPlaceArtistChartEntry {...chartEntries[0]} />
-        <PodiumArtistChartEntry {...chartEntries[1]} />
-        <PodiumArtistChartEntry {...chartEntries[2]} />
         <div className="pt-5">
-          {chartEntries.slice(3, 40).map((entry) => (
+          {chartEntries.slice(1, 40).map((entry) => (
             <TopTenArtistChartEntry key={entry.artist_id} {...entry} />
           ))}
         </div>

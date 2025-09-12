@@ -3,7 +3,6 @@
 import { SongChart as SongChartType } from "@/types/chart-data";
 import { SongChartEntry } from "./song-chart-entry";
 import { FirstPlaceChartEntry } from "./first-place-chart-entry";
-import { SecondPlaceChartEntry } from "./second-place-chart-entry";
 import { TopTenChartEntry } from "./top-ten-chart-entry";
 import { BannerScroller } from "../ui/banner-scroller";
 import { ChartHeader } from "../chart-header";
@@ -28,10 +27,8 @@ export const SongChart = ({
       <section className="relative max-w-8xl" id="1">
         <BannerScroller banners={banners.map((banner) => banner.banner_url)} />
         <FirstPlaceChartEntry {...chartEntries[0]} />
-        <SecondPlaceChartEntry {...chartEntries[1]} />
-        <SecondPlaceChartEntry {...chartEntries[2]} />
         <div className="pt-5">
-          {chartEntries.slice(3, 40).map((entry) => (
+          {chartEntries.slice(1, 40).map((entry) => (
             <TopTenChartEntry key={entry.track_id} {...entry} />
           ))}
         </div>

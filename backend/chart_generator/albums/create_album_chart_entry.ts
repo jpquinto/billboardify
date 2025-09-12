@@ -6,7 +6,7 @@ import {
   GetItemCommandInput,
   UpdateItemCommandInput,
 } from "@aws-sdk/client-dynamodb";
-import { generateImageBanner } from "./album_banner";
+const { generateImageBanner } = require("/opt/nodejs/generate_album_banner");
 
 const DYNAMODB_CLIENT = new DynamoDBClient({});
 const { ALBUM_HISTORY_TABLE_NAME } = process.env;

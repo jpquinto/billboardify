@@ -60,6 +60,16 @@ module "song_history_table" {
       type = "S"
     }
   ]
+
+  global_secondary_indexes = [
+    {
+      name            = "track_id_index"
+      hash_key        = "track_id"
+      projection_type = "ALL"
+      read_capacity   = 5
+      write_capacity  = 5
+    }
+  ]
 }
 
 module "artist_history_table" {

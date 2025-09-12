@@ -54,8 +54,9 @@ export const BannerScroller = ({ banners }: { banners: string[] }) => {
           }%, rgba(255,255,255,1) 100%)`,
         }}
       />
+
       <div
-        className="flex flex-col items-center leading-none opacity-50"
+        className="flex flex-col items-center leading-none opacity-40 relative"
         style={{ filter: `blur(1.5px)` }}
       >
         {/* First Banner */}
@@ -80,6 +81,8 @@ export const BannerScroller = ({ banners }: { banners: string[] }) => {
 
         {/* Second Banner */}
         <Banner src={banners[2]} alt="Artist Banner 2" />
+        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-white from-5% via-transparent to-white to-95%"></div>
+        <div className="absolute top-0 left-0 w-full h-[100px] bg-gradient-to-b from-white to-transparent"></div>
       </div>
     </div>
   );

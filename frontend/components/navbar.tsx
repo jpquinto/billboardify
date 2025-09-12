@@ -27,7 +27,7 @@ export const Navbar = () => {
     {
       label: "songs",
       href: "/charts/hot-100",
-      logo: "/charts/sphere-logo.png",
+      logo: "/song-chart-logo.png",
       logoText: "HOT 100",
       labelColor: "text-purple-700/50",
       topBarColor: "from-pink-400/70",

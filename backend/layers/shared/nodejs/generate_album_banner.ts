@@ -21,7 +21,7 @@ interface WaveOptions {
 
 interface GradientImageOptionsSharp {
   gradientWidth?: number;
-  middleBlendWidth?: number; // NEW: Width of the middle blending sections
+  middleBlendWidth?: number;
   outputFormat?: "png" | "jpeg" | "webp";
   quality?: number;
   waveOptions?: WaveOptions;
@@ -169,9 +169,10 @@ async function createWideBlendingSection(
   waveOptions: WaveOptions = {}
 ): Promise<Buffer> {
   const canvas = Buffer.alloc(width * height * 4); // RGBA
-  const gradientLength = 400;
 
   for (let y = 0; y < height; y++) {
+    const gradientLength = Math.floor(Math.random() * 401) + 200;
+    console.log(`Row ${y}: gradientLength = ${gradientLength}`);
     const edgeColor = edgeColors[y] || { r: 0, g: 0, b: 0 };
 
     for (let x = 0; x < width; x++) {
