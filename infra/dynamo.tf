@@ -17,7 +17,40 @@ module "listening_history_table" {
     {
       name = "timestamp"
       type = "S"
+    },
+    {
+      name = "track_id"
+      type = "S"
+    },
+    {
+      name = "artist_id"
+      type = "S"
+    },
+    {
+      name = "album_id"
+      type = "S"
     }
+  ]
+
+  global_secondary_indexes = [
+    {
+      name            = "track_id_timestamp_index"
+      hash_key        = "track_id"
+      range_key       = "timestamp"
+      projection_type = "KEYS_ONLY"
+    },
+    {
+      name            = "artist_id_timestamp_index"
+      hash_key        = "artist_id"
+      range_key       = "timestamp"
+      projection_type = "KEYS_ONLY"
+    },
+    {
+      name            = "album_id_timestamp_index"
+      hash_key        = "album_id"
+      range_key       = "timestamp"
+      projection_type = "KEYS_ONLY"
+    },
   ]
 }
 
