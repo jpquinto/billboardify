@@ -81,6 +81,8 @@ export interface AlbumChartEntry {
   album_cover_url: string;
   genre?: string | null;
   album_cover_banner?: string | null;
+  cover_primary_color?: string | null;
+  cover_secondary_color?: string | null;
 }
 
 export interface AlbumChart {

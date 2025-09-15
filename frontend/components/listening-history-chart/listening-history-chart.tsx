@@ -13,6 +13,8 @@ import { LiquidGlassContainer } from "../ui/liquid-glass-container";
 interface ListeningHistoryChartProps {
   id: string;
   type: "song" | "artist" | "album";
+  primaryColor?: string;
+  secondaryColor?: string;
 }
 
 const chartConfig = {
@@ -25,6 +27,8 @@ const chartConfig = {
 export const ListeningHistoryChart = ({
   id,
   type,
+  primaryColor = "#8200db",
+  secondaryColor = "#fb64b6",
 }: ListeningHistoryChartProps) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -169,10 +173,16 @@ export const ListeningHistoryChart = ({
               x2="100%"
               y2="0%"
             >
-              <stop offset="0%" stopColor="#8200db" />
-              {/* <stop offset="50%" stopColor="#fb64b6" />
-              <stop offset="50%" stopColor="#ffba00" /> */}
-              <stop offset="100%" stopColor="#fb64b6" />
+              <stop
+                offset="0%"
+                stopColor={primaryColor || "#8200db"}
+                stopOpacity="0.7"
+              />
+              <stop
+                offset="100%"
+                stopColor={secondaryColor || "#fb64b6"}
+                stopOpacity="0.7"
+              />
             </linearGradient>
           </defs>
           <XAxis

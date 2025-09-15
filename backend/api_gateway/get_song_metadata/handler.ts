@@ -52,10 +52,15 @@ export const handler = async (event: any) => {
     // Convert DynamoDB item to regular object
     const song = result.Items[0];
 
-    const albumBanner = await getAlbumBanner(
+    const bannerResult = await getAlbumBanner(
       song.album_id?.S!,
       song.album_cover_url?.S!
     );
+
+    const albumBanner = bannerResult ? bannerResult.s3Url : null;
+    const primaryColor = bannerResult ? bannerResult.primaryColor : null;
+    const secondaryColor = bannerResult ? bannerResult.secondaryColor : null;
+
     const songData = {
       track_id: song.track_id?.S,
       artist_id: song.artist_id?.S,
@@ -78,6 +83,8 @@ export const handler = async (event: any) => {
         : null,
       last_charted_at: song.last_charted_at?.S,
       album_cover_banner: albumBanner,
+      cover_primary_color: primaryColor,
+      cover_secondary_color: secondaryColor,
     };
 
     return {

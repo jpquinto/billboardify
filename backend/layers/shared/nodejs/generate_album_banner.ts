@@ -9,6 +9,22 @@ interface S3UploadResult {
   size: number;
 }
 
+interface ColorRGB {
+  r: number;
+  g: number;
+  b: number;
+}
+
+interface ColorWithCount extends ColorRGB {
+  count: number;
+}
+
+interface BannerResult {
+  s3Url: string;
+  primaryColor: string | null;
+  secondaryColor: string | null;
+}
+
 const S3_CLIENT = new S3Client({});
 const { PUBLIC_ASSETS_BUCKET_NAME } = process.env;
 
@@ -25,6 +41,111 @@ interface GradientImageOptionsSharp {
   outputFormat?: "png" | "jpeg" | "webp";
   quality?: number;
   waveOptions?: WaveOptions;
+}
+
+/**
+ * Extracts the two most prominent and distinct colors from an image
+ * @param imageBuffer - The image buffer to analyze
+ * @returns Promise with primary and secondary colors, or nulls if not found
+ */
+async function extractProminentColors(imageBuffer: Buffer): Promise<{
+  primaryColor: ColorRGB | null;
+  secondaryColor: ColorRGB | null;
+}> {
+  try {
+    // Resize image to 100x100 for faster processing while maintaining color accuracy
+    const resizedBuffer = await sharp(imageBuffer)
+      .resize(100, 100, { fit: "cover" })
+      .raw()
+      .toBuffer();
+
+    const colorMap = new Map<string, ColorWithCount>();
+
+    // Count colors with quantization to group similar colors
+    for (let i = 0; i < resizedBuffer.length; i += 3) {
+      const r = resizedBuffer[i];
+      const g = resizedBuffer[i + 1];
+      const b = resizedBuffer[i + 2];
+
+      // Quantize colors to reduce noise (group similar colors)
+      const quantizedR = Math.round(r / 16) * 16;
+      const quantizedG = Math.round(g / 16) * 16;
+      const quantizedB = Math.round(b / 16) * 16;
+
+      const colorKey = `${quantizedR},${quantizedG},${quantizedB}`;
+
+      if (colorMap.has(colorKey)) {
+        colorMap.get(colorKey)!.count++;
+      } else {
+        colorMap.set(colorKey, {
+          r: quantizedR,
+          g: quantizedG,
+          b: quantizedB,
+          count: 1,
+        });
+      }
+    }
+
+    // Convert to array and sort by frequency
+    const sortedColors = Array.from(colorMap.values()).sort(
+      (a, b) => b.count - a.count
+    );
+
+    // Filter out colors that are too similar to black, white, or gray
+    const filteredColors = sortedColors.filter((color) => {
+      const brightness = (color.r + color.g + color.b) / 3;
+      const isNotBlackish = brightness > 30;
+      const isNotWhitish = brightness < 225;
+      const hasColorSaturation =
+        Math.max(color.r, color.g, color.b) -
+          Math.min(color.r, color.g, color.b) >
+        20;
+
+      return isNotBlackish && isNotWhitish && hasColorSaturation;
+    });
+
+    if (filteredColors.length === 0) {
+      return { primaryColor: null, secondaryColor: null };
+    }
+
+    const primaryColor = filteredColors[0];
+    let secondaryColor = null;
+
+    // Find a secondary color that's distinct enough from the primary
+    for (let i = 1; i < filteredColors.length; i++) {
+      const candidate = filteredColors[i];
+      const colorDistance = calculateColorDistance(primaryColor, candidate);
+
+      // Colors should be at least 60 units apart in RGB space to be considered distinct
+      if (colorDistance > 60) {
+        secondaryColor = candidate;
+        break;
+      }
+    }
+
+    return {
+      primaryColor: primaryColor
+        ? { r: primaryColor.r, g: primaryColor.g, b: primaryColor.b }
+        : null,
+      secondaryColor: secondaryColor
+        ? { r: secondaryColor.r, g: secondaryColor.g, b: secondaryColor.b }
+        : null,
+    };
+  } catch (error) {
+    console.error("Error extracting prominent colors:", error);
+    return { primaryColor: null, secondaryColor: null };
+  }
+}
+
+/**
+ * Calculates the Euclidean distance between two colors in RGB space
+ */
+function calculateColorDistance(color1: ColorRGB, color2: ColorRGB): number {
+  const rDiff = color1.r - color2.r;
+  const gDiff = color1.g - color2.g;
+  const bDiff = color1.b - color2.b;
+
+  return Math.sqrt(rDiff * rDiff + gDiff * gDiff + bDiff * bDiff);
 }
 
 export async function generateGradientTransitionImage(
@@ -305,9 +426,27 @@ export async function uploadImageToS3(
   }
 }
 
-export async function generateImageBanner(albumId: string, imageUrl: string) {
+export async function generateImageBanner(
+  albumId: string,
+  imageUrl: string
+): Promise<BannerResult> {
   try {
-    // Step 1: Generate the melting transition images with different effects
+    // Step 1: Fetch the original image to extract colors
+    console.log("Fetching original image for color analysis...");
+    const response = await fetch(imageUrl);
+    if (!response.ok) throw new Error("Failed to fetch image");
+    const originalImageBuffer = Buffer.from(await response.arrayBuffer());
+
+    // Step 2: Extract prominent colors from the original image
+    console.log("Extracting prominent colors...");
+    const { primaryColor, secondaryColor } = await extractProminentColors(
+      originalImageBuffer
+    );
+
+    console.log("Primary color:", primaryColor);
+    console.log("Secondary color:", secondaryColor);
+
+    // Step 3: Generate the melting transition images with different effects
     console.log("Generating melting transitions...");
 
     // Subtle melting effect
@@ -330,7 +469,11 @@ export async function generateImageBanner(albumId: string, imageUrl: string) {
 
     console.log("✅ Image Upload Success!");
 
-    return result.s3Url;
+    return {
+      s3Url: result.s3Url,
+      primaryColor: primaryColor ? JSON.stringify(primaryColor) : null,
+      secondaryColor: secondaryColor ? JSON.stringify(secondaryColor) : null,
+    };
   } catch (error) {
     console.error("❌ Error processing image:", error);
     throw error;

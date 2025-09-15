@@ -14,4 +14,6 @@ export interface SongMetadata {
   last_week_position: number | null;
   last_charted_at: string | null;
   album_cover_banner: string | null;
+  cover_primary_color: string | null;
+  cover_secondary_color: string | null;
 }

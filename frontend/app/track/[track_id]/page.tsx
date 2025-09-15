@@ -8,6 +8,7 @@ import Image from "next/image";
 import { ListeningHistoryChart } from "@/components/listening-history-chart/listening-history-chart";
 import Container from "@/components/ui/container";
 import { SongHero } from "@/components/songs/song-hero";
+import { parseColorToRgb } from "@/utils/parse-rgb";
 
 export default function SongPage({ params }: { params: { track_id: string } }) {
   const resolvedParams = params instanceof Promise ? use(params) : params;
@@ -102,6 +103,11 @@ export default function SongPage({ params }: { params: { track_id: string } }) {
   //     );
   //   }
 
+  const primaryColor =
+    parseColorToRgb(songMetadata?.cover_primary_color) || undefined;
+  const secondaryColor =
+    parseColorToRgb(songMetadata?.cover_secondary_color) || undefined;
+
   return (
     <main className="flex-1">
       <div>
@@ -116,7 +122,12 @@ export default function SongPage({ params }: { params: { track_id: string } }) {
         <Container className="-translate-y-10 pt-20 relative">
           <div className="grid grid-cols-2 gap-x-10">
             <div></div>
-            <ListeningHistoryChart type={"song"} id={resolvedParams.track_id} />
+            <ListeningHistoryChart
+              type={"song"}
+              id={resolvedParams.track_id}
+              primaryColor={primaryColor}
+              secondaryColor={secondaryColor}
+            />
           </div>
         </Container>
       </div>

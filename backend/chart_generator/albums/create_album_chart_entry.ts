@@ -62,6 +62,8 @@ export const getAndUpdateAlbumChartEntry = async (
   let weeksOnChart = 1;
   let peakPosition = position;
   let albumCoverBanner: string | undefined = undefined;
+  let primaryColor: string | undefined = undefined;
+  let secondaryColor: string | undefined = undefined;
 
   // Determine if this album should be marked as "charted" (position <= 50)
   const isCharted = position <= 50;
@@ -87,22 +89,56 @@ export const getAndUpdateAlbumChartEntry = async (
       ? parseInt(existingItem.peak_position.N)
       : position;
 
-    // Check for existing banner
+    // Check for existing banner and colors
     const existingBanner = existingItem.album_cover_banner?.S;
+    const existingPrimaryColor = existingItem.cover_primary_color?.S;
+    const existingSecondaryColor = existingItem.cover_secondary_color?.S;
 
     playCount += existingPlayCount;
     lastWeekPosition = existingCurrentPosition;
     weeksOnChart = isCharted ? existingWeeksOnChart + 1 : existingWeeksOnChart;
     peakPosition = Math.min(existingPeakPosition, position);
     albumCoverBanner = existingBanner;
+
+    // Parse existing colors if they exist
+    if (existingPrimaryColor) {
+      try {
+        primaryColor = JSON.parse(existingPrimaryColor);
+      } catch (error) {
+        console.error(
+          `Failed to parse primary color for ${entry.album_id}:`,
+          error
+        );
+      }
+    }
+    if (existingSecondaryColor) {
+      try {
+        secondaryColor = JSON.parse(existingSecondaryColor);
+      } catch (error) {
+        console.error(
+          `Failed to parse secondary color for ${entry.album_id}:`,
+          error
+        );
+      }
+    }
   }
 
-  if (needsMeltingBanner && !albumCoverBanner && entry.album_cover_url) {
+  if (
+    needsMeltingBanner &&
+    (!albumCoverBanner || !primaryColor || !secondaryColor) &&
+    entry.album_cover_url
+  ) {
     try {
-      albumCoverBanner = await generateImageBanner(
+      const bannerResult = await generateImageBanner(
         entry.album_id,
         entry.album_cover_url
       );
+
+      if (bannerResult) {
+        albumCoverBanner = bannerResult.s3Url;
+        primaryColor = bannerResult.primaryColor;
+        secondaryColor = bannerResult.secondaryColor;
+      }
     } catch (error) {
       console.error(
         `❌ Failed to generate banner for ${entry.album_name}:`,
@@ -134,6 +170,15 @@ export const getAndUpdateAlbumChartEntry = async (
 
   if (albumCoverBanner) {
     updateExpression += ", #album_cover_banner = :album_cover_banner";
+  }
+
+  // Add color fields if they exist
+  if (primaryColor) {
+    updateExpression += ", #cover_primary_color = :cover_primary_color";
+  }
+
+  if (secondaryColor) {
+    updateExpression += ", #cover_secondary_color = :cover_secondary_color";
   }
 
   if (entry.genre) {
@@ -179,6 +224,22 @@ export const getAndUpdateAlbumChartEntry = async (
     expressionAttributeValues[":album_cover_banner"] = { S: albumCoverBanner };
   }
 
+  // Add color attributes if we have colors
+  if (primaryColor) {
+    expressionAttributeNames["#cover_primary_color"] = "cover_primary_color";
+    expressionAttributeValues[":cover_primary_color"] = {
+      S: JSON.stringify(primaryColor),
+    };
+  }
+
+  if (secondaryColor) {
+    expressionAttributeNames["#cover_secondary_color"] =
+      "cover_secondary_color";
+    expressionAttributeValues[":cover_secondary_color"] = {
+      S: JSON.stringify(secondaryColor),
+    };
+  }
+
   if (entry.genre) {
     expressionAttributeNames["#genre"] = "genre";
     expressionAttributeValues[":genre"] = { S: entry.genre };
@@ -212,5 +273,7 @@ export const getAndUpdateAlbumChartEntry = async (
     genre: entry.genre,
     album_cover_url: entry.album_cover_url,
     album_cover_banner: albumCoverBanner,
+    cover_primary_color: primaryColor,
+    cover_secondary_color: secondaryColor,
   };
 };
