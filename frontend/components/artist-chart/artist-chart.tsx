@@ -20,6 +20,9 @@ export const ArtistChart = ({
         title={"Artists 25"}
         logo={"/artist-chart-logo.png"}
         timestamp={timestamp}
+        color1={"bg-emerald-300"}
+        color2={"bg-cyan-500"}
+        color3={"bg-blue-700"}
       />
 
       <div className="relative max-w-8xl">

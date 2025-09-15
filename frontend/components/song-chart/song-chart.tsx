@@ -22,6 +22,9 @@ export const SongChart = ({
         title={"Hot 100"}
         logo={"/sphere-logo.png"}
         timestamp={timestamp}
+        color1={"bg-amber-400"}
+        color2={"bg-pink-400"}
+        color3={"bg-purple-700"}
       />
 
       <section className="relative max-w-8xl" id="1">

@@ -5,6 +5,7 @@ import { AlbumChartEntry as AlbumChartEntryType } from "@/types/chart-data";
 import { LiquidGlassContainer } from "../ui/liquid-glass-container";
 import { ImageGradientTransition } from "../ui/image-gradient";
 import Container from "../ui/container";
+import { parseColorToRgb } from "@/utils/parse-rgb";
 
 export const TopTenAlbumChartEntry = (entry: AlbumChartEntryType) => {
   const getPositionChangeIcon = () => {
@@ -56,6 +57,8 @@ export const TopTenAlbumChartEntry = (entry: AlbumChartEntryType) => {
     };
   }, []);
 
+  console.log(entry);
+
   return (
     <section
       ref={componentRef}
@@ -67,7 +70,7 @@ export const TopTenAlbumChartEntry = (entry: AlbumChartEntryType) => {
       id={entry.position.toString()}
     >
       <Container>
-        <LiquidGlassContainer className="relative overflow-hidden">
+        <LiquidGlassContainer className="relative overflow-hidden group">
           <div className="mx-auto min-w-6xl min-h-[15rem] w-full flex items-center gap-8 p-4 z-10 py-10 border-gray-200 transition-colors">
             {/* Position */}
             <div className="flex items-center gap-2 min-w-[60px]">
@@ -79,7 +82,9 @@ export const TopTenAlbumChartEntry = (entry: AlbumChartEntryType) => {
             {/* Track & Artist Info */}
             <div className="flex-1 min-w-0">
               <Link href={`/track/${entry.album_id}`} className="group">
-                <h3 className="font-semibold text-gray-900 truncate transition-colors text-5xl tracking-tighter pb-3">
+                <h3
+                  className={`font-semibold text-gray-900 truncate transition-colors text-5xl tracking-tighter pb-3 group-hover:bg-gradient-to-br group-hover:bg-clip-text group-hover:text-transparent`}
+                >
                   {entry.album_name.length > 25
                     ? entry.album_name.slice(0, 25) + "..."
                     : entry.album_name}

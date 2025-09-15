@@ -71,7 +71,7 @@ export default function MediaPlayer() {
       "linear-gradient(to bottom right, #B91C1C 0%, #F97316 50%, #FCD34D 100%)",
   };
 
-  const progressBarBackground = paths[pathname] || paths["/hot-100"];
+  const progressBarBackground = paths[pathname] || paths["/charts/hot-100"];
 
   if (loading) {
     return (
@@ -134,91 +134,93 @@ export default function MediaPlayer() {
 
     return (
       <div className="flex bg-gradient-to-t from-white to-transparent">
-        <LiquidGlassContainer className="p-6 rounded-lg flex items-start justify-center 2xl:justify-end border-none shadow-none">
-          <div className="flex min-w-[30rem] pb-[10px]">
-            {/* Album Cover */}
-            <div className="relative w-16 h-16 flex-shrink-0">
-              <Image
-                src={albumCoverUrl}
-                alt={songTitle}
-                width={64}
-                height={64}
-                className="rounded-lg shadow-md"
-              />
-            </div>
-
-            {/* Song and Artist Info */}
-            <div className="ml-4 flex min-w-0 flex-grow">
-              <div className="my-auto text-gray-900">
-                <p className="font-bold text-xl truncate">
-                  {songTitle.length > 25
-                    ? `${songTitle.substring(0, 25)}...`
-                    : songTitle}
-                </p>
-                <p className="text-base truncate">
-                  {artistNames.length > 30
-                    ? `${artistNames.substring(0, 30)}...`
-                    : artistNames}
-                </p>
+        <div className="w-full p-6 rounded-lg flex items-start justify-center 2xl:justify-end border-none shadow-none">
+          <LiquidGlassContainer className="">
+            <div className="flex min-w-[30rem] pb-[10px]">
+              {/* Album Cover */}
+              <div className="relative w-16 h-16 flex-shrink-0">
+                <Image
+                  src={albumCoverUrl}
+                  alt={songTitle}
+                  width={64}
+                  height={64}
+                  className="rounded-lg shadow-md"
+                />
               </div>
-            </div>
 
-            {/* Playback Controls */}
-            <div className="flex items-center space-x-3 ml-4">
-              {/* Previous Button */}
-              <button className="p-2 rounded-full bg-gray-400/40 hover:bg-gray-400/60 transition-colors duration-200 hover:cursor-pointer">
-                <svg
-                  className="w-5 h-5 text-gray-700"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z" />
-                </svg>
-              </button>
+              {/* Song and Artist Info */}
+              <div className="ml-4 flex min-w-0 flex-grow">
+                <div className="my-auto text-gray-900">
+                  <p className="font-bold text-xl truncate">
+                    {songTitle.length > 25
+                      ? `${songTitle.substring(0, 25)}...`
+                      : songTitle}
+                  </p>
+                  <p className="text-base truncate">
+                    {artistNames.length > 30
+                      ? `${artistNames.substring(0, 30)}...`
+                      : artistNames}
+                  </p>
+                </div>
+              </div>
 
-              {/* Play/Pause Button */}
-              <button className="p-3 rounded-full bg-gray-400/50 hover:bg-gray-400/70 transition-colors duration-200 hover:cursor-pointer">
-                {/* <svg
+              {/* Playback Controls */}
+              <div className="flex items-center space-x-3 ml-4">
+                {/* Previous Button */}
+                <button className="p-2 rounded-full bg-gray-400/40 hover:bg-gray-400/60 transition-colors duration-200 hover:cursor-pointer">
+                  <svg
+                    className="w-5 h-5 text-gray-700"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z" />
+                  </svg>
+                </button>
+
+                {/* Play/Pause Button */}
+                <button className="p-3 rounded-full bg-gray-400/50 hover:bg-gray-400/70 transition-colors duration-200 hover:cursor-pointer">
+                  {/* <svg
                   className="w-6 h-6 text-gray-700"
                   fill="currentColor"
                   viewBox="0 0 24 24"
                 >
                   <path d="M8 5v14l11-7z" />
                 </svg> */}
-                <svg
-                  className="w-6 h-6 text-gray-700"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
-                </svg>
-              </button>
+                  <svg
+                    className="w-6 h-6 text-gray-700"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
+                  </svg>
+                </button>
 
-              {/* Skip Button */}
-              <button className="p-2 rounded-full bg-gray-400/40 hover:bg-gray-400/60 transition-colors duration-200 hover:cursor-pointer">
-                <svg
-                  className="w-5 h-5 text-gray-700"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z" />
-                </svg>
-              </button>
+                {/* Skip Button */}
+                <button className="p-2 rounded-full bg-gray-400/40 hover:bg-gray-400/60 transition-colors duration-200 hover:cursor-pointer">
+                  <svg
+                    className="w-5 h-5 text-gray-700"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z" />
+                  </svg>
+                </button>
+              </div>
             </div>
-          </div>
-          {/* Progress Bar */}
-          <div className="absolute bottom-0 w-full left-0 h-1 mx-2 mb-[6px]">
-            <div className="relative" style={{ width: `calc(100% - 16px)` }}>
-              <div
-                className="h-1 rounded-full transition-all duration-2000 ease-linear "
-                style={{
-                  width: `${progressPercent}%`,
-                  background: progressBarBackground,
-                }}
-              ></div>
+            {/* Progress Bar */}
+            <div className="absolute bottom-0 w-full left-0 h-1 mx-2 mb-[6px]">
+              <div className="relative" style={{ width: `calc(100% - 16px)` }}>
+                <div
+                  className="h-1 rounded-full transition-all duration-2000 ease-linear "
+                  style={{
+                    width: `${progressPercent}%`,
+                    background: progressBarBackground,
+                  }}
+                ></div>
+              </div>
             </div>
-          </div>
-        </LiquidGlassContainer>
+          </LiquidGlassContainer>
+        </div>
       </div>
     );
   }

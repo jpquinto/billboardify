@@ -27,9 +27,13 @@ export const AlbumChart = ({
         title={"Albums 50"}
         logo={"/album-chart-logo.png"}
         timestamp={timestamp}
+        color1={"bg-amber-200"}
+        color2={"bg-orange-500"}
+        color3={"bg-red-700"}
+        decorationOpacity="opacity-60"
       />
 
-      <section className="relative max-w-8xl" id="1">
+      <section className="relative max-w-8xl pt-20" id="1">
         <div className="pt-5">
           {chartEntries.slice(0, 20).map((entry) => (
             <TopTenAlbumChartEntry key={entry.album_id} {...entry} />

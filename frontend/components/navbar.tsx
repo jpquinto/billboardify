@@ -33,20 +33,20 @@ export const Navbar = () => {
       topBarColor: "from-pink-400/70",
     },
     {
-      label: "artists",
-      href: "/charts/artists-25",
-      logo: "/artist-chart-logo.png",
-      logoText: "ARTISTS 25",
-      labelColor: "text-blue-800",
-      topBarColor: "from-sky-700/70",
-    },
-    {
       label: "albums",
       href: "/charts/albums-50",
       logo: "/album-chart-logo.png",
       logoText: "ALBUMS 50",
       labelColor: "text-orange-400",
       topBarColor: "from-red-400/70",
+    },
+    {
+      label: "artists",
+      href: "/charts/artists-25",
+      logo: "/artist-chart-logo.png",
+      logoText: "ARTISTS 25",
+      labelColor: "text-blue-800",
+      topBarColor: "from-sky-700/70",
     },
   ];
 

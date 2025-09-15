@@ -50,7 +50,7 @@ export default function Albums50() {
         );
 
         const timestamp = chartsData.charts[0].timestamp;
-        const cacheKey = `latest_album_chart_${timestamp}`;
+        const cacheKey = `latest_albums_chart_${timestamp}`;
 
         // Step 2: Check cache for chart data
         let chartData = chartCache.get<AlbumChartType>(cacheKey);

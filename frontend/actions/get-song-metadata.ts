@@ -21,8 +21,6 @@ export const getSongMetadata = async (
     // Transform the response to match your interface
     const data = response.data;
 
-    console.log(data);
-
     return data;
   } catch (error) {
     console.error("Error fetching chart:", error);
