@@ -92,7 +92,7 @@ export const Navbar = () => {
             role="button"
           >
             <Image
-              src={logo || "/sphere-logo.png"}
+              src={logo || "/song-chart-logo.png"}
               alt="Logo"
               className="h-14 w-auto"
               width={260}

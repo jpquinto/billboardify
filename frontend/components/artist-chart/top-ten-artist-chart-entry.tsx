@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { ArtistChartEntry as ArtistChartEntryType } from "@/types/chart-data";
 import { LiquidGlassContainer } from "../ui/liquid-glass-container";
+import Container from "../ui/container";
 
 export const TopTenArtistChartEntry = (entry: ArtistChartEntryType) => {
   const getPositionChangeIcon = () => {
@@ -64,66 +65,68 @@ export const TopTenArtistChartEntry = (entry: ArtistChartEntryType) => {
       }}
       id={entry.position.toString()}
     >
-      <LiquidGlassContainer>
-        <div className="max-w-8xl mx-auto min-w-6xl w-full flex items-center gap-8 p-4 border-gray-200 transition-colors">
-          {/* Position */}
-          <div className="flex items-center gap-2 min-w-[60px]">
-            {getPositionChangeIcon()}
-            <span className="text-5xl font-bold text-gray-900">
-              {entry.position}
-            </span>
-          </div>
-
-          {/* Album Cover */}
-          <div className="flex-shrink-0">
-            <img
-              src={entry.artist_image_url || "/placeholder-artist.png"}
-              alt={entry.artist_name}
-              className="w-20 h-20 rounded object-cover"
-            />
-          </div>
-
-          {/* Track & Artist Info */}
-          <div className="flex-1 min-w-0">
-            <Link href={`/artist/${entry.artist_id}`} className="group">
-              <h3 className="font-semibold text-gray-900 truncate group-hover:bg-gradient-to-br group-hover:from-purple-700 group-hover:via-pink-400 group-hover:to-amber-400 group-hover:bg-clip-text group-hover:text-transparent transition-colors text-4xl tracking-tighter pb-2">
-                {entry.artist_name.length > 25
-                  ? entry.artist_name.slice(0, 25) + "..."
-                  : entry.artist_name}
-              </h3>
-            </Link>
-          </div>
-
-          {/* Chart Stats */}
-          <div className="hidden sm:flex items-center gap-6 text-sm text-gray-600">
-            {/* Last Week */}
-            <div className="text-center min-w-[40px]">
-              <div className="text-xs text-gray-400 uppercase">Last</div>
-              <div className="font-medium">{entry.last_week || "—"}</div>
+      <Container>
+        <LiquidGlassContainer>
+          <div className="max-w-8xl mx-auto min-w-6xl w-full flex items-center gap-8 p-4 border-gray-200 transition-colors">
+            {/* Position */}
+            <div className="flex items-center gap-2 min-w-[60px]">
+              {getPositionChangeIcon()}
+              <span className="text-5xl font-bold text-gray-900">
+                {entry.position}
+              </span>
             </div>
 
-            {/* Peak */}
-            <div className="text-center min-w-[40px]">
-              <div className="text-xs text-gray-400 uppercase">Peak</div>
-              <div className="font-medium">{entry.peak}</div>
+            {/* Album Cover */}
+            <div className="flex-shrink-0">
+              <img
+                src={entry.artist_image_url || "/placeholder-artist.png"}
+                alt={entry.artist_name}
+                className="w-20 h-20 rounded object-cover"
+              />
             </div>
 
-            {/* Weeks on Chart */}
-            <div className="text-center min-w-[40px]">
-              <div className="text-xs text-gray-400 uppercase">Wks</div>
-              <div className="font-medium">{entry.weeks_on_chart}</div>
+            {/* Track & Artist Info */}
+            <div className="flex-1 min-w-0">
+              <Link href={`/artist/${entry.artist_id}`} className="group">
+                <h3 className="font-semibold text-gray-900 truncate group-hover:bg-gradient-to-br group-hover:from-purple-700 group-hover:via-pink-400 group-hover:to-amber-400 group-hover:bg-clip-text group-hover:text-transparent transition-colors text-4xl tracking-tighter pb-2">
+                  {entry.artist_name.length > 25
+                    ? entry.artist_name.slice(0, 25) + "..."
+                    : entry.artist_name}
+                </h3>
+              </Link>
             </div>
 
-            {/* Plays */}
-            <div className="text-center min-w-[60px]">
-              <div className="text-xs text-gray-400 uppercase">Plays</div>
-              <div className="font-medium">
-                {formatNumber(entry.total_plays_since_last_week)}
+            {/* Chart Stats */}
+            <div className="hidden sm:flex items-center gap-6 text-sm text-gray-600">
+              {/* Last Week */}
+              <div className="text-center min-w-[40px]">
+                <div className="text-xs text-gray-400 uppercase">Last</div>
+                <div className="font-medium">{entry.last_week || "—"}</div>
+              </div>
+
+              {/* Peak */}
+              <div className="text-center min-w-[40px]">
+                <div className="text-xs text-gray-400 uppercase">Peak</div>
+                <div className="font-medium">{entry.peak}</div>
+              </div>
+
+              {/* Weeks on Chart */}
+              <div className="text-center min-w-[40px]">
+                <div className="text-xs text-gray-400 uppercase">Wks</div>
+                <div className="font-medium">{entry.weeks_on_chart}</div>
+              </div>
+
+              {/* Plays */}
+              <div className="text-center min-w-[60px]">
+                <div className="text-xs text-gray-400 uppercase">Plays</div>
+                <div className="font-medium">
+                  {formatNumber(entry.total_plays_since_last_week)}
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </LiquidGlassContainer>
+        </LiquidGlassContainer>
+      </Container>
     </section>
   );
 };

@@ -21,12 +21,6 @@ export const AlbumChart = ({
 }) => {
   const { chartData: chartEntries } = chartData;
 
-  const banners = [
-    chartEntries[2].album_cover_url,
-    chartEntries[3].album_cover_url,
-    chartEntries[7].album_cover_url,
-  ];
-
   return (
     <div className="flex justify-center flex-col mx-auto px-4 pt-30">
       <ChartHeader
@@ -34,20 +28,8 @@ export const AlbumChart = ({
         logo={"/album-chart-logo.png"}
         timestamp={timestamp}
       />
-      {/* 
-      <ImageGradientTransition
-        imageUrl={chartEntries[3].album_cover_url}
-        gradientWidth={400}
-        className=""
-      /> */}
 
       <section className="relative max-w-8xl" id="1">
-        {/* <GradientBannerScroller
-          banners={chartEntries
-            .slice(0, 10)
-            .map((entry) => entry.album_cover_url)}
-          gradientWidth={1500}
-        /> */}
         <div className="pt-5">
           {chartEntries.slice(0, 20).map((entry) => (
             <TopTenAlbumChartEntry key={entry.album_id} {...entry} />

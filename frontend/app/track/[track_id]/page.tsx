@@ -1,16 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { SongChart } from "@/components/song-chart/song-chart";
-import { SongChart as SongChartType } from "@/types/chart-data";
-import { getSongChart } from "@/actions/get-song-chart";
-import { ChartProgressBar } from "@/components/chart-progress-bar";
-import { listCharts } from "@/actions/list-song-charts";
+import { useEffect, useState, use } from "react";
 import { chartCache } from "@/hooks/useCache";
 import { SongMetadata } from "@/types/song-metadata";
 import { getSongMetadata } from "@/actions/get-song-metadata";
+import Image from "next/image";
+import { ListeningHistoryChart } from "@/components/listening-history-chart/listening-history-chart";
+import Container from "@/components/ui/container";
+import { SongHero } from "@/components/songs/song-hero";
 
 export default function SongPage({ params }: { params: { track_id: string } }) {
+  const resolvedParams = params instanceof Promise ? use(params) : params;
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [songMetadata, setSongMetadata] = useState<SongMetadata | null>(null);
@@ -29,7 +29,7 @@ export default function SongPage({ params }: { params: { track_id: string } }) {
 
         if (!songMetadata) {
           // Cache miss - fetch from API
-          songMetadata = await getSongMetadata(params.track_id);
+          songMetadata = await getSongMetadata(resolvedParams.track_id);
           // chartCache.set("charts_list", songMetadata, 0.5); // Cache for 30 minutes
         }
 
@@ -44,7 +44,7 @@ export default function SongPage({ params }: { params: { track_id: string } }) {
     };
 
     fetchData();
-  }, []);
+  }, [resolvedParams.track_id]);
 
   if (loading) {
     return (
@@ -104,7 +104,22 @@ export default function SongPage({ params }: { params: { track_id: string } }) {
 
   return (
     <main className="flex-1">
-      <div>Hello</div>
+      <div>
+        <SongHero
+          album_cover_banner={
+            songMetadata?.album_cover_banner || "/banner-placeholder.png"
+          }
+          track_name={songMetadata?.track_name || "Unknown Track"}
+          artist_name={songMetadata?.artist_name || "Unknown Artist"}
+          album_name={songMetadata?.album_name || "Unknown Album"}
+        />
+        <Container className="-translate-y-10 pt-20 relative">
+          <div className="grid grid-cols-2 gap-x-10">
+            <div></div>
+            <ListeningHistoryChart type={"song"} id={resolvedParams.track_id} />
+          </div>
+        </Container>
+      </div>
     </main>
   );
 }
