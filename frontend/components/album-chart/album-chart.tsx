@@ -3,14 +3,9 @@
 import { AlbumChart as AlbumChartType } from "@/types/chart-data";
 import { AlbumChartEntry } from "./album-chart-entry";
 
-import { BannerScroller } from "../ui/banner-scroller";
 import { ChartHeader } from "../chart-header";
 import { LogoSeparator } from "../ui/logo-separator";
-import { FirstPlaceAlbumChartEntry } from "./first-place-album-chart-entry";
-import { PodiumAlbumChartEntry } from "./podium-album-chart-entry";
 import { TopTenAlbumChartEntry } from "./top-ten-album-chart-entry";
-import { ImageGradientTransition } from "../ui/image-gradient";
-import { GradientBannerScroller } from "../ui/album-cover-scroller";
 
 export const AlbumChart = ({
   chartData,
@@ -30,7 +25,6 @@ export const AlbumChart = ({
         color1={"bg-amber-200"}
         color2={"bg-orange-500"}
         color3={"bg-red-700"}
-        decorationOpacity="opacity-60"
       />
 
       <section className="relative max-w-8xl pt-20" id="1">

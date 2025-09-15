@@ -69,10 +69,10 @@ const ChartHeaderDecoration = ({
   color1 = "bg-amber-400",
   color2 = "bg-pink-400",
   color3 = "bg-purple-700",
-  decorationOpacity = "",
+  decorationOpacity = "opacity-50",
 }: ChartHeaderDecorationProps) => {
   return (
-    <div className={`relative min-w-4xl mx-auto ${decorationOpacity}`}>
+    <div className={`relative min-w-2xl mx-auto ${decorationOpacity} z-20`}>
       <div className="absolute top-0 left-0 w-full h-6">
         <div
           className={`w-[60%] mx-auto pb-9 ${color1} rounded-b-full border-white border-[1px] shadow-2xl`}
