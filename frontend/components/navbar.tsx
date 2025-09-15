@@ -36,7 +36,7 @@ export const Navbar = () => {
       label: "artists",
       href: "/charts/artists-25",
       logo: "/artist-chart-logo.png",
-      logoText: "ARTIST 25",
+      logoText: "ARTISTS 25",
       labelColor: "text-blue-800",
       topBarColor: "from-sky-700/70",
     },

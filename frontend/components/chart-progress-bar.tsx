@@ -47,7 +47,7 @@ export const ChartProgressBar = ({
 
   return (
     <div className="fixed top-1/2 right-0 -translate-y-1/2 z-50 p-4">
-      <div className="flex flex-col w-12 gap-y-[20px] items-end">
+      <div className="flex flex-col w-12 gap-y-[10px] items-end">
         {sections.map((section) => {
           const sectionNum = parseInt(section);
           const distance = Math.abs(activeSection - sectionNum);
@@ -70,8 +70,23 @@ export const ChartProgressBar = ({
             bgColor = gradient3;
           }
 
+          const sectionText =
+            sectionNum === 1 ? "1" : `${(sectionNum - 1) * 10}`;
+
           return (
-            <div key={section} className="relative h-[6px]">
+            <div
+              key={section}
+              className="relative flex space-x-2 items-center justify-center"
+            >
+              <div
+                className={cn(
+                  "text-sm font-semibold font-mono tabular-nums transition-opacity my-auto bg-clip-text text-transparent",
+                  distance === 0 ? "opacity-100" : "opacity-0",
+                  bgColor
+                )}
+              >
+                {sectionText}
+              </div>
               <div
                 className={cn(
                   "h-2 transition-all duration-500 ease-in-out rounded-full flex items-end justify-end backdrop-blur-sm border p-2 text-white relative before:absolute before:inset-0 before:rounded-xl before:bg-gradient-to-br before:from-white before:via-transparent before:to-transparent before:opacity-70 before:pointer-events-none after:absolute after:inset-0 after:rounded-xl after:bg-gradient-to-tl after:from-white/30 after:via-transparent after:to-transparent after:opacity-90 after:pointer-events-none border-white",
