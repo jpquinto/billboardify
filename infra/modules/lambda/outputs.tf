@@ -33,3 +33,7 @@ output "qualified_arn" {
 output "qualified_invoke_arn" {
   value = aws_lambda_function.function.qualified_invoke_arn
 }
+
+output "security_group_ids" {
+  value = local.security_group_ids
+}

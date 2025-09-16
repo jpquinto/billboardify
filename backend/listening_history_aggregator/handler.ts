@@ -1,8 +1,9 @@
 export const handler = async () => {
-  console.log("Playlist Manager Handler Triggered");
+  console.log("Listening History Aggregation Handler Triggered");
 
-  // Step 1. Check if playlist exists. If not, create one
-  // Step 2. Fetch latest chart from S3
-  // Step 3. Parse chart data
-  // Step 4. Update playlist with new chart data
+  // Step 1. Get last aggregation timestamp
+  // Step 2. Get new listening history since last aggregation
+  // Step 3. Aggregate listening history by song, artist, album
+  // Step 4. Store aggregated data
+  // Step 5. Update last aggregation timestamp
 };
