@@ -25,8 +25,11 @@ module "listening_history_aggregator_lambda" {
   environment_variables = {
     REGION : var.aws_region
     AWS_ACCOUNT_ID : local.account_id
-    INGESTION_STATUS_TABLE_NAME : module.status_timestamps_table.name
+    AGGREGATION_STATUS_TABLE_NAME : module.status_timestamps_table.name
     LISTENING_HISTORY_TABLE_NAME : module.listening_history_table.name
+    DB_USERNAME : local.rds_secrets.username
+    DB_PASSWORD : local.rds_secrets.password
+    DB_HOST : local.rds_secrets.host
   }
 }
 
@@ -40,10 +43,9 @@ resource "aws_iam_policy" "listening_history_aggregator_policy" {
       {
         Effect = "Allow",
         Action = [
-          "dynamodb:PutItem",
-          "dynamodb:BatchWriteItem",
+          "dynamodb:*",
         ],
-        Resource = module.listening_history_table.arn
+        Resource = "*" // module.listening_history_table.arn
       },
       {
         Effect = "Allow",
@@ -71,4 +73,13 @@ module "sg_lambda_to_rds" {
 
   to_security_group_id = module.spotify_rds.security_group_ids[0]
   port                 = 5432
+}
+
+module "sg_lambda_to_ddb_endpoint" {
+  source                 = "./modules/sg/prefix_list"
+  from_name              = module.listening_history_aggregator_lambda.name
+  to_name                = "DynamoDB VPC Endpoint"
+  from_security_group_id = module.listening_history_aggregator_lambda.security_group_ids[0]
+  to_prefix_list_ids     = [module.vpc_endpoint_gateway_dynamodb.prefix_list_id]
+  port                   = 443
 }
