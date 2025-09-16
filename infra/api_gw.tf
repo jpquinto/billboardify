@@ -59,6 +59,15 @@ module "spotify-project-api" {
       enable_cors_all      = true
       use_authorizer       = false # TODO: Enable when auth is ready
     },
+    {
+      http_method          = "GET"
+      path                 = "get-leaderboards"
+      integration_type     = "lambda"
+      lambda_invoke_arn    = module.get_leaderboards_lambda.invoke_arn
+      lambda_function_name = module.get_leaderboards_lambda.name
+      enable_cors_all      = true
+      use_authorizer       = false # TODO: Enable when auth is ready
+    },
   ]
   authorizer_type = "COGNITO_USER_POOLS"
   api_type        = ["REGIONAL"]
