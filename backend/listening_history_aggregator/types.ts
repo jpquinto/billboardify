@@ -11,6 +11,7 @@ export interface ListeningHistoryDynamoDBItem {
   album_id: string;
   album_cover_url: string;
   genre?: string;
+  artist_image_url: string;
 }
 
 export interface DailySongAggregation {
@@ -22,6 +23,7 @@ export interface DailySongAggregation {
   artist_name: string;
   album_name: string;
   daily_play_count: number;
+  album_cover_url: string;
 }
 
 export interface DailyArtistAggregation {
@@ -30,6 +32,7 @@ export interface DailyArtistAggregation {
   artist_name: string;
   daily_play_count: number;
   genre?: string;
+  artist_image_url: string;
 }
 
 export interface DailyAlbumAggregation {
@@ -39,6 +42,7 @@ export interface DailyAlbumAggregation {
   album_name: string;
   artist_name: string;
   daily_play_count: number;
+  album_cover_url: string;
 }
 
 export interface MonthlySongAggregation {
@@ -50,6 +54,7 @@ export interface MonthlySongAggregation {
   artist_name: string;
   album_name: string;
   monthly_play_count: number;
+  album_cover_url: string;
 }
 
 export interface MonthlyArtistAggregation {
@@ -58,6 +63,7 @@ export interface MonthlyArtistAggregation {
   artist_name: string;
   monthly_play_count: number;
   genre?: string;
+  artist_image_url: string;
 }
 
 export interface MonthlyAlbumAggregation {
@@ -67,6 +73,7 @@ export interface MonthlyAlbumAggregation {
   album_name: string;
   artist_name: string;
   monthly_play_count: number;
+  album_cover_url: string;
 }
 
 export interface YearlySongAggregation {
@@ -78,6 +85,7 @@ export interface YearlySongAggregation {
   artist_name: string;
   album_name: string;
   yearly_play_count: number;
+  album_cover_url: string;
 }
 
 export interface YearlyArtistAggregation {
@@ -86,6 +94,7 @@ export interface YearlyArtistAggregation {
   artist_name: string;
   yearly_play_count: number;
   genre?: string;
+  artist_image_url: string;
 }
 
 export interface YearlyAlbumAggregation {
@@ -95,6 +104,7 @@ export interface YearlyAlbumAggregation {
   album_name: string;
   artist_name: string;
   yearly_play_count: number;
+  album_cover_url: string;
 }
 
 export interface AggregationResult {

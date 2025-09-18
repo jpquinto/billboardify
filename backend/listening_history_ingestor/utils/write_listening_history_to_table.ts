@@ -10,6 +10,9 @@ const { LISTENING_HISTORY_TABLE_NAME } = process.env;
 const DYNAMODB_CLIENT = new DynamoDBClient({});
 const BATCH_SIZE = 25; // DynamoDB BatchWriteItem limit
 
+// TTL: 2 months from now (in seconds)
+const TTL_SECONDS = Math.floor(Date.now() / 1000) + 2 * 30 * 24 * 60 * 60;
+
 /**
  * Writes listening history items to the DynamoDB table in batches.
  * @param listeningHistory The array of listening history items to write.
@@ -66,6 +69,8 @@ export const writeListeningHistoryToTable = async (
         album_id: { S: item.albumId ?? "unknown" },
         album_cover_url: { S: item.albumCoverUrl ?? "unknown" },
         ingested_at: { S: new Date().toISOString() },
+        artist_image_url: { S: item.artistImageUrl ?? "unknown" }, // Add artist_image_url
+        ttl: { N: TTL_SECONDS.toString() }, // Add TTL attribute
       };
 
       // Only add genre if it exists

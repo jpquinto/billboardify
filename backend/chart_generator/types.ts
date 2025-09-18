@@ -11,6 +11,7 @@ export interface ListeningHistoryDynamoDBItem {
   album_id: string;
   album_cover_url: string;
   genre?: string;
+  artist_image_url: string;
 }
 
 // Represents an entry in the song history DynamoDB table
@@ -65,6 +66,7 @@ export interface CurrentArtistChartPointData {
   artist_id: string;
   artist_name: string;
   genre?: string;
+  artist_image_url?: string | null;
 }
 
 // Represents the calculation for an album for a specific chart week

@@ -129,10 +129,11 @@ async function getDailyTrackLeaderboard(
       artist_name,
       album_id,
       album_name,
+      album_cover_url,
       SUM(daily_play_count) as total_plays
     FROM daily_track_aggregates
     WHERE date >= $1 AND date <= $2
-    GROUP BY track_id, track_name, artist_id, artist_name, album_id, album_name
+    GROUP BY track_id, track_name, artist_id, artist_name, album_id, album_name, album_cover_url
     ORDER BY total_plays DESC
     LIMIT $3 OFFSET $4
   `;
@@ -151,6 +152,7 @@ async function getDailyTrackLeaderboard(
     artist_name: row.artist_name,
     album_id: row.album_id,
     album_name: row.album_name,
+    album_cover_url: row.album_cover_url,
     total_plays: parseInt(row.total_plays),
   }));
 }
@@ -171,10 +173,11 @@ async function getMonthlyTrackLeaderboard(
       artist_name,
       album_id,
       album_name,
+      album_cover_url,
       SUM(monthly_play_count) as total_plays
     FROM monthly_track_aggregates
     WHERE year_month >= $1 AND year_month <= $2
-    GROUP BY track_id, track_name, artist_id, artist_name, album_id, album_name
+    GROUP BY track_id, track_name, artist_id, artist_name, album_id, album_name, album_cover_url
     ORDER BY total_plays DESC
     LIMIT $3 OFFSET $4
   `;
@@ -193,6 +196,7 @@ async function getMonthlyTrackLeaderboard(
     artist_name: row.artist_name,
     album_id: row.album_id,
     album_name: row.album_name,
+    album_cover_url: row.album_cover_url,
     total_plays: parseInt(row.total_plays),
   }));
 }
@@ -213,10 +217,11 @@ async function getYearlyTrackLeaderboard(
       artist_name,
       album_id,
       album_name,
+      album_cover_url,
       SUM(yearly_play_count) as total_plays
     FROM yearly_track_aggregates
     WHERE year >= $1 AND year <= $2
-    GROUP BY track_id, track_name, artist_id, artist_name, album_id, album_name
+    GROUP BY track_id, track_name, artist_id, artist_name, album_id, album_name, album_cover_url
     ORDER BY total_plays DESC
     LIMIT $3 OFFSET $4
   `;
@@ -235,6 +240,7 @@ async function getYearlyTrackLeaderboard(
     artist_name: row.artist_name,
     album_id: row.album_id,
     album_name: row.album_name,
+    album_cover_url: row.album_cover_url,
     total_plays: parseInt(row.total_plays),
   }));
 }
@@ -252,10 +258,11 @@ async function getDailyArtistLeaderboard(
       artist_id,
       artist_name,
       genre,
+      artist_image_url,
       SUM(daily_play_count) as total_plays
     FROM daily_artist_aggregates
     WHERE date >= $1 AND date <= $2
-    GROUP BY artist_id, artist_name, genre
+    GROUP BY artist_id, artist_name, genre, artist_image_url
     ORDER BY total_plays DESC
     LIMIT $3 OFFSET $4
   `;
@@ -271,6 +278,7 @@ async function getDailyArtistLeaderboard(
     artist_id: row.artist_id,
     artist_name: row.artist_name,
     genre: row.genre,
+    artist_image_url: row.artist_image_url,
     total_plays: parseInt(row.total_plays),
   }));
 }
@@ -288,10 +296,11 @@ async function getMonthlyArtistLeaderboard(
       artist_id,
       artist_name,
       genre,
+      artist_image_url,
       SUM(monthly_play_count) as total_plays
     FROM monthly_artist_aggregates
     WHERE year_month >= $1 AND year_month <= $2
-    GROUP BY artist_id, artist_name, genre
+    GROUP BY artist_id, artist_name, genre, artist_image_url
     ORDER BY total_plays DESC
     LIMIT $3 OFFSET $4
   `;
@@ -307,6 +316,7 @@ async function getMonthlyArtistLeaderboard(
     artist_id: row.artist_id,
     artist_name: row.artist_name,
     genre: row.genre,
+    artist_image_url: row.artist_image_url,
     total_plays: parseInt(row.total_plays),
   }));
 }
@@ -324,10 +334,11 @@ async function getYearlyArtistLeaderboard(
       artist_id,
       artist_name,
       genre,
+      artist_image_url,
       SUM(yearly_play_count) as total_plays
     FROM yearly_artist_aggregates
     WHERE year >= $1 AND year <= $2
-    GROUP BY artist_id, artist_name, genre
+    GROUP BY artist_id, artist_name, genre, artist_image_url
     ORDER BY total_plays DESC
     LIMIT $3 OFFSET $4
   `;
@@ -343,6 +354,7 @@ async function getYearlyArtistLeaderboard(
     artist_id: row.artist_id,
     artist_name: row.artist_name,
     genre: row.genre,
+    artist_image_url: row.artist_image_url,
     total_plays: parseInt(row.total_plays),
   }));
 }
@@ -361,10 +373,11 @@ async function getDailyAlbumLeaderboard(
       album_name,
       artist_id,
       artist_name,
+      album_cover_url,
       SUM(daily_play_count) as total_plays
     FROM daily_album_aggregates
     WHERE date >= $1 AND date <= $2
-    GROUP BY album_id, album_name, artist_id, artist_name
+    GROUP BY album_id, album_name, artist_id, artist_name, album_cover_url
     ORDER BY total_plays DESC
     LIMIT $3 OFFSET $4
   `;
@@ -381,6 +394,7 @@ async function getDailyAlbumLeaderboard(
     album_name: row.album_name,
     artist_id: row.artist_id,
     artist_name: row.artist_name,
+    album_cover_url: row.album_cover_url,
     total_plays: parseInt(row.total_plays),
   }));
 }
@@ -399,10 +413,11 @@ async function getMonthlyAlbumLeaderboard(
       album_name,
       artist_id,
       artist_name,
+      album_cover_url,
       SUM(monthly_play_count) as total_plays
     FROM monthly_album_aggregates
     WHERE year_month >= $1 AND year_month <= $2
-    GROUP BY album_id, album_name, artist_id, artist_name
+    GROUP BY album_id, album_name, artist_id, artist_name, album_cover_url
     ORDER BY total_plays DESC
     LIMIT $3 OFFSET $4
   `;
@@ -419,6 +434,7 @@ async function getMonthlyAlbumLeaderboard(
     album_name: row.album_name,
     artist_id: row.artist_id,
     artist_name: row.artist_name,
+    album_cover_url: row.album_cover_url,
     total_plays: parseInt(row.total_plays),
   }));
 }
@@ -437,10 +453,11 @@ async function getYearlyAlbumLeaderboard(
       album_name,
       artist_id,
       artist_name,
+      album_cover_url,
       SUM(yearly_play_count) as total_plays
     FROM yearly_album_aggregates
     WHERE year >= $1 AND year <= $2
-    GROUP BY album_id, album_name, artist_id, artist_name
+    GROUP BY album_id, album_name, artist_id, artist_name, album_cover_url
     ORDER BY total_plays DESC
     LIMIT $3 OFFSET $4
   `;
@@ -457,6 +474,7 @@ async function getYearlyAlbumLeaderboard(
     album_name: row.album_name,
     artist_id: row.artist_id,
     artist_name: row.artist_name,
+    album_cover_url: row.album_cover_url,
     total_plays: parseInt(row.total_plays),
   }));
 }

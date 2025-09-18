@@ -36,6 +36,7 @@ export const aggregateListeningHistory = (
         track_name: item.track_name,
         artist_name: item.artist_name,
         album_name: item.album_name,
+        album_cover_url: item.album_cover_url, // Added
         daily_play_count: 0,
       };
     }
@@ -48,6 +49,7 @@ export const aggregateListeningHistory = (
         date,
         artist_id: item.artist_id,
         artist_name: item.artist_name,
+        artist_image_url: item.artist_image_url,
         daily_play_count: 0,
         genre: item.genre,
       };
@@ -63,6 +65,7 @@ export const aggregateListeningHistory = (
         artist_id: item.artist_id,
         album_name: item.album_name,
         artist_name: item.artist_name,
+        album_cover_url: item.album_cover_url, // Added
         daily_play_count: 0,
       };
     }
@@ -79,6 +82,7 @@ export const aggregateListeningHistory = (
         track_name: item.track_name,
         artist_name: item.artist_name,
         album_name: item.album_name,
+        album_cover_url: item.album_cover_url, // Added
         monthly_play_count: 0,
       };
     }
@@ -91,6 +95,7 @@ export const aggregateListeningHistory = (
         year_month: yearMonth,
         artist_id: item.artist_id,
         artist_name: item.artist_name,
+        artist_image_url: item.artist_image_url, // Added
         monthly_play_count: 0,
         genre: item.genre,
       };
@@ -106,6 +111,7 @@ export const aggregateListeningHistory = (
         artist_id: item.artist_id,
         album_name: item.album_name,
         artist_name: item.artist_name,
+        album_cover_url: item.album_cover_url, // Added
         monthly_play_count: 0,
       };
     }
@@ -122,6 +128,7 @@ export const aggregateListeningHistory = (
         track_name: item.track_name,
         artist_name: item.artist_name,
         album_name: item.album_name,
+        album_cover_url: item.album_cover_url, // Added
         yearly_play_count: 0,
       };
     }
@@ -134,6 +141,7 @@ export const aggregateListeningHistory = (
         year,
         artist_id: item.artist_id,
         artist_name: item.artist_name,
+        artist_image_url: item.artist_image_url, // Added
         yearly_play_count: 0,
         genre: item.genre,
       };
@@ -149,6 +157,7 @@ export const aggregateListeningHistory = (
         artist_id: item.artist_id,
         album_name: item.album_name,
         artist_name: item.artist_name,
+        album_cover_url: item.album_cover_url, // Added
         yearly_play_count: 0,
       };
     }

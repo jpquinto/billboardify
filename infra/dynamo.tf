@@ -52,6 +52,9 @@ module "listening_history_table" {
       projection_type = "KEYS_ONLY"
     },
   ]
+
+  ttl_enabled   = true
+  ttl_attribute = "ttl"
 }
 
 module "status_timestamps_table" {

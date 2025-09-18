@@ -61,7 +61,7 @@ export const getAndUpdateArtistChartEntry = async (
   let lastWeekPosition: number | null = null;
   let weeksOnChart = 1;
   let peakPosition = position;
-  let artistImageUrl: string | null = null;
+  let artistImageUrl: string | null = entry.artist_image_url || null;
   let artistBannerUrl: string | null = null;
 
   // Determine if this artist should be marked as "charted" (position <= 25)

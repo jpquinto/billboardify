@@ -1,5 +1,6 @@
 import { ListeningHistoryItem } from "listening_history_ingestor/handler";
 import { getSongGenre } from "./get_song_genre";
+import { getArtistImage } from "./get_artist_image";
 
 const getAccessToken = require("/opt/nodejs/get_access_token").default;
 
@@ -39,6 +40,7 @@ export const ingestRecentListeningData = async (
 
     const foundGenres: Record<string, string> = {}; // Cache by track_id
     const foundGenresByArtist: Record<string, string> = {}; // Cache by artist_id
+    const foundArtistImages: Record<string, string> = {}; // Cache artist images by artist_id
 
     // Step 3: Map the response to our data model with genres
     const listeningItems: ListeningHistoryItem[] = [];
@@ -82,8 +84,32 @@ export const ingestRecentListeningData = async (
           );
           listeningItem.genre = null;
         }
+        // Get artist image with caching
+        try {
+          let artistImageUrl = foundArtistImages[listeningItem.artistId];
+
+          if (!artistImageUrl) {
+            console.log(
+              `Fetching artist image for ${listeningItem.artistName}...`
+            );
+            artistImageUrl =
+              (await getArtistImage(listeningItem.artistId)) || "";
+
+            // Cache the result (even if null) to avoid repeated API calls
+            foundArtistImages[listeningItem.artistId] = artistImageUrl;
+          }
+
+          listeningItem.artistImageUrl = artistImageUrl || null;
+        } catch (error) {
+          console.error(
+            `Failed to get artist image for artist ${listeningItem.artistId}:`,
+            error
+          );
+          listeningItem.artistImageUrl = null;
+        }
       } else {
         listeningItem.genre = null;
+        listeningItem.artistImageUrl = null;
       }
 
       listeningItems.push(listeningItem);

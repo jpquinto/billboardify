@@ -42,6 +42,7 @@ export const calculateArtistChartPointsFromListeningHistory = (
         artist_id: item.artist_id,
         artist_name: getFirstArtist(item.artist_name),
         genre: item.genre,
+        artist_image_url: item.artist_image_url,
       });
     }
   }

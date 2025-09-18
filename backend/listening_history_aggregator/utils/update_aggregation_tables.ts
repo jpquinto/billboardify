@@ -74,15 +74,15 @@ async function updateDailyTrackAggregates(
   // Build VALUES clause for batch insert
   const valueStrings = values
     .map((_, index) => {
-      const base = index * 8;
+      const base = index * 9;
       return `($${base + 1}, $${base + 2}, $${base + 3}, $${base + 4}, $${
         base + 5
-      }, $${base + 6}, $${base + 7}, $${base + 8})`;
+      }, $${base + 6}, $${base + 7}, $${base + 8}, $${base + 9})`;
     })
     .join(", ");
 
   const query = `
-    INSERT INTO daily_track_aggregates (date, track_id, artist_id, album_id, track_name, artist_name, album_name, daily_play_count)
+    INSERT INTO daily_track_aggregates (date, track_id, artist_id, album_id, track_name, artist_name, album_name, daily_play_count, album_cover_url)
     VALUES ${valueStrings}
     ON CONFLICT (date, track_id)
     DO UPDATE SET
@@ -91,7 +91,8 @@ async function updateDailyTrackAggregates(
       album_id = EXCLUDED.album_id,
       track_name = EXCLUDED.track_name,
       artist_name = EXCLUDED.artist_name,
-      album_name = EXCLUDED.album_name
+      album_name = EXCLUDED.album_name,
+      album_cover_url = EXCLUDED.album_cover_url
   `;
 
   // Flatten all parameters
@@ -104,49 +105,13 @@ async function updateDailyTrackAggregates(
     agg.artist_name,
     agg.album_name,
     agg.daily_play_count,
+    agg.album_cover_url,
   ]);
 
   await client.query(query, params);
 }
 
 async function updateDailyArtistAggregates(
-  client: any,
-  aggregations: Record<string, any>
-) {
-  const values = Object.values(aggregations);
-  if (values.length === 0) return;
-
-  const valueStrings = values
-    .map((_, index) => {
-      const base = index * 5;
-      return `($${base + 1}, $${base + 2}, $${base + 3}, $${base + 4}, $${
-        base + 5
-      })`;
-    })
-    .join(", ");
-
-  const query = `
-    INSERT INTO daily_artist_aggregates (date, artist_id, artist_name, daily_play_count, genre)
-    VALUES ${valueStrings}
-    ON CONFLICT (date, artist_id)
-    DO UPDATE SET
-      daily_play_count = daily_artist_aggregates.daily_play_count + EXCLUDED.daily_play_count,
-      artist_name = EXCLUDED.artist_name,
-      genre = COALESCE(EXCLUDED.genre, daily_artist_aggregates.genre)
-  `;
-
-  const params = values.flatMap((agg) => [
-    agg.date,
-    agg.artist_id,
-    agg.artist_name,
-    agg.daily_play_count,
-    agg.genre || null,
-  ]);
-
-  await client.query(query, params);
-}
-
-async function updateDailyAlbumAggregates(
   client: any,
   aggregations: Record<string, any>
 ) {
@@ -163,14 +128,54 @@ async function updateDailyAlbumAggregates(
     .join(", ");
 
   const query = `
-    INSERT INTO daily_album_aggregates (date, album_id, artist_id, album_name, artist_name, daily_play_count)
+    INSERT INTO daily_artist_aggregates (date, artist_id, artist_name, daily_play_count, genre, artist_image_url)
+    VALUES ${valueStrings}
+    ON CONFLICT (date, artist_id)
+    DO UPDATE SET
+      daily_play_count = daily_artist_aggregates.daily_play_count + EXCLUDED.daily_play_count,
+      artist_name = EXCLUDED.artist_name,
+      genre = COALESCE(EXCLUDED.genre, daily_artist_aggregates.genre),
+      artist_image_url = EXCLUDED.artist_image_url
+  `;
+
+  const params = values.flatMap((agg) => [
+    agg.date,
+    agg.artist_id,
+    agg.artist_name,
+    agg.daily_play_count,
+    agg.genre || null,
+    agg.artist_image_url || null,
+  ]);
+
+  await client.query(query, params);
+}
+
+async function updateDailyAlbumAggregates(
+  client: any,
+  aggregations: Record<string, any>
+) {
+  const values = Object.values(aggregations);
+  if (values.length === 0) return;
+
+  const valueStrings = values
+    .map((_, index) => {
+      const base = index * 7;
+      return `($${base + 1}, $${base + 2}, $${base + 3}, $${base + 4}, $${
+        base + 5
+      }, $${base + 6}, $${base + 7})`;
+    })
+    .join(", ");
+
+  const query = `
+    INSERT INTO daily_album_aggregates (date, album_id, artist_id, album_name, artist_name, daily_play_count, album_cover_url)
     VALUES ${valueStrings}
     ON CONFLICT (date, album_id)
     DO UPDATE SET
       daily_play_count = daily_album_aggregates.daily_play_count + EXCLUDED.daily_play_count,
       artist_id = EXCLUDED.artist_id,
       album_name = EXCLUDED.album_name,
-      artist_name = EXCLUDED.artist_name
+      artist_name = EXCLUDED.artist_name,
+      album_cover_url = EXCLUDED.album_cover_url
   `;
 
   const params = values.flatMap((agg) => [
@@ -180,6 +185,7 @@ async function updateDailyAlbumAggregates(
     agg.album_name,
     agg.artist_name,
     agg.daily_play_count,
+    agg.album_cover_url,
   ]);
 
   await client.query(query, params);
@@ -195,15 +201,15 @@ async function updateMonthlyTrackAggregates(
 
   const valueStrings = values
     .map((_, index) => {
-      const base = index * 8;
+      const base = index * 9;
       return `($${base + 1}, $${base + 2}, $${base + 3}, $${base + 4}, $${
         base + 5
-      }, $${base + 6}, $${base + 7}, $${base + 8})`;
+      }, $${base + 6}, $${base + 7}, $${base + 8}, $${base + 9})`;
     })
     .join(", ");
 
   const query = `
-    INSERT INTO monthly_track_aggregates (year_month, track_id, artist_id, album_id, track_name, artist_name, album_name, monthly_play_count)
+    INSERT INTO monthly_track_aggregates (year_month, track_id, artist_id, album_id, track_name, artist_name, album_name, monthly_play_count, album_cover_url)
     VALUES ${valueStrings}
     ON CONFLICT (year_month, track_id)
     DO UPDATE SET
@@ -212,7 +218,8 @@ async function updateMonthlyTrackAggregates(
       album_id = EXCLUDED.album_id,
       track_name = EXCLUDED.track_name,
       artist_name = EXCLUDED.artist_name,
-      album_name = EXCLUDED.album_name
+      album_name = EXCLUDED.album_name,
+      album_cover_url = EXCLUDED.album_cover_url
   `;
 
   const params = values.flatMap((agg) => [
@@ -224,49 +231,13 @@ async function updateMonthlyTrackAggregates(
     agg.artist_name,
     agg.album_name,
     agg.monthly_play_count,
+    agg.album_cover_url,
   ]);
 
   await client.query(query, params);
 }
 
 async function updateMonthlyArtistAggregates(
-  client: any,
-  aggregations: Record<string, any>
-) {
-  const values = Object.values(aggregations);
-  if (values.length === 0) return;
-
-  const valueStrings = values
-    .map((_, index) => {
-      const base = index * 5;
-      return `($${base + 1}, $${base + 2}, $${base + 3}, $${base + 4}, $${
-        base + 5
-      })`;
-    })
-    .join(", ");
-
-  const query = `
-    INSERT INTO monthly_artist_aggregates (year_month, artist_id, artist_name, monthly_play_count, genre)
-    VALUES ${valueStrings}
-    ON CONFLICT (year_month, artist_id)
-    DO UPDATE SET
-      monthly_play_count = monthly_artist_aggregates.monthly_play_count + EXCLUDED.monthly_play_count,
-      artist_name = EXCLUDED.artist_name,
-      genre = COALESCE(EXCLUDED.genre, monthly_artist_aggregates.genre)
-  `;
-
-  const params = values.flatMap((agg) => [
-    agg.year_month,
-    agg.artist_id,
-    agg.artist_name,
-    agg.monthly_play_count,
-    agg.genre || null,
-  ]);
-
-  await client.query(query, params);
-}
-
-async function updateMonthlyAlbumAggregates(
   client: any,
   aggregations: Record<string, any>
 ) {
@@ -283,14 +254,54 @@ async function updateMonthlyAlbumAggregates(
     .join(", ");
 
   const query = `
-    INSERT INTO monthly_album_aggregates (year_month, album_id, artist_id, album_name, artist_name, monthly_play_count)
+    INSERT INTO monthly_artist_aggregates (year_month, artist_id, artist_name, monthly_play_count, genre, artist_image_url)
+    VALUES ${valueStrings}
+    ON CONFLICT (year_month, artist_id)
+    DO UPDATE SET
+      monthly_play_count = monthly_artist_aggregates.monthly_play_count + EXCLUDED.monthly_play_count,
+      artist_name = EXCLUDED.artist_name,
+      genre = COALESCE(EXCLUDED.genre, monthly_artist_aggregates.genre),
+      artist_image_url = EXCLUDED.artist_image_url
+  `;
+
+  const params = values.flatMap((agg) => [
+    agg.year_month,
+    agg.artist_id,
+    agg.artist_name,
+    agg.monthly_play_count,
+    agg.genre || null,
+    agg.artist_image_url || null,
+  ]);
+
+  await client.query(query, params);
+}
+
+async function updateMonthlyAlbumAggregates(
+  client: any,
+  aggregations: Record<string, any>
+) {
+  const values = Object.values(aggregations);
+  if (values.length === 0) return;
+
+  const valueStrings = values
+    .map((_, index) => {
+      const base = index * 7;
+      return `($${base + 1}, $${base + 2}, $${base + 3}, $${base + 4}, $${
+        base + 5
+      }, $${base + 6}, $${base + 7})`;
+    })
+    .join(", ");
+
+  const query = `
+    INSERT INTO monthly_album_aggregates (year_month, album_id, artist_id, album_name, artist_name, monthly_play_count, album_cover_url)
     VALUES ${valueStrings}
     ON CONFLICT (year_month, album_id)
     DO UPDATE SET
       monthly_play_count = monthly_album_aggregates.monthly_play_count + EXCLUDED.monthly_play_count,
       artist_id = EXCLUDED.artist_id,
       album_name = EXCLUDED.album_name,
-      artist_name = EXCLUDED.artist_name
+      artist_name = EXCLUDED.artist_name,
+      album_cover_url = EXCLUDED.album_cover_url
   `;
 
   const params = values.flatMap((agg) => [
@@ -300,6 +311,7 @@ async function updateMonthlyAlbumAggregates(
     agg.album_name,
     agg.artist_name,
     agg.monthly_play_count,
+    agg.album_cover_url,
   ]);
 
   await client.query(query, params);
@@ -315,15 +327,15 @@ async function updateYearlyTrackAggregates(
 
   const valueStrings = values
     .map((_, index) => {
-      const base = index * 8;
+      const base = index * 9;
       return `($${base + 1}, $${base + 2}, $${base + 3}, $${base + 4}, $${
         base + 5
-      }, $${base + 6}, $${base + 7}, $${base + 8})`;
+      }, $${base + 6}, $${base + 7}, $${base + 8}, $${base + 9})`;
     })
     .join(", ");
 
   const query = `
-    INSERT INTO yearly_track_aggregates (year, track_id, artist_id, album_id, track_name, artist_name, album_name, yearly_play_count)
+    INSERT INTO yearly_track_aggregates (year, track_id, artist_id, album_id, track_name, artist_name, album_name, yearly_play_count, album_cover_url)
     VALUES ${valueStrings}
     ON CONFLICT (year, track_id)
     DO UPDATE SET
@@ -332,7 +344,8 @@ async function updateYearlyTrackAggregates(
       album_id = EXCLUDED.album_id,
       track_name = EXCLUDED.track_name,
       artist_name = EXCLUDED.artist_name,
-      album_name = EXCLUDED.album_name
+      album_name = EXCLUDED.album_name,
+      album_cover_url = EXCLUDED.album_cover_url
   `;
 
   const params = values.flatMap((agg) => [
@@ -344,49 +357,13 @@ async function updateYearlyTrackAggregates(
     agg.artist_name,
     agg.album_name,
     agg.yearly_play_count,
+    agg.album_cover_url,
   ]);
 
   await client.query(query, params);
 }
 
 async function updateYearlyArtistAggregates(
-  client: any,
-  aggregations: Record<string, any>
-) {
-  const values = Object.values(aggregations);
-  if (values.length === 0) return;
-
-  const valueStrings = values
-    .map((_, index) => {
-      const base = index * 5;
-      return `($${base + 1}, $${base + 2}, $${base + 3}, $${base + 4}, $${
-        base + 5
-      })`;
-    })
-    .join(", ");
-
-  const query = `
-    INSERT INTO yearly_artist_aggregates (year, artist_id, artist_name, yearly_play_count, genre)
-    VALUES ${valueStrings}
-    ON CONFLICT (year, artist_id)
-    DO UPDATE SET
-      yearly_play_count = yearly_artist_aggregates.yearly_play_count + EXCLUDED.yearly_play_count,
-      artist_name = EXCLUDED.artist_name,
-      genre = COALESCE(EXCLUDED.genre, yearly_artist_aggregates.genre)
-  `;
-
-  const params = values.flatMap((agg) => [
-    parseInt(agg.year),
-    agg.artist_id,
-    agg.artist_name,
-    agg.yearly_play_count,
-    agg.genre || null,
-  ]);
-
-  await client.query(query, params);
-}
-
-async function updateYearlyAlbumAggregates(
   client: any,
   aggregations: Record<string, any>
 ) {
@@ -403,14 +380,54 @@ async function updateYearlyAlbumAggregates(
     .join(", ");
 
   const query = `
-    INSERT INTO yearly_album_aggregates (year, album_id, artist_id, album_name, artist_name, yearly_play_count)
+    INSERT INTO yearly_artist_aggregates (year, artist_id, artist_name, yearly_play_count, genre, artist_image_url)
+    VALUES ${valueStrings}
+    ON CONFLICT (year, artist_id)
+    DO UPDATE SET
+      yearly_play_count = yearly_artist_aggregates.yearly_play_count + EXCLUDED.yearly_play_count,
+      artist_name = EXCLUDED.artist_name,
+      genre = COALESCE(EXCLUDED.genre, yearly_artist_aggregates.genre),
+      artist_image_url = EXCLUDED.artist_image_url
+  `;
+
+  const params = values.flatMap((agg) => [
+    parseInt(agg.year),
+    agg.artist_id,
+    agg.artist_name,
+    agg.yearly_play_count,
+    agg.genre || null,
+    agg.artist_image_url || null,
+  ]);
+
+  await client.query(query, params);
+}
+
+async function updateYearlyAlbumAggregates(
+  client: any,
+  aggregations: Record<string, any>
+) {
+  const values = Object.values(aggregations);
+  if (values.length === 0) return;
+
+  const valueStrings = values
+    .map((_, index) => {
+      const base = index * 7;
+      return `($${base + 1}, $${base + 2}, $${base + 3}, $${base + 4}, $${
+        base + 5
+      }, $${base + 6}, $${base + 7})`;
+    })
+    .join(", ");
+
+  const query = `
+    INSERT INTO yearly_album_aggregates (year, album_id, artist_id, album_name, artist_name, yearly_play_count, album_cover_url)
     VALUES ${valueStrings}
     ON CONFLICT (year, album_id)
     DO UPDATE SET
       yearly_play_count = yearly_album_aggregates.yearly_play_count + EXCLUDED.yearly_play_count,
       artist_id = EXCLUDED.artist_id,
       album_name = EXCLUDED.album_name,
-      artist_name = EXCLUDED.artist_name
+      artist_name = EXCLUDED.artist_name,
+      album_cover_url = EXCLUDED.album_cover_url
   `;
 
   const params = values.flatMap((agg) => [
@@ -420,6 +437,7 @@ async function updateYearlyAlbumAggregates(
     agg.album_name,
     agg.artist_name,
     agg.yearly_play_count,
+    agg.album_cover_url,
   ]);
 
   await client.query(query, params);
