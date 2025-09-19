@@ -68,7 +68,7 @@ export const FirstPlaceChartEntry = (entry: SongChartEntryType) => {
 
                 {/* Track & Artist Info */}
                 <div className="flex-1 min-w-0">
-                  <Link href={`/track/${entry.track_id}`} className="group">
+                  <Link href={`/tracks/${entry.track_id}`} className="group">
                     <h3 className="font-semibold text-gray-900 truncate transition-colors text-5xl tracking-tighter">
                       {entry.track_name.length > 25
                         ? entry.track_name.slice(0, 25) + "..."

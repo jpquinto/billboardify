@@ -48,7 +48,7 @@ export const SongChartEntry = (entry: SongChartEntryType) => {
 
       {/* Track & Artist Info */}
       <div className="flex-1 min-w-0">
-        <Link href={`/track/${entry.track_id}`} className="group">
+        <Link href={`/tracks/${entry.track_id}`} className="group">
           <h3 className="font-semibold text-gray-900 truncate group-hover:text-blue-600 transition-colors">
             {entry.track_name}
           </h3>

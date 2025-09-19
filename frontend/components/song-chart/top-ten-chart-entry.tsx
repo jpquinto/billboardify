@@ -87,7 +87,7 @@ export const TopTenChartEntry = (entry: SongChartEntryType) => {
 
             {/* Track & Artist Info */}
             <div className="flex-1 min-w-0">
-              <Link href={`/track/${entry.track_id}`} className="group">
+              <Link href={`/tracks/${entry.track_id}`} className="group">
                 <h3 className="font-semibold text-gray-900 truncate group-hover:bg-gradient-to-br group-hover:from-purple-700 group-hover:via-pink-400 group-hover:to-amber-400 group-hover:bg-clip-text group-hover:text-transparent transition-colors text-4xl tracking-tighter pb-2">
                   {entry.track_name.length > 30
                     ? entry.track_name.slice(0, 30) + "..."
