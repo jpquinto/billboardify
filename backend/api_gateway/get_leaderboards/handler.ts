@@ -1,3 +1,4 @@
+import { getLeaderboardSummary } from "./utils/get_leaderboard_summary";
 import { getLeaderboards } from "./utils/get_leaderboards";
 
 export const handler = async (event: any) => {
@@ -71,7 +72,7 @@ export const handler = async (event: any) => {
         pagination: {
           offset: offset,
           limit: 50,
-          has_more: leaderboardData.length === 50, // If we got 50 results, there might be more
+          has_more: leaderboardData.leaderboard.length === 50, // If we got 50 results, there might be more
         },
         filters: {
           type,

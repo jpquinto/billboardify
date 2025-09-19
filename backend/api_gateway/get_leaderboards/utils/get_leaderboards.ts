@@ -1,7 +1,9 @@
+import { getLeaderboardSummary } from "./get_leaderboard_summary";
+
 const { getPool } = require("/opt/nodejs/db/pool");
 
 export const getLeaderboards = async (
-  type: string,
+  type: "song" | "artist" | "album",
   granularity: string,
   offset: number,
   start_date: string,
@@ -14,11 +16,11 @@ export const getLeaderboards = async (
     const limit = 50;
 
     // Route to appropriate helper function based on type and granularity
-    let result;
+    let leaderboard;
 
-    if (type === "song" || type === "track") {
+    if (type === "song") {
       if (granularity === "daily") {
-        result = await getDailyTrackLeaderboard(
+        leaderboard = await getDailyTrackLeaderboard(
           client,
           offset,
           limit,
@@ -26,7 +28,7 @@ export const getLeaderboards = async (
           end_date
         );
       } else if (granularity === "monthly") {
-        result = await getMonthlyTrackLeaderboard(
+        leaderboard = await getMonthlyTrackLeaderboard(
           client,
           offset,
           limit,
@@ -34,7 +36,7 @@ export const getLeaderboards = async (
           end_date
         );
       } else if (granularity === "yearly") {
-        result = await getYearlyTrackLeaderboard(
+        leaderboard = await getYearlyTrackLeaderboard(
           client,
           offset,
           limit,
@@ -46,7 +48,7 @@ export const getLeaderboards = async (
       }
     } else if (type === "artist") {
       if (granularity === "daily") {
-        result = await getDailyArtistLeaderboard(
+        leaderboard = await getDailyArtistLeaderboard(
           client,
           offset,
           limit,
@@ -54,7 +56,7 @@ export const getLeaderboards = async (
           end_date
         );
       } else if (granularity === "monthly") {
-        result = await getMonthlyArtistLeaderboard(
+        leaderboard = await getMonthlyArtistLeaderboard(
           client,
           offset,
           limit,
@@ -62,7 +64,7 @@ export const getLeaderboards = async (
           end_date
         );
       } else if (granularity === "yearly") {
-        result = await getYearlyArtistLeaderboard(
+        leaderboard = await getYearlyArtistLeaderboard(
           client,
           offset,
           limit,
@@ -74,7 +76,7 @@ export const getLeaderboards = async (
       }
     } else if (type === "album") {
       if (granularity === "daily") {
-        result = await getDailyAlbumLeaderboard(
+        leaderboard = await getDailyAlbumLeaderboard(
           client,
           offset,
           limit,
@@ -82,7 +84,7 @@ export const getLeaderboards = async (
           end_date
         );
       } else if (granularity === "monthly") {
-        result = await getMonthlyAlbumLeaderboard(
+        leaderboard = await getMonthlyAlbumLeaderboard(
           client,
           offset,
           limit,
@@ -90,7 +92,7 @@ export const getLeaderboards = async (
           end_date
         );
       } else if (granularity === "yearly") {
-        result = await getYearlyAlbumLeaderboard(
+        leaderboard = await getYearlyAlbumLeaderboard(
           client,
           offset,
           limit,
@@ -104,7 +106,21 @@ export const getLeaderboards = async (
       throw new Error(`Invalid type: ${type}`);
     }
 
-    return result;
+    let leaderboardSummary = undefined;
+    if (offset === 0) {
+      leaderboardSummary = await getLeaderboardSummary(
+        client,
+        type,
+        granularity,
+        start_date,
+        end_date
+      );
+    }
+
+    return {
+      leaderboard,
+      summary: leaderboardSummary,
+    };
   } catch (error) {
     console.error("Error fetching leaderboards:", error);
     throw error;
