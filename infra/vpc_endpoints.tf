@@ -31,7 +31,7 @@ module "vpc_endpoint_interface_bedrock" {
   aws_region = data.aws_region.current.name
   service    = "bedrock-runtime"
   vpc_id     = module.vpc.vpc.id
-  subnet_ids = module.vpc.subnet_ids.private
+  subnet_ids = [module.vpc.subnet_ids.private[0]]
   create_sg  = true
 }
 

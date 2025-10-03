@@ -27,7 +27,7 @@ module "rag_trainer_lambda" {
   s3_key          = "lambda/rag_trainer/rag_trainer.zip"
 
   enable_vpc_access           = true
-  subnet_ids                  = module.vpc.subnet_ids.private
+  subnet_ids                  = [module.vpc.subnet_ids.private[0]]
   create_sg                   = true
   ipv6_allowed_for_dual_stack = false
 
