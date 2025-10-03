@@ -21,3 +21,7 @@ data "aws_lambda_layer_version" "spotify_sparticuz" {
 data "aws_lambda_layer_version" "spotify_sharp" {
   layer_name = "spotify-sharp-layer"
 }
+
+locals {
+  s3_bucket_layers = "jeremy-lambda-layers"
+}
