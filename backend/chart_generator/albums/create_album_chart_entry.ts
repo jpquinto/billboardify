@@ -275,5 +275,6 @@ export const getAndUpdateAlbumChartEntry = async (
     album_cover_banner: albumCoverBanner,
     cover_primary_color: primaryColor,
     cover_secondary_color: secondaryColor,
+    is_debut: weeksOnChart === 1,
   };
 };

@@ -193,5 +193,6 @@ export const getAndUpdateChartEntry = async (
     plays_since_last_week: recent_play_count,
     points: entry.points,
     genre: entry.genre,
+    is_debut: weeksOnChart === 1,
   };
 };

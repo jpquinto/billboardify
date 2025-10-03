@@ -202,5 +202,6 @@ export const getAndUpdateArtistChartEntry = async (
     artist_image_url: artistImageUrl,
     banner_url: artistBannerUrl,
     genre: entry.genre,
+    is_debut: weeksOnChart === 1,
   };
 };

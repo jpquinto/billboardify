@@ -97,6 +97,7 @@ export interface SongChartData {
   plays_since_last_week: number;
   points: number;
   genre?: string | null;
+  is_debut: boolean;
 }
 
 // Represents a single artist entry in the artist chart
@@ -113,6 +114,7 @@ export interface ArtistChartData {
   artist_image_url: string | null;
   banner_url: string | null;
   genre?: string | null;
+  is_debut: boolean;
 }
 
 // Represents a single album entry in the artist chart
@@ -133,6 +135,7 @@ export interface AlbumChartData {
   album_cover_banner?: string | null;
   cover_primary_color?: string | null;
   cover_secondary_color?: string | null;
+  is_debut: boolean;
 }
 
 // Summary information about the generated song chart
