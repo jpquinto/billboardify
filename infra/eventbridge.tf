@@ -45,3 +45,27 @@ resource "aws_lambda_permission" "allow_eventbridge_aggregator" {
   principal     = "events.amazonaws.com"
   source_arn    = aws_cloudwatch_event_rule.listening_history_aggregator_trigger.arn
 }
+
+resource "aws_cloudwatch_event_rule" "chart_generator_trigger" {
+  name                = "chart-generator-trigger"
+  description         = "Chart generator Lambda every Friday at 1am"
+  schedule_expression = "cron(0 9 ? * FRI *)"
+}
+
+resource "aws_cloudwatch_event_target" "trigger_chart_generator_lambda" {
+  rule      = aws_cloudwatch_event_rule.chart_generator_trigger.name
+  target_id = "ChartGeneratorLambda"
+  arn       = module.chart_generator_lambda.arn
+
+  input = jsonencode({
+    trigger : "daily"
+  })
+}
+
+resource "aws_lambda_permission" "allow_eventbridge_chart_generator" {
+  statement_id  = "AllowEventBridgeInvoke"
+  action        = "lambda:InvokeFunction"
+  function_name = module.chart_generator_lambda.name
+  principal     = "events.amazonaws.com"
+  source_arn    = aws_cloudwatch_event_rule.chart_generator_trigger.arn
+}
