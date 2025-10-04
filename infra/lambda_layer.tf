@@ -51,9 +51,6 @@ module "python_dependencies_layer" {
   s3_key          = "lambda_layers/python_dependencies.zip"
 
   dependencies = [
-    "pg8000==1.31.5",
-    "langgraph==0.5.2",
-    "langchain-aws==0.2.28",
-    "langchain-core==0.3.68"
+    "pg8000==1.31.5"
   ]
 }

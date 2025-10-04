@@ -1,8 +1,13 @@
 import json
 import pg8000
+import os
 from typing import List, Dict, Optional
-from utils.rag_base import RAGBase
+from rag_base import RAGBase
 
+llm_model_id = os.environ.get(
+    "BEDROCK_LLM_MODEL_ID",
+    "us.amazon.nova-pro-v1:0"
+)
 
 class SQLGenerator(RAGBase):
     """
@@ -19,7 +24,7 @@ class SQLGenerator(RAGBase):
         self.prompt = ""
         
         # LLM configuration
-        self.llm_model_id = "anthropic.claude-3-5-sonnet-20241022-v2:0"
+        self.llm_model_id = llm_model_id
         
         # Retrieval configuration
         self.top_k = self.config.get("top_k", 10)  # Number of similar examples to retrieve
@@ -42,7 +47,6 @@ class SQLGenerator(RAGBase):
         question: str,
         question_sql_list: List[Dict],
         ddl_list: List[Dict],
-        doc_list: List[Dict],
         **kwargs,
     ):
         """
@@ -53,7 +57,6 @@ class SQLGenerator(RAGBase):
             question: The question to generate SQL for
             question_sql_list: List of dicts with 'question', 'sql', 'similarity' keys
             ddl_list: List of dicts with 'content', 'similarity' keys
-            doc_list: List of dicts with 'content', 'similarity' keys
             tenant_id: The tenant ID to use for filtering (optional)
 
         Returns:
@@ -73,11 +76,6 @@ class SQLGenerator(RAGBase):
             for ddl in ddl_list:
                 initial_prompt += f"{ddl['content']}\n\n"
 
-        # Add documentation to prompt
-        if doc_list:
-            initial_prompt += "\n===Additional Context\n"
-            for doc in doc_list:
-                initial_prompt += f"{doc['content']}\n\n"
 
         # Add response guidelines
         initial_prompt += (
@@ -86,8 +84,9 @@ class SQLGenerator(RAGBase):
             "2. If the provided context is insufficient, please explain why it can't be generated.\n"
             "3. Please use the most relevant table(s).\n"
             "4. If the question has been asked and answered before, please repeat the answer exactly as it was given before.\n"
-            "5. Ensure that the output SQL is Athena/Presto-compliant and executable, and free of syntax errors.\n"
+            "5. Ensure that the output SQL is PostgreSQL compatible and executable, and free of syntax errors.\n"
             "6. If querying a large table, limit the results to 10 at the max using LIMIT.\n"
+            "7. If asking about a specific artist, album, or track, ensure to filter using LIKE for partial matches and to capture different casing.\n"
         )
         
         # Start with system message
@@ -369,20 +368,22 @@ class SQLGenerator(RAGBase):
                 else:
                     messages.append({
                         "role": msg["role"],
-                        "content": msg["content"]
+                        "content": [{"text": msg["content"]}]  # Nova format
                     })
             
-            # Prepare the request body for Claude
+            # Prepare the request body for Nova
             body = {
-                "anthropic_version": "bedrock-2023-05-31",
-                "max_tokens": kwargs.get("max_tokens", 4096),
                 "messages": messages,
-                "temperature": kwargs.get("temperature", 0.0),  # Low temp for deterministic SQL
+                "inferenceConfig": {
+                    "max_new_tokens": kwargs.get("max_tokens", 4096),
+                    "temperature": kwargs.get("temperature", 0.0),  # Low temp for deterministic SQL
+                },
+                "schemaVersion": "messages-v1"
             }
             
             # Add system message if present
             if system_message:
-                body["system"] = system_message
+                body["system"] = [{"text": system_message}]
             
             self.log(f"Calling LLM model: {self.llm_model_id}")
             
@@ -397,8 +398,8 @@ class SQLGenerator(RAGBase):
             # Parse response
             response_body = json.loads(response.get('body').read())
             
-            # Extract the generated text from Claude's response
-            generated_sql = response_body.get('content')[0].get('text')
+            # Extract the generated text from Nova's response
+            generated_sql = response_body.get('output').get('message').get('content')[0].get('text')
             
             self.log(f"Successfully generated SQL")
             
@@ -408,5 +409,95 @@ class SQLGenerator(RAGBase):
             self.log(f"Error calling LLM: {e}", title="Error")
             raise e
 
-    def generate_followup_questions(self):
-        pass
+    def execute_query(self, sql: str) -> Dict:
+        """
+        Execute a SQL query against the RDS database and return results.
+        Uses connection pool for parallel-safe execution.
+        
+        Args:
+            sql: The SQL query string to execute
+            
+        Returns:
+            Dict with the following structure:
+            {
+                'success': bool,
+                'data': List[Dict] | None,  # Query results as list of dicts
+                'columns': List[str] | None,  # Column names
+                'row_count': int,  # Number of rows returned
+                'error': str | None  # Error message if failed
+            }
+        """
+        # First validate the SQL
+        is_valid, error_msg = self.is_valid_sql(sql)
+        if not is_valid:
+            self.log(f"Invalid SQL query: {error_msg}", title="Error")
+            return {
+                'success': False,
+                'data': None,
+                'columns': None,
+                'row_count': 0,
+                'error': error_msg
+            }
+        
+        # Get connection from pool
+        conn = self._get_connection()
+        
+        try:
+            cursor = conn.cursor()
+            
+            try:
+                # Execute the query
+                self.log(f"Executing SQL query: {sql[:100]}...")
+                cursor.execute(sql)
+                
+                # Fetch all results
+                results = cursor.fetchall()
+                
+                # Get column names from cursor description
+                columns = [desc[0] for desc in cursor.description] if cursor.description else []
+                
+                # Convert results to list of dicts
+                data = []
+                for row in results:
+                    row_dict = {}
+                    for i, col_name in enumerate(columns):
+                        row_dict[col_name] = row[i]
+                    data.append(row_dict)
+                
+                row_count = len(data)
+                self.log(f"Query executed successfully. Retrieved {row_count} rows")
+                
+                return {
+                    'success': True,
+                    'data': data,
+                    'columns': columns,
+                    'row_count': row_count,
+                    'error': None
+                }
+                
+            finally:
+                cursor.close()
+                
+        except pg8000.Error as e:
+            error_msg = f"Database error executing query: {e}"
+            self.log(error_msg, title="Error")
+            return {
+                'success': False,
+                'data': None,
+                'columns': None,
+                'row_count': 0,
+                'error': error_msg
+            }
+        except Exception as e:
+            error_msg = f"Unexpected error executing query: {e}"
+            self.log(error_msg, title="Error")
+            return {
+                'success': False,
+                'data': None,
+                'columns': None,
+                'row_count': 0,
+                'error': error_msg
+            }
+        finally:
+            # Always return connection to pool
+            self._return_connection(conn)

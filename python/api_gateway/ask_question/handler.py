@@ -1,32 +1,28 @@
 import json
-import logging
 import os
-import re
-import time
 from typing import Any, Dict, List, TypedDict
 
 import boto3
-from langgraph.graph import StateGraph, END
+from langchain_core.output_parsers import JsonOutputParser
+from langgraph.graph import StateGraph
 from sql_generator import SQLGenerator
 
 class AgentState(TypedDict):
     generator: SQLGenerator
     user_query: str
-    tenant_id: str
     query_embedding: List[float]
     question_sql_examples: List[Dict[str, str]]
-    documentation_examples: List[Dict[str, str]]
     ddl_examples: List[Dict[str, str]]
     message_log: List[Dict[str, str]]
     generated_sql: str
-    athena_response: List[Any]
+    rds_response: List[Any]
     text_response: str
     retry_count: int
     validation_error: str
 
 llm_model_id = os.environ.get(
     "BEDROCK_LLM_MODEL_ID",
-    "anthropic.claude-3-5-sonnet-20241022-v2:0"
+    "amazon.nova-pro-v1:0"
 )
 
 ## Nodes
@@ -45,11 +41,6 @@ def get_similar_question_sql(state: AgentState):
     question_sql_examples = state["generator"].get_similar_question_sql(query_embedding, top_k=3)
     return {"question_sql_examples": question_sql_examples}
 
-def get_related_documentation(state: AgentState):
-    query_embedding = state["query_embedding"]
-    documentation_examples = state["generator"].get_related_documentation(query_embedding, top_k=3)
-    return {"documentation_examples": documentation_examples}
-
 def get_related_ddl(state: AgentState):
     query_embedding = state["query_embedding"]
     ddl_examples = state["generator"].get_related_ddl(query_embedding, top_k=3)
@@ -60,16 +51,12 @@ def get_sql_prompt(state: AgentState):
     question = state["user_query"]
     question_sql_list = state["question_sql_examples"]
     ddl_list = state["ddl_examples"]
-    doc_list = state["documentation_examples"]
-    tenant_id = state["tenant_id"]
 
     message_log = state["generator"].get_sql_prompt(
         initial_prompt=initial_prompt,
         question=question,
         question_sql_list=question_sql_list,
         ddl_list=ddl_list,
-        doc_list=doc_list,
-        tenant_id=tenant_id
     )
     return {"message_log": message_log}
 
@@ -123,7 +110,7 @@ def handle_validation_failure(state: AgentState):
     print(error_msg)
     return {
         "text_response": error_msg,
-        "athena_response": []
+        "rds_response": []
     }
 
 def call_llm(state: AgentState):
@@ -131,13 +118,48 @@ def call_llm(state: AgentState):
     generated_sql = state["generator"].call_llm(message_log)
     return {"generated_sql": generated_sql}
 
+
 def execute_query(state: AgentState):
+    """
+    Execute the validated SQL query and format the response.
+    """
     generated_sql = state["generated_sql"]
-    athena_response = "MOCK RESPONSE"  # TODO: implement later
-    return {
-        "athena_response": athena_response,
-        "text_response": generated_sql  # Add this so run_agent can access it
-    }
+
+    print(f"Executing SQL: {generated_sql}")
+    
+    # Execute query using the generator's execute_query method
+    result = state["generator"].execute_query(generated_sql)
+    
+    if result['success']:
+        # Format successful response
+        print(f"Query executed successfully: {result['row_count']} rows returned")
+        
+        # Create a formatted text response
+        text_response = f"Query executed successfully. Retrieved {result['row_count']} rows.\n\n"
+        text_response += f"SQL Query:\n{generated_sql}\n\n"
+        
+        if result['row_count'] > 0:
+            text_response += f"Columns: {', '.join(result['columns'])}\n"
+            text_response += f"First {min(5, result['row_count'])} rows shown below."
+        else:
+            text_response += "No rows returned."
+
+        print(text_response)
+        print(f"RDS Response: {result['data'][:5]}")  # Print first 5 rows of data
+        
+        return {
+            "rds_response": result['data'],
+            "text_response": text_response
+        }
+    else:
+        # Handle execution error
+        error_msg = f"Query execution failed: {result['error']}\n\nSQL Query:\n{generated_sql}"
+        print(f"Query execution failed: {result['error']}")
+        
+        return {
+            "rds_response": [],
+            "text_response": error_msg
+        }
 
 def close_connection(state: AgentState):
     state["generator"].close_connection()
@@ -150,7 +172,6 @@ def create_graph():
     workflow.add_node("connect_to_postgres", connect_to_postgres)
     workflow.add_node("generate_embedding", generate_embedding)
     workflow.add_node("get_similar_question_sql", get_similar_question_sql)
-    workflow.add_node("get_related_documentation", get_related_documentation)
     workflow.add_node("get_related_ddl", get_related_ddl)
     workflow.add_node("get_sql_prompt", get_sql_prompt)
     workflow.add_node("call_llm", call_llm)
@@ -168,12 +189,10 @@ def create_graph():
 
     # Parallel retrieval of examples
     workflow.add_edge("generate_embedding", "get_similar_question_sql")
-    workflow.add_edge("generate_embedding", "get_related_documentation")
     workflow.add_edge("generate_embedding", "get_related_ddl")
     
     # All three retrieval nodes converge to get_sql_prompt
     workflow.add_edge("get_similar_question_sql", "get_sql_prompt")
-    workflow.add_edge("get_related_documentation", "get_sql_prompt")
     workflow.add_edge("get_related_ddl", "get_sql_prompt")
 
     # LLM call and validation
@@ -199,29 +218,27 @@ def create_graph():
     workflow.add_edge("handle_validation_failure", "close_connection")
     
     # End
-    workflow.add_edge("close_connection", END)
+    # workflow.add_edge("close_connection", END)
 
     app = workflow.compile()
 
     return app
 
-def run_agent(user_query: str, tenant_id: str) -> Dict[str, Any]:
+def run_agent(user_query: str) -> Dict[str, Any]:
     try:
         generator = SQLGenerator()
         app = create_graph()
-        print(f"Running agent with user query: {user_query} and tenant ID: {tenant_id}")
+        print(f"Running agent with user query: {user_query}")
         llm_response = app.invoke(
             {
                 "generator": generator,
                 "user_query": user_query,
-                "tenant_id": tenant_id,
                 "query_embedding": [],
                 "question_sql_examples": [],
-                "documentation_examples": [],
                 "ddl_examples": [],
                 "message_log": [],
                 "generated_sql": "",
-                "athena_response": [],
+                "rds_response": [],
                 "text_response": "",
             }
         )
@@ -238,13 +255,11 @@ def run_agent(user_query: str, tenant_id: str) -> Dict[str, Any]:
     
 def handler(event, context):
 
-    tenant_id = '32bbf67c-cba7-4d0b-aea6-67388e016b5b'
-    message_id = '1234'
-    user_query = "Who are my top 5 customers by revenue in the last three months?"
+    user_query = "What were my highest played songs by aespa in the last month?"
 
-    print(f"Processing request with user_query: {user_query}, tenant_id: {tenant_id}, message_id: {message_id}")
+    print(f"Processing request with user_query: {user_query}")
 
-    response = run_agent(user_query=user_query, tenant_id=tenant_id)
+    response = run_agent(user_query=user_query)
 
     print(f"Returning response: {json.dumps(response) if not isinstance(response, dict) or 'error' not in response else 'Error response'}")
 
