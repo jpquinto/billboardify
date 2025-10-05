@@ -1,61 +1,57 @@
-import { Music, Play, User } from "lucide-react";
+import { Music, Play, Disc3 } from "lucide-react";
 
-// Helper function to check if data matches artist structure
-export const isArtistData = (data: any[]): boolean => {
+// Helper function to check if data matches album structure
+export const isAlbumData = (data: any[]): boolean => {
   if (!data || data.length === 0) return false;
 
   const firstItem = data[0];
   const requiredFields = [
-    "artist_id",
+    "album_id",
+    "album_name",
     "artist_name",
-    "genre",
     "total_plays",
-    "artist_image_url",
+    "album_cover_url",
   ];
 
   return requiredFields.every((field) => field in firstItem);
 };
 
-interface Artist {
-  artist_id: string;
+interface Album {
+  album_id: string;
+  album_name: string;
   artist_name: string;
-  genre: string;
   total_plays: number;
-  artist_image_url: string;
+  album_cover_url: string;
 }
 
-interface ChatArtistListProps {
-  artists: Artist[];
+interface ChatAlbumListProps {
+  albums: Album[];
 }
 
-export const ChatArtistList = ({ artists }: ChatArtistListProps) => {
+export const ChatAlbumList = ({ albums }: ChatAlbumListProps) => {
   return (
     <div className="space-y-2">
       <div className="flex items-center gap-2 mb-3">
-        <User className="w-4 h-4 text-slate-600 dark:text-slate-400" />
+        <Disc3 className="w-4 h-4 text-slate-600 dark:text-slate-400" />
         <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-          {artists.length} {artists.length === 1 ? "Artist" : "Artists"}
+          {albums.length} {albums.length === 1 ? "Album" : "Albums"}
         </h3>
       </div>
       <div className="space-y-2">
-        {artists.map((artist, index) => (
-          <ChatArtistRow
-            key={artist.artist_id}
-            artist={artist}
-            rank={index + 1}
-          />
+        {albums.map((album, index) => (
+          <ChatAlbumRow key={album.album_id} album={album} rank={index + 1} />
         ))}
       </div>
     </div>
   );
 };
 
-interface ChatArtistRowProps {
-  artist: Artist;
+interface ChatAlbumRowProps {
+  album: Album;
   rank: number;
 }
 
-const ChatArtistRow = ({ artist, rank }: ChatArtistRowProps) => {
+const ChatAlbumRow = ({ album, rank }: ChatAlbumRowProps) => {
   const formatPlays = (plays: number) => {
     if (plays >= 1000000) {
       return `${(plays / 1000000).toFixed(1)}M`;
@@ -74,38 +70,38 @@ const ChatArtistRow = ({ artist, rank }: ChatArtistRowProps) => {
         </span>
       </div>
 
-      {/* Artist Image */}
+      {/* Album Cover */}
       <div className="flex-shrink-0 relative">
-        {artist.artist_image_url ? (
+        {album.album_cover_url ? (
           <img
-            src={artist.artist_image_url}
-            alt={artist.artist_name}
-            className="w-12 h-12 rounded-full object-cover shadow-sm"
+            src={album.album_cover_url}
+            alt={album.album_name}
+            className="w-12 h-12 rounded-md object-cover shadow-sm"
           />
         ) : (
-          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center">
-            <User className="w-6 h-6 text-white" />
+          <div className="w-12 h-12 rounded-md bg-gradient-to-br from-green-500 to-teal-600 flex items-center justify-center">
+            <Disc3 className="w-6 h-6 text-white" />
           </div>
         )}
-        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-full flex items-center justify-center">
+        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-md flex items-center justify-center">
           <Play className="w-5 h-5 text-white" fill="white" />
         </div>
       </div>
 
-      {/* Artist Info */}
+      {/* Album Info */}
       <div className="flex-1 min-w-0">
         <h4 className="text-sm font-semibold text-slate-900 dark:text-slate-100 truncate">
-          {artist.artist_name}
+          {album.album_name}
         </h4>
         <p className="text-xs text-slate-600 dark:text-slate-400 truncate">
-          {artist.genre}
+          {album.artist_name}
         </p>
       </div>
 
       {/* Play Count */}
       <div className="flex-shrink-0 text-right px-2">
         <div className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-          {formatPlays(artist.total_plays)}
+          {formatPlays(album.total_plays)}
         </div>
         <div className="text-xs text-slate-500 dark:text-slate-400">plays</div>
       </div>

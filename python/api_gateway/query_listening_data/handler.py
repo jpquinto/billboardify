@@ -1,6 +1,7 @@
 import json
 import os
 from typing import Any, Dict, List, TypedDict
+from datetime import date, datetime
 
 import boto3
 from langchain_core.output_parsers import JsonOutputParser
@@ -24,6 +25,28 @@ llm_model_id = os.environ.get(
     "BEDROCK_LLM_MODEL_ID",
     "us.amazon.nova-pro-v1:0"
 )
+
+def serialize_datetime(obj):
+    """
+    Convert datetime objects to ISO format strings for JSON serialization.
+    """
+    if isinstance(obj, (date, datetime)):
+        return obj.isoformat()
+    return obj
+
+def make_json_serializable(data):
+    """
+    Recursively convert all datetime objects in a data structure to strings.
+    """
+    if isinstance(data, list):
+        return [make_json_serializable(item) for item in data]
+    elif isinstance(data, dict):
+        return {key: make_json_serializable(value) for key, value in data.items()}
+    elif isinstance(data, (date, datetime)):
+        return data.isoformat()
+    else:
+        return data
+
 
 ## Nodes
 def connect_to_postgres(state: AgentState):
@@ -134,6 +157,9 @@ def execute_query(state: AgentState):
         # Format successful response
         print(f"Query executed successfully: {result['row_count']} rows returned")
         
+        # Convert datetime objects to strings for JSON serialization
+        serializable_data = make_json_serializable(result['data'])
+        
         # Create a formatted text response
         text_response = f"Query executed successfully. Retrieved {result['row_count']} rows.\n\n"
         text_response += f"SQL Query:\n{generated_sql}\n\n"
@@ -145,10 +171,10 @@ def execute_query(state: AgentState):
             text_response += "No rows returned."
 
         print(text_response)
-        print(f"RDS Response: {result['data'][:5]}")  # Print first 5 rows of data
+        print(f"RDS Response: {serializable_data[:5]}")  # Print first 5 rows of data
         
         return {
-            "rds_response": result['data'],
+            "rds_response": serializable_data,
             "text_response": text_response
         }
     else:

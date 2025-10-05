@@ -2,6 +2,9 @@ import { Bot } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { markdownToHtml } from "@/utils/markdown-to-html";
 import { ChatSongList, isSongData } from "./chat-song-list";
+import { ChatArtistList, isArtistData } from "./chat-artist-list";
+import { ChatAlbumList, isAlbumData } from "./chat-album-list";
+import { ChatBarChart, isBarChartData } from "./chat-bar-chart";
 
 interface AssistantMessageProps {
   content: string;
@@ -22,6 +25,9 @@ export const AssistantMessage = ({
   const toolDataExists =
     hasToolData && hasToolData.data && hasToolData.data.length > 0;
   const isSongList = toolDataExists && isSongData(hasToolData.data);
+  const isArtistList = toolDataExists && isArtistData(hasToolData.data);
+  const isAlbumList = toolDataExists && isAlbumData(hasToolData.data);
+  const isBarChart = toolDataExists && isBarChartData(hasToolData.data);
 
   return (
     <div className="flex gap-3">
@@ -38,6 +44,12 @@ export const AssistantMessage = ({
               <div>
                 {isSongList ? (
                   <ChatSongList songs={hasToolData.data} />
+                ) : isArtistList ? (
+                  <ChatArtistList artists={hasToolData.data} />
+                ) : isAlbumList ? (
+                  <ChatAlbumList albums={hasToolData.data} />
+                ) : isBarChart ? (
+                  <ChatBarChart data={hasToolData.data} />
                 ) : (
                   <>
                     <h4 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
