@@ -13,6 +13,7 @@ import "./scroll.css";
 interface Message {
   role: "user" | "assistant";
   content: string;
+  userQuery?: string;
   toolData?: {
     tool_query_listening_data?: {
       sql: string;
@@ -56,6 +57,7 @@ export const Chat = () => {
             content: `Sorry, I encountered an error: ${
               response.error || "Unknown error"
             }`,
+            userQuery: currentInput, // Track the user query
           },
         ]);
       } else {
@@ -65,6 +67,7 @@ export const Chat = () => {
             role: "assistant",
             content: response.response,
             toolData: response.tool_data,
+            userQuery: currentInput, // Track the user query
           },
         ]);
       }
@@ -74,6 +77,7 @@ export const Chat = () => {
         {
           role: "assistant",
           content: "Sorry, something went wrong. Please try again.",
+          userQuery: currentInput, // Track the user query even on error
         },
       ]);
       console.error("Error calling askQuestion:", error);
@@ -94,7 +98,7 @@ export const Chat = () => {
       {/* Header */}
       <div className="border-b px-6 py-4 z-[999]">
         <div className="flex items-center gap-3">
-          <Avatar className="w-20 h-20">
+          <Avatar className="w-8 h-8">
             <AvatarImage src="/chat-logo.png" alt="User Avatar" />
             <AvatarFallback className="bg-slate-200 dark:bg-slate-700">
               <User className="w-4 h-4" />
@@ -112,7 +116,7 @@ export const Chat = () => {
       </div>
 
       {/* Messages */}
-      <ScrollArea className="flex-1 px-4 py-6 min-h-[65dvh] 2xl:min-h-[70dvh] max-h-[65dvh] 2xl:max-h-[70dvh] overflow-y-scroll">
+      <ScrollArea className="flex-1 px-4 py-6 min-h-[68dvh] 2xl:min-h-[70dvh] max-h-[65dvh] 2xl:max-h-[70dvh] overflow-y-scroll">
         <div className="px-20 mx-auto space-y-6">
           {messages.map((message, index) => (
             <div key={index}>
@@ -135,6 +139,7 @@ export const Chat = () => {
                 <AssistantMessage
                   content={message.content}
                   toolData={message.toolData}
+                  userQuery={message.userQuery}
                 />
               )}
             </div>

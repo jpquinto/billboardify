@@ -5,6 +5,7 @@ import { ChatSongList, isSongData } from "./chat-song-list";
 import { ChatArtistList, isArtistData } from "./chat-artist-list";
 import { ChatAlbumList, isAlbumData } from "./chat-album-list";
 import { ChatBarChart, isBarChartData } from "./chat-bar-chart";
+import { ChatFeedback } from "./chat-feedback";
 
 interface AssistantMessageProps {
   content: string;
@@ -15,11 +16,13 @@ interface AssistantMessageProps {
       data: any[];
     };
   };
+  userQuery?: string;
 }
 
 export const AssistantMessage = ({
   content,
   toolData,
+  userQuery,
 }: AssistantMessageProps) => {
   const hasToolData = toolData?.tool_query_listening_data;
   const toolDataExists =
@@ -28,6 +31,10 @@ export const AssistantMessage = ({
   const isArtistList = toolDataExists && isArtistData(hasToolData.data);
   const isAlbumList = toolDataExists && isAlbumData(hasToolData.data);
   const isBarChart = toolDataExists && isBarChartData(hasToolData.data);
+
+  // Check if a special component is being rendered
+  const hasSpecialComponent =
+    isSongList || isArtistList || isAlbumList || isBarChart;
 
   return (
     <div className="flex gap-3">
@@ -99,9 +106,20 @@ export const AssistantMessage = ({
             )}
           </div>
         )}
-        <div className="bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-3">
-          <div dangerouslySetInnerHTML={{ __html: markdownToHtml(content) }} />
-        </div>
+
+        {/* Only render content if no special component is shown */}
+        {!hasSpecialComponent && (
+          <div className="bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-3">
+            <div
+              dangerouslySetInnerHTML={{ __html: markdownToHtml(content) }}
+            />
+          </div>
+        )}
+
+        {/* Feedback moved outside content container */}
+        {hasToolData && userQuery && (
+          <ChatFeedback question={userQuery} sql={hasToolData.sql} />
+        )}
       </div>
     </div>
   );
