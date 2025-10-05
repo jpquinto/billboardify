@@ -87,9 +87,15 @@ class SQLGenerator(RAGBase):
             "3. Please use the most relevant table(s).\n"
             "4. If the question has been asked and answered before, please repeat the answer exactly as it was given before.\n"
             "5. Ensure that the output SQL is PostgreSQL compatible and executable, and free of syntax errors.\n"
-            "6. If querying a large table, limit the results to 10 at the max using LIMIT.\n"
-            "7. If asking about a specific artist, album, or track, ensure to filter using LIKE for partial matches and to capture different casing.\n"
+            "6. When returning a list, always limit the results to 10 at the max using LIMIT.\n"
+            "7. If asking about a specific artist, album, or track, ensure to filter using ILIKE for partial matches and to capture different casing.\n"
             f"8. Use the current date as {current_date} whenever the user asks for 'this week', 'this month', etc.\n"
+            "9. Do not include any newlines or breaks in the query, it should be one long string.\n"
+            f"10. When performing date arithmetic, ALWAYS cast date strings using the DATE keyword. For example: DATE '{current_date}' - INTERVAL '7 days'. Never use string literals directly with INTERVAL operations.\n"
+            "11. For date comparisons, use one of these formats:\n"
+            "    - DATE 'YYYY-MM-DD' for date literals\n"
+            "    - 'YYYY-MM-DD'::date for type casting\n"
+            "12. When applicable, always return the track_id, artist_id, or album_id in the results.\n"
         )
         
         # Start with system message

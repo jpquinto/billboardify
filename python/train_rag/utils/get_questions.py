@@ -10,6 +10,7 @@ def get_questions():
             "question": "What are the top 10 most played tracks in September 2025?",
             "sql": """
                 SELECT 
+                    track_id,
                     track_name,
                     artist_name,
                     album_name,
@@ -47,6 +48,7 @@ def get_questions():
             "question": "What are my top 5 most played Drake songs over the last 30 days?",
             "sql": """
                 SELECT 
+                    track_id,
                     track_name,
                     artist_name,
                     album_name,
@@ -73,6 +75,7 @@ def get_questions():
             "question": "What were my most played albums over the last 30 days?",
             "sql": """
                 SELECT 
+                    album_id,
                     album_name,
                     artist_name,
                     SUM(daily_play_count) AS total_plays,
@@ -96,6 +99,7 @@ def get_questions():
             "question": "Who were my top artists over the last 30 days?",
             "sql": """
                 SELECT 
+                    artist_id,
                     artist_name,
                     genre,
                     SUM(daily_play_count) AS total_plays,
@@ -131,6 +135,7 @@ def get_questions():
             "question": "What k-pop artists did I listen to the most in 2024?",
             "sql": """
                 SELECT 
+                    artist_id,
                     artist_name,
                     genre,
                     yearly_play_count AS total_plays,
@@ -149,6 +154,7 @@ def get_questions():
             "question": "Show me my listening trends for The Weeknd over the last 3 months by month",
             "sql": """
                 SELECT 
+                    artist_id,
                     year_month,
                     artist_name,
                     monthly_play_count AS total_plays
@@ -166,6 +172,7 @@ def get_questions():
             "question": "What was my most played song in October 2025?",
             "sql": """
                 SELECT 
+                    track_id,
                     track_name,
                     artist_name,
                     album_name,
@@ -220,6 +227,7 @@ def get_questions():
             "question": "Which albums from aespa did I play the most this year?",
             "sql": """
                 SELECT 
+                    album_id,
                     album_name,
                     artist_name,
                     SUM(monthly_play_count) AS total_plays,

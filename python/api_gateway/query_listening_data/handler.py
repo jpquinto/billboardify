@@ -22,7 +22,7 @@ class AgentState(TypedDict):
 
 llm_model_id = os.environ.get(
     "BEDROCK_LLM_MODEL_ID",
-    "amazon.nova-pro-v1:0"
+    "us.amazon.nova-pro-v1:0"
 )
 
 ## Nodes
@@ -240,14 +240,21 @@ def run_agent(user_query: str) -> Dict[str, Any]:
                 "generated_sql": "",
                 "rds_response": [],
                 "text_response": "",
+                "retry_count": 0,  # Initialize retry_count
+                "validation_error": ""  # Initialize validation_error
             }
         )
         generated_sql = llm_response.get("generated_sql", "")
         text_response = llm_response.get("text_response", "")
+        rds_response = llm_response.get("rds_response", [])  # Get the actual data
+        
         print(f"Agent response - SQL: {generated_sql}")
+        print(f"Agent response - Data rows: {len(rds_response)}")
+        
         return {
             "sql": generated_sql,
-            "response": text_response
+            "response": text_response,
+            "data": rds_response  # Include the actual query results
         }
     except Exception as e:
         print(f"Error during agent execution: {e}")

@@ -10,8 +10,8 @@ module "spotify-project-chatbot-api" {
       http_method          = "POST"
       path                 = "ask-question"
       integration_type     = "lambda"
-      lambda_invoke_arn    = module.ask_question_lambda.invoke_arn
-      lambda_function_name = module.ask_question_lambda.name
+      lambda_invoke_arn    = module.chatbot_supervisor_lambda.invoke_arn
+      lambda_function_name = module.chatbot_supervisor_lambda.name
       enable_cors_all      = true
       use_authorizer       = false # TODO: Enable when auth is ready
     },

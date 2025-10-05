@@ -1,21 +1,21 @@
-module "ask_question_tools_packager" {
+module "query_listening_data_tools_packager" {
   source = "./modules/util_packager"
 
-  entry_file_path = "${path.root}/../python/api_gateway/ask_question/handler.py"
-  export_dir      = "${path.root}/dist/api_gateway/ask_question"
-  sys_paths       = ["${path.root}/../python/api_gateway/ask_question"]
+  entry_file_path = "${path.root}/../python/api_gateway/query_listening_data/handler.py"
+  export_dir      = "${path.root}/dist/api_gateway/query_listening_data"
+  sys_paths       = ["${path.root}/../python/api_gateway/query_listening_data"]
   no_reqs         = true
 }
 
-module "ask_question_lambda" {
+module "query_listening_data_lambda" {
   source  = "./modules/lambda"
   context = module.null_label.context
 
-  name = "ask-question-lambda"
+  name = "query-listening-data-lambda"
 
-  source_dir = module.ask_question_tools_packager.result.build_directory
+  source_dir = module.query_listening_data_tools_packager.result.build_directory
 
-  build_path = "${path.root}/dist/api_gateway/ask_question/ask_question.zip"
+  build_path = "${path.root}/dist/api_gateway/query_listening_data/query_listening_data.zip"
 
   handler         = "handler.handler"
   runtime         = "python3.12"
@@ -24,7 +24,7 @@ module "ask_question_lambda" {
   deployment_type = "zip"
   zip_project     = true
   s3_bucket       = local.s3_bucket_layers
-  s3_key          = "lambda/api_gateway/ask_question/ask_question.zip"
+  s3_key          = "lambda/api_gateway/query_listening_data/query_listening_data.zip"
 
   enable_vpc_access           = true
   subnet_ids                  = [module.vpc.subnet_ids.private[0]]
@@ -46,9 +46,9 @@ module "ask_question_lambda" {
   ]
 }
 
-resource "aws_iam_policy" "ask_question_policy" {
-  name        = "ask-question-policy"
-  description = "Allows the ask question Lambda to read from Secrets Manager."
+resource "aws_iam_policy" "query_listening_data_policy" {
+  name        = "query-listening-data-policy"
+  description = "Allows the query listening data Lambda to read from Secrets Manager."
 
   policy = jsonencode({
     Version = "2012-10-17",
@@ -73,26 +73,26 @@ resource "aws_iam_policy" "ask_question_policy" {
   })
 }
 
-resource "aws_iam_role_policy_attachment" "ask_question_attach" {
-  role       = module.ask_question_lambda.role_name
-  policy_arn = aws_iam_policy.ask_question_policy.arn
+resource "aws_iam_role_policy_attachment" "query_listening_data_attach" {
+  role       = module.query_listening_data_lambda.role_name
+  policy_arn = aws_iam_policy.query_listening_data_policy.arn
 }
 
-module "sg_ask_question_lambda_to_rds" {
+module "sg_query_listening_data_lambda_to_rds" {
   source                 = "./modules/sg/each_other"
-  from_name              = module.ask_question_lambda.name
+  from_name              = module.query_listening_data_lambda.name
   to_name                = "RDS"
-  from_security_group_id = module.ask_question_lambda.security_group_ids[0]
+  from_security_group_id = module.query_listening_data_lambda.security_group_ids[0]
 
   to_security_group_id = module.spotify_rds.security_group_ids[0]
   port                 = 5432
 }
 
-module "sg_ask_question_lambda_to_bedrock" {
+module "sg_query_listening_data_lambda_to_bedrock" {
   source                 = "./modules/sg/each_other"
-  from_name              = module.ask_question_lambda.name
+  from_name              = module.query_listening_data_lambda.name
   to_name                = "Bedrock VPC Endpoint"
-  from_security_group_id = module.ask_question_lambda.security_group_ids[0]
+  from_security_group_id = module.query_listening_data_lambda.security_group_ids[0]
 
   to_security_group_id = module.vpc_endpoint_interface_bedrock.security_group_ids[0]
   port                 = 443

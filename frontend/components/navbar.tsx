@@ -62,7 +62,7 @@ export const Navbar = () => {
   const topBarHeight = scrolled ? "4px" : "0px";
 
   return (
-    <header className="top-0 fixed w-[100dvw] transition-colors duration-500 z-[998]">
+    <header className="top-0 fixed w-[100dvw] transition-colors duration-500 z-[995]">
       <div
         className={cn("fixed flex w-full top-0 left-0 z-[999] transition-all")}
         style={{ opacity: topBarOpacity, height: topBarHeight }}
