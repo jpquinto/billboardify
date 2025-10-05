@@ -3,6 +3,7 @@ import pg8000
 import os
 from typing import List, Dict, Optional
 from rag_base import RAGBase
+from datetime import datetime
 
 llm_model_id = os.environ.get(
     "BEDROCK_LLM_MODEL_ID",
@@ -76,6 +77,7 @@ class SQLGenerator(RAGBase):
             for ddl in ddl_list:
                 initial_prompt += f"{ddl['content']}\n\n"
 
+        current_date = datetime.now().strftime("%Y-%m-%d")
 
         # Add response guidelines
         initial_prompt += (
@@ -87,6 +89,7 @@ class SQLGenerator(RAGBase):
             "5. Ensure that the output SQL is PostgreSQL compatible and executable, and free of syntax errors.\n"
             "6. If querying a large table, limit the results to 10 at the max using LIMIT.\n"
             "7. If asking about a specific artist, album, or track, ensure to filter using LIKE for partial matches and to capture different casing.\n"
+            f"8. Use the current date as {current_date} whenever the user asks for 'this week', 'this month', etc.\n"
         )
         
         # Start with system message

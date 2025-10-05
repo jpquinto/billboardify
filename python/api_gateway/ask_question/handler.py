@@ -254,18 +254,43 @@ def run_agent(user_query: str) -> Dict[str, Any]:
         return {"error": str(e)}
     
 def handler(event, context):
+    try:
+        # Parse the request body
+        if isinstance(event.get('body'), str):
+            body = json.loads(event['body'])
+        else:
+            body = event.get('body', {})
+        
+        # Extract user_query from the body
+        user_query = body.get('user_query') or body.get('query')
+        
+        if not user_query:
+            return {
+                "statusCode": 400,
+                "body": json.dumps({
+                    "error": "user_query is required in request body"
+                }),
+            }
 
-    user_query = "What were my highest played songs by aespa in the last month?"
+        print(f"Processing request with user_query: {user_query}")
 
-    print(f"Processing request with user_query: {user_query}")
+        response = run_agent(user_query=user_query)
 
-    response = run_agent(user_query=user_query)
+        print(f"Returning response: {json.dumps(response) if not isinstance(response, dict) or 'error' not in response else 'Error response'}")
 
-    print(f"Returning response: {json.dumps(response) if not isinstance(response, dict) or 'error' not in response else 'Error response'}")
-
-    return {
-        "statusCode": 200,
-        "body": {
-            "response": response,
-        },
-    }
+        return {
+            "statusCode": 200,
+            "body": json.dumps({
+                "response": response,
+            }),
+        }
+    
+    except Exception as e:
+        print(f"Error processing request: {str(e)}")
+        return {
+            "statusCode": 500,
+            "body": json.dumps({
+                "error": "Internal server error",
+                "message": str(e)
+            }),
+        }
