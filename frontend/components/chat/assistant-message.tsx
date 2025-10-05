@@ -15,6 +15,11 @@ interface AssistantMessageProps {
       response: string;
       data: any[];
     };
+    tool_control_playback?: {
+      status: "success" | "error";
+      message: string;
+      tracks_processed?: number;
+    };
   };
   userQuery?: string;
 }
@@ -31,6 +36,7 @@ export const AssistantMessage = ({
   const isArtistList = toolDataExists && isArtistData(hasToolData.data);
   const isAlbumList = toolDataExists && isAlbumData(hasToolData.data);
   const isBarChart = toolDataExists && isBarChartData(hasToolData.data);
+  const playbackMessage = toolData?.tool_control_playback?.message;
 
   // Check if a special component is being rendered
   const hasSpecialComponent =
@@ -50,7 +56,10 @@ export const AssistantMessage = ({
             {toolDataExists && (
               <div>
                 {isSongList ? (
-                  <ChatSongList songs={hasToolData.data} />
+                  <ChatSongList
+                    songs={hasToolData.data}
+                    playbackMessage={playbackMessage}
+                  />
                 ) : isArtistList ? (
                   <ChatArtistList artists={hasToolData.data} />
                 ) : isAlbumList ? (

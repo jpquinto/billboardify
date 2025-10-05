@@ -45,9 +45,10 @@ _current_user_query = ""
 def tool_query_listening_data() -> str:
     """
     Use this tool to query the user's listening data. It is used for direct lookups for any questions that involve the user's listening history.
+    This tool returns track information including track IDs, names, artists, and play counts.
     
     Returns:
-        str: The result of the SQL query execution as a JSON string.
+        str: The result of the SQL query execution as a JSON string containing track information.
     """
     try:
         print("Executing tool_query_listening_data...")
@@ -77,13 +78,52 @@ def tool_query_listening_data() -> str:
         return json.dumps({"error": f"Failed to query listening history: {str(e)}"})
     
 @tool
-def tool_create_queue():
+def tool_control_playback(track_ids: List[str], action: str = "add_to_queue") -> str:
     """
-    Use this tool to add to the user's current playback queue. It is used whenever the user asks to play certain tracks or generate a queue.
+    Use this tool to control the user's playback. It can add tracks to the queue and/or replace the current playback.
+    
+    Args:
+        track_ids: A list of Spotify track IDs (e.g., ["abc123", "def456"])
+        action: The playback action to perform. Options are:
+            - "add_to_queue": Add tracks to the end of the current queue (default)
+            - "play_now": Replace current playback and start playing these tracks immediately
+    
+    Returns:
+        str: The result of the playback control operation as a JSON string.
+    
+    Examples:
+        - To play a user's top tracks: First use tool_query_listening_data to get the track IDs, 
+          then use this tool with those IDs and action="play_now"
+        - To add tracks to queue: Use action="add_to_queue" with the track IDs
     """
-    print("Executing tool_create_queue...")
-    # Call the create_queue lambda function
-    return json.dumps({"status": "queue created"})
+    try:
+        print(f"Executing tool_control_playback with {len(track_ids)} tracks and action={action}")
+        
+        if not track_ids:
+            return json.dumps({"error": "No track IDs provided"})
+        
+        response = call_lambda_function(
+            os.getenv("PLAYBACK_CONTROLLER_LAMBDA_ARN", ""),
+            {
+                "track_ids": track_ids,
+                "action": action
+            },
+        )
+        
+        print(f"tool_control_playback response: {json.dumps(response) if isinstance(response, dict) else response}")
+        
+        # Ensure we return a string
+        if isinstance(response, dict):
+            return json.dumps(response)
+        elif isinstance(response, str):
+            return response
+        else:
+            return str(response)
+            
+    except Exception as e:
+        print(f"Error in tool_control_playback: {e}")
+        return json.dumps({"error": f"Failed to control playback: {str(e)}"})
+
 
 @tool
 def tool_create_playlist():
@@ -94,7 +134,7 @@ def tool_create_playlist():
     # Call the create_playlist lambda function
     return json.dumps({"status": "playlist created"})
 
-tools = [tool_query_listening_data, tool_create_queue, tool_create_playlist]
+tools = [tool_query_listening_data, tool_control_playback, tool_create_playlist]
 
 # Initialize the LLM with tools using AWS Bedrock Nova Pro
 llm = ChatBedrockConverse(

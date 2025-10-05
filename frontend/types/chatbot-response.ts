@@ -8,6 +8,11 @@ export type ChatbotResponse =
           response: string;
           data: any[];
         };
+        tool_control_playback?: {
+          status: "success" | "error";
+          message: string;
+          tracks_processed?: number;
+        }
       };
     }
   | {

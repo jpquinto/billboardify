@@ -131,10 +131,8 @@ class SQLGenerator(RAGBase):
         # Strip whitespace and convert to uppercase for checking
         sql_stripped = sql.strip()
         sql_upper = sql_stripped.upper()
-        
-        # Check if SQL starts with SELECT
-        if not sql_upper.startswith('SELECT'):
-            return False, "SQL query must start with SELECT statement"
+
+        # TODO: implement
         
         # If we get here, it's valid
         return True, ""

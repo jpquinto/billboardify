@@ -106,7 +106,7 @@ export const Chat = () => {
           </Avatar>
           <div>
             <h1 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
-              Chartify Assistant
+              Spotify Assistant
             </h1>
             <p className="text-sm text-slate-500 dark:text-slate-400">
               Whatcha listenin' to?
@@ -116,7 +116,7 @@ export const Chat = () => {
       </div>
 
       {/* Messages */}
-      <ScrollArea className="flex-1 px-4 py-6 min-h-[68dvh] 2xl:min-h-[70dvh] max-h-[65dvh] 2xl:max-h-[70dvh] overflow-y-scroll">
+      <ScrollArea className="flex-1 px-4 py-6 min-h-[75dvh] max-h-[75dvh] overflow-y-scroll">
         <div className="px-20 mx-auto space-y-6">
           {messages.map((message, index) => (
             <div key={index}>

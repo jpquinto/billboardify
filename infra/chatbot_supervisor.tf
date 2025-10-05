@@ -32,6 +32,7 @@ module "chatbot_supervisor_lambda" {
 
   environment_variables = {
     QUERY_LISTENING_DATA_LAMBDA_ARN : module.query_listening_data_lambda.name
+    PLAYBACK_CONTROLLER_LAMBDA_ARN : module.playback_controller_tool_lambda.name
     BEDROCK_LLM_MODEL_ID : "us.amazon.nova-pro-v1:0"
   }
 

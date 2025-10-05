@@ -10,7 +10,6 @@ export const isSongData = (data: any[]): boolean => {
     "track_name",
     "artist_name",
     "album_name",
-    "total_plays",
     "album_cover_url",
   ];
 
@@ -22,21 +21,23 @@ interface Song {
   track_name: string;
   artist_name: string;
   album_name: string;
-  total_plays: number;
+  total_plays?: number;
   album_cover_url: string;
 }
 
 interface ChatSongListProps {
   songs: Song[];
+  playbackMessage?: string;
 }
 
-export const ChatSongList = ({ songs }: ChatSongListProps) => {
+export const ChatSongList = ({ songs, playbackMessage }: ChatSongListProps) => {
   return (
     <div className="space-y-2">
       <div className="flex items-center gap-2 mb-3">
         <Music className="w-4 h-4 text-slate-600 dark:text-slate-400" />
         <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-          {songs.length} {songs.length === 1 ? "Track" : "Tracks"}
+          {playbackMessage ||
+            `${songs.length} ${songs.length === 1 ? "Track" : "Tracks"}`}
         </h3>
       </div>
       <div className="space-y-2">
@@ -103,13 +104,17 @@ const ChatSongRow = ({ song, rank }: ChatSongRowProps) => {
         </p>
       </div>
 
-      {/* Play Count */}
-      <div className="flex-shrink-0 text-right px-2">
-        <div className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-          {formatPlays(song.total_plays)}
+      {/* Play Count - Only render if total_plays exists */}
+      {song.total_plays !== undefined && (
+        <div className="flex-shrink-0 text-right px-2">
+          <div className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+            {formatPlays(song.total_plays)}
+          </div>
+          <div className="text-xs text-slate-500 dark:text-slate-400">
+            plays
+          </div>
         </div>
-        <div className="text-xs text-slate-500 dark:text-slate-400">plays</div>
-      </div>
+      )}
     </div>
   );
 };

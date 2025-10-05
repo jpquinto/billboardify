@@ -18,7 +18,8 @@
       "listening_history_aggregator/**/*",
       "reset_chart_data/**/*",
       "layers/**/*",
-      "ingest_genres/**/*"
+      "ingest_genres/**/*",
+      "playback_controller_tool/**/*"
     ],
     "exclude": [
       "dist",
