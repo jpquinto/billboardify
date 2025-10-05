@@ -69,3 +69,27 @@ resource "aws_lambda_permission" "allow_eventbridge_chart_generator" {
   principal     = "events.amazonaws.com"
   source_arn    = aws_cloudwatch_event_rule.chart_generator_trigger.arn
 }
+
+resource "aws_cloudwatch_event_rule" "song_chart_playlist_generator_trigger" {
+  name                = "playlist-generator-trigger"
+  description         = "Playlist Generator Lambda every Friday at 1:05am"
+  schedule_expression = "cron(5 9 ? * FRI *)"
+}
+
+resource "aws_cloudwatch_event_target" "trigger_song_chart_playlist_generator_lambda" {
+  rule      = aws_cloudwatch_event_rule.song_chart_playlist_generator_trigger.name
+  target_id = "SongChartPlaylistGeneratorLambda"
+  arn       = module.song_chart_playlist_generator_lambda.arn
+
+  input = jsonencode({
+    trigger : "daily"
+  })
+}
+
+resource "aws_lambda_permission" "allow_eventbridge_song_chart_playlist_generator" {
+  statement_id  = "AllowEventBridgeInvoke"
+  action        = "lambda:InvokeFunction"
+  function_name = module.song_chart_playlist_generator_lambda.name
+  principal     = "events.amazonaws.com"
+  source_arn    = aws_cloudwatch_event_rule.song_chart_playlist_generator_trigger.arn
+}

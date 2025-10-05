@@ -126,13 +126,51 @@ def tool_control_playback(track_ids: List[str], action: str = "add_to_queue") ->
 
 
 @tool
-def tool_create_playlist():
+def tool_create_playlist(track_ids: List[str], playlist_name: str = "") -> str:
     """
-    Use this tool to create a playlist for the user.
+    Use this tool to create a playlist for the user with the specified tracks.
+    
+    Args:
+        track_ids: A list of Spotify track IDs to add to the playlist (e.g., ["abc123", "def456"])
+        playlist_name: Optional name for the playlist. If not provided, a name will be generated based on the user's request.
+    
+    Returns:
+        str: The result of the playlist creation operation as a JSON string, including the playlist ID and URL.
+    
+    Examples:
+        - To create a playlist from top tracks: First use tool_query_listening_data to get the track IDs,
+          then use this tool with those IDs and an appropriate playlist_name
+        - To create a playlist from Drake songs: Query listening data for Drake tracks, then create playlist
+          with playlist_name="My Top Drake Songs"
     """
-    print("Executing tool_create_playlist...")
-    # Call the create_playlist lambda function
-    return json.dumps({"status": "playlist created"})
+    try:
+        print(f"Executing tool_create_playlist with {len(track_ids)} tracks and name='{playlist_name}'")
+        
+        if not track_ids:
+            return json.dumps({"error": "No track IDs provided"})
+        
+        response = call_lambda_function(
+            os.getenv("CREATE_PLAYLIST_LAMBDA_ARN", ""),
+            {
+                "track_ids": track_ids,
+                "playlist_name": playlist_name,
+                "user_query": _current_user_query
+            },
+        )
+        
+        print(f"tool_create_playlist response: {json.dumps(response) if isinstance(response, dict) else response}")
+        
+        # Ensure we return a string
+        if isinstance(response, dict):
+            return json.dumps(response)
+        elif isinstance(response, str):
+            return response
+        else:
+            return str(response)
+            
+    except Exception as e:
+        print(f"Error in tool_create_playlist: {e}")
+        return json.dumps({"error": f"Failed to create playlist: {str(e)}"})
 
 tools = [tool_query_listening_data, tool_control_playback, tool_create_playlist]
 
@@ -142,7 +180,7 @@ llm = ChatBedrockConverse(
     client=bedrock_client,
     temperature=0.0,
     top_p=0.8,
-    max_tokens=2048,
+    max_tokens=1024,
 ).bind_tools(tools)
 
 def execute_tools(state: AgentState) -> Dict[str, List[BaseMessage]]:
@@ -245,11 +283,19 @@ def should_continue(state: AgentState) -> str:
     messages = state["messages"]
     last_message = messages[-1]
     
+    # Count how many times we've called tools
+    tool_message_count = sum(1 for msg in messages if isinstance(msg, ToolMessage))
+    
+    # If we've used tools more than 5 times, end to prevent loops
+    if tool_message_count > 5:
+        print("Max tool calls reached, ending")
+        return END
+    
     # If there are tool calls, route to tools
     if hasattr(last_message, "tool_calls") and last_message.tool_calls:
         print(f"Tool calls detected: {last_message.tool_calls}")
         return "tools"
-    # Otherwise, end
+    
     return END
 
 def create_graph():
@@ -293,7 +339,7 @@ def run_agent(user_query: str) -> Dict[str, Any]:
     }
 
     # Run the graph
-    result = app.invoke(state)
+    result = app.invoke(state, {"recursion_limit": 10})
     
     # Extract the final response
     final_message = result["messages"][-1]

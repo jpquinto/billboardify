@@ -25,6 +25,7 @@ module "song_chart_playlist_generator_lambda" {
     SPOTIFY_REFRESH_TOKEN = local.spotify_secrets.SPOTIFY_REFRESH_TOKEN
     SPOTIFY_CLIENT_ID     = local.spotify_secrets.SPOTIFY_CLIENT_ID
     SPOTIFY_CLIENT_SECRET = local.spotify_secrets.SPOTIFY_CLIENT_SECRET
+    INGESTION_STATUS_TABLE_NAME : module.status_timestamps_table.name
   }
 }
 
@@ -41,6 +42,20 @@ resource "aws_iam_policy" "song_chart_playlist_generator_policy" {
           "s3:GetObject"
         ],
         Resource = "${module.song_chart_history_bucket.bucket_arn}/*"
+      },
+      {
+        Effect = "Allow",
+        Action = [
+          "s3:ListBucket"
+        ],
+        Resource = module.song_chart_history_bucket.bucket_arn
+      },
+      {
+        Effect = "Allow",
+        Action = [
+          "dynamodb:GetItem"
+        ],
+        Resource = [module.status_timestamps_table.arn]
       }
     ]
   })

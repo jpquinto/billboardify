@@ -1,5 +1,6 @@
 import { SongChart } from "./types";
 import { generatePlaylist } from "./utils/generate_playlist";
+import { getLastChartGenerationTimestamp } from "./utils/get_last_generation_timestamp";
 import { getSongChart } from "./utils/get_latest_chart";
 import { getOrCreatePlaylist } from "./utils/get_playlist";
 
@@ -38,12 +39,29 @@ export const handler = async () => {
 
   console.log(`Using playlist ID: ${playlistId}`);
 
-  // Step 2. Fetch latest chart from S3
+  // Step 2. Fetch latest chart generation timestamp
+  let lastChartGenerationTimestamp: string | null = null;
+  try {
+    lastChartGenerationTimestamp = await getLastChartGenerationTimestamp();
+  } catch (error: any) {
+    console.error(
+      "Error fetching last chart generation timestamp:",
+      error.message
+    );
+    return;
+  }
+
+  if (!lastChartGenerationTimestamp) {
+    console.error("No last chart generation timestamp found.");
+    return;
+  }
+
+  // Step 3. Fetch latest chart from S3
 
   let songChart: SongChart | null = null;
 
   try {
-    songChart = await getSongChart("2025-09-10T08:12:39.822Z");
+    songChart = await getSongChart(lastChartGenerationTimestamp);
   } catch (error: any) {
     console.error("Error fetching song chart:", error.message);
     return;

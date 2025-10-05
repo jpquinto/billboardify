@@ -1,11 +1,11 @@
-module "playback_controller_tool_lambda" {
+module "create_playlist_lambda" {
   source  = "./modules/lambda"
   context = module.null_label.context
 
-  name            = "playback-controller-lambda"
+  name            = "create-playlist-lambda"
   handler         = "handler.handler"
-  source_dir      = "${path.root}/../backend/dist/playback_controller_tool"
-  build_path      = "${path.root}/../backend/build/playback_controller_tool/playback_controller_tool.zip"
+  source_dir      = "${path.root}/../backend/dist/create_playlist"
+  build_path      = "${path.root}/../backend/build/create_playlist/create_playlist.zip"
   runtime         = "nodejs20.x"
   memory          = 256
   time_limit      = 60

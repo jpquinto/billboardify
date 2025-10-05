@@ -19,7 +19,8 @@
       "reset_chart_data/**/*",
       "layers/**/*",
       "ingest_genres/**/*",
-      "playback_controller_tool/**/*"
+      "playback_controller_tool/**/*",
+      "create_playlist/**/*"
     ],
     "exclude": [
       "dist",

@@ -87,7 +87,7 @@ class SQLGenerator(RAGBase):
             "3. Please use the most relevant table(s).\n"
             "4. If the question has been asked and answered before, please repeat the answer exactly as it was given before.\n"
             "5. Ensure that the output SQL is PostgreSQL compatible and executable, and free of syntax errors.\n"
-            "6. When returning a list, always limit the results to 10 at the max using LIMIT.\n"
+            "6. When returning a list, always limit the results to 10 at the max using LIMIT, unless you are asked to create a playlist. In that case, you can return up to 50 songs.\n"
             "7. If asking about a specific artist, album, or track, ensure to filter using ILIKE for partial matches and to capture different casing.\n"
             f"8. Use the current date as {current_date} whenever the user asks for 'this week', 'this month', etc.\n"
             "9. Do not include any newlines or breaks in the query, it should be one long string.\n"
