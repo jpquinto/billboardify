@@ -127,7 +127,7 @@ export const Chat = () => {
                       <User className="w-4 h-4" />
                     </AvatarFallback>
                   </Avatar>
-                  <div className="rounded-2xl px-4 py-3 max-w-[80%] bg-gradient-to-tr from-teal-500/80 to-purple-600/80 text-white font-semibold">
+                  <div className="rounded-2xl px-4 py-3 max-w-[80%] bg-gradient-to-tr from-teal-100 to-purple-100 text-slate-900">
                     <div
                       dangerouslySetInnerHTML={{
                         __html: markdownToHtml(message.content),

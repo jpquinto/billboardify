@@ -20,6 +20,13 @@ interface AssistantMessageProps {
       message: string;
       tracks_processed?: number;
     };
+    tool_create_playlist?: {
+      status: "success" | "error";
+      message: string;
+      playlist_url: string;
+      playlist_id: string;
+      tracks_added: number;
+    };
   };
   userQuery?: string;
 }
@@ -36,7 +43,9 @@ export const AssistantMessage = ({
   const isArtistList = toolDataExists && isArtistData(hasToolData.data);
   const isAlbumList = toolDataExists && isAlbumData(hasToolData.data);
   const isBarChart = toolDataExists && isBarChartData(hasToolData.data);
-  const playbackMessage = toolData?.tool_control_playback?.message;
+  const playbackMessage =
+    toolData?.tool_control_playback?.message ||
+    toolData?.tool_create_playlist?.message;
 
   // Check if a special component is being rendered
   const hasSpecialComponent =
@@ -59,6 +68,18 @@ export const AssistantMessage = ({
                   <ChatSongList
                     songs={hasToolData.data}
                     playbackMessage={playbackMessage}
+                    playlistData={
+                      toolData?.tool_create_playlist?.status === "success"
+                        ? {
+                            playlist_url:
+                              toolData.tool_create_playlist.playlist_url,
+                            playlist_id:
+                              toolData.tool_create_playlist.playlist_id,
+                            tracks_added:
+                              toolData.tool_create_playlist.tracks_added,
+                          }
+                        : undefined
+                    }
                   />
                 ) : isArtistList ? (
                   <ChatArtistList artists={hasToolData.data} />

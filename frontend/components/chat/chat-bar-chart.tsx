@@ -45,18 +45,20 @@ const chartConfig = {
 
 export const ChatBarChart = ({ data }: ChatBarChartProps) => {
   // Transform data for recharts
-  const chartData = data.map((item) => {
-    const plays = item.total_plays ?? item.plays ?? item.daily_play_count ?? 0;
-    return {
-      date: item.date,
-      plays,
-      formattedDate: new Date(item.date).toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-      }),
-    };
-  });
-
+  const chartData = data
+    .map((item) => {
+      const plays =
+        item.total_plays ?? item.plays ?? item.daily_play_count ?? 0;
+      return {
+        date: item.date,
+        plays,
+        formattedDate: new Date(item.date).toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+        }),
+      };
+    })
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   // Calculate total plays
   const totalPlays = chartData.reduce((sum, item) => sum + item.plays, 0);
 
@@ -109,8 +111,8 @@ export const ChatBarChart = ({ data }: ChatBarChartProps) => {
                 x2="100%"
                 y2="0%"
               >
-                <stop offset="0%" stopColor="#9333ea" stopOpacity="0.7" />
-                <stop offset="100%" stopColor="#14b8a6" stopOpacity="0.7" />
+                <stop offset="0%" stopColor="#9333ea" stopOpacity="0.4" />
+                <stop offset="100%" stopColor="#14b8a6" stopOpacity="0.4" />
               </linearGradient>
             </defs>
             <XAxis

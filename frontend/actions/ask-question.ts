@@ -24,8 +24,6 @@ export const askQuestion = async (
 
     const data = response.data;
 
-    console.log("Got data:", data);
-
     return {
       response: data.response,
       tool_data: data.tool_data || {},

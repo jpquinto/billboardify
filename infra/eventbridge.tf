@@ -81,6 +81,7 @@ resource "aws_cloudwatch_event_target" "trigger_song_chart_playlist_generator_la
   target_id = "SongChartPlaylistGeneratorLambda"
   arn       = module.song_chart_playlist_generator_lambda.arn
 
+  depends_on = [aws_cloudwatch_event_rule.song_chart_playlist_generator_trigger]
   input = jsonencode({
     trigger : "daily"
   })

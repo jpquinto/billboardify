@@ -180,7 +180,7 @@ llm = ChatBedrockConverse(
     client=bedrock_client,
     temperature=0.0,
     top_p=0.8,
-    max_tokens=1024,
+    max_tokens=2048,
 ).bind_tools(tools)
 
 def execute_tools(state: AgentState) -> Dict[str, List[BaseMessage]]:
@@ -254,6 +254,8 @@ def call_model(state: AgentState) -> Dict[str, List[BaseMessage]]:
     
     response = llm.invoke(messages)
     print(f"Model response type: {type(response).__name__}")
+    print(f"Model response content: {response.content}")  # ADD THIS LINE
+    print(f"Model response content type: {type(response.content)}")  # ADD THIS LINE
     if hasattr(response, "tool_calls"):
         print(f"Tool calls in response: {response.tool_calls}")
     
@@ -286,8 +288,8 @@ def should_continue(state: AgentState) -> str:
     # Count how many times we've called tools
     tool_message_count = sum(1 for msg in messages if isinstance(msg, ToolMessage))
     
-    # If we've used tools more than 5 times, end to prevent loops
-    if tool_message_count > 5:
+    # If we've used tools more than 3 times, end to prevent loops
+    if tool_message_count > 3:
         print("Max tool calls reached, ending")
         return END
     
@@ -346,9 +348,35 @@ def run_agent(user_query: str) -> Dict[str, Any]:
     
     response_text = ""
     if isinstance(final_message, AIMessage):
-        response_text = final_message.content
+        # Handle different content formats from Bedrock
+        if isinstance(final_message.content, str):
+            response_text = final_message.content
+        elif isinstance(final_message.content, list):
+            # Extract text from content blocks
+            text_parts = []
+            for block in final_message.content:
+                if isinstance(block, dict) and block.get('type') == 'text':
+                    text_parts.append(block.get('text', ''))
+                elif isinstance(block, str):
+                    text_parts.append(block)
+            response_text = ' '.join(text_parts)
+        else:
+            response_text = str(final_message.content)
     else:
         response_text = str(final_message)
+    
+    # Add logging to debug
+    print(f"Final message type: {type(final_message)}")
+    print(f"Final message content: {final_message.content if hasattr(final_message, 'content') else final_message}")
+    print(f"Extracted response text: {response_text}")
+    
+    # Fallback if response is empty
+    if not response_text or response_text.strip() == "":
+        # Check if we have tool data that indicates success
+        if result.get("tool_data", {}).get("tool_create_playlist"):
+            playlist_data = result["tool_data"]["tool_create_playlist"]
+            if playlist_data.get("status") == "success":
+                response_text = f"Successfully created playlist: {playlist_data.get('message', 'Playlist created')}"
     
     # Return both the LLM response and the raw tool data
     return {

@@ -13,6 +13,13 @@ export type ChatbotResponse =
           message: string;
           tracks_processed?: number;
         }
+        tool_create_playlist?: {
+          status: "success" | "error";
+          message: string;
+          playlist_url: string;
+          playlist_id: string;
+          tracks_added: number;
+        }
       };
     }
   | {
