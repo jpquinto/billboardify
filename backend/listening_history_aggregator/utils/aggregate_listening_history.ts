@@ -15,6 +15,26 @@ export const aggregateListeningHistory = (
     yearlyAlbumAggregations: {},
   };
 
+  // Artists with commas in their actual names (exceptions)
+  const artistNameExceptions = [
+    "Tyler, The Creator",
+    // Add more exceptions here as needed
+  ];
+
+  // Helper function to extract first artist name
+  const getFirstArtistName = (artistName: string): string => {
+    // Check if this is an exception artist
+    for (const exception of artistNameExceptions) {
+      if (artistName.startsWith(exception)) {
+        return exception;
+      }
+    }
+
+    // Otherwise, extract first artist name before comma
+    const commaIndex = artistName.indexOf(",");
+    return commaIndex > 0 ? artistName.substring(0, commaIndex) : artistName;
+  };
+
   listeningHistory.forEach((item) => {
     const playedAt = new Date(item.timestamp);
 
@@ -24,6 +44,9 @@ export const aggregateListeningHistory = (
       playedAt.getMonth() + 1
     ).padStart(2, "0")}`; // "2023-10"
     const year = playedAt.getFullYear().toString(); // "2023"
+
+    // Extract first artist name only for artist aggregations
+    const firstArtistName = getFirstArtistName(item.artist_name);
 
     // Daily Song Aggregation - key by date AND track_id
     const dailySongKey = `${date}-${item.track_id}`;
@@ -48,7 +71,7 @@ export const aggregateListeningHistory = (
       result.dailyArtistAggregations[dailyArtistKey] = {
         date,
         artist_id: item.artist_id,
-        artist_name: item.artist_name,
+        artist_name: firstArtistName,
         artist_image_url: item.artist_image_url,
         daily_play_count: 0,
         genre: item.genre,
@@ -94,7 +117,7 @@ export const aggregateListeningHistory = (
       result.monthlyArtistAggregations[monthlyArtistKey] = {
         year_month: yearMonth,
         artist_id: item.artist_id,
-        artist_name: item.artist_name,
+        artist_name: firstArtistName,
         artist_image_url: item.artist_image_url, // Added
         monthly_play_count: 0,
         genre: item.genre,
@@ -140,7 +163,7 @@ export const aggregateListeningHistory = (
       result.yearlyArtistAggregations[yearlyArtistKey] = {
         year,
         artist_id: item.artist_id,
-        artist_name: item.artist_name,
+        artist_name: firstArtistName,
         artist_image_url: item.artist_image_url, // Added
         yearly_play_count: 0,
         genre: item.genre,
