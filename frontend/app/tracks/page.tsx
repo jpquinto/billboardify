@@ -124,6 +124,9 @@ export default function SongsPage() {
     <main className="flex-1">
       <div>
         <Container className="-translate-y-10 pt-20 relative overflow-visible">
+          {/* <SongHero
+            TODO: implement
+          /> */}
           <div className="grid grid-cols-3 gap-x-10 relative min-h-screen">
             <div className="col-span-2">
               <SongsLeaderboard leaderboard={songLeaderboard!} />

@@ -30,13 +30,13 @@ export const FirstPlaceChartEntry = (entry: SongChartEntryType) => {
     <Container>
       <div className="pt-[10rem] pb-20 scale-[1.04] hover:scale-[1.08] transition-all">
         <LiquidGlassContainer
-          style={{
-            boxShadow: `inset 0px -5px 10px -5px #8200db, 
-              inset 0px -6px 7px -3px #fb64b6,
-              inset 0px -8px 5px -1px #ffba00,
-              0px 4px 12px rgba(0, 0, 0, 0.1),
-              0px 2px 6px rgba(255, 255, 255, 0.2)`,
-          }}
+        // style={{
+        //   boxShadow: `inset 0px -5px 10px -5px #8200db,
+        //     inset 0px -6px 7px -3px #fb64b6,
+        //     inset 0px -8px 5px -1px #ffba00,
+        //     0px 4px 12px rgba(0, 0, 0, 0.1),
+        //     0px 2px 6px rgba(255, 255, 255, 0.2)`,
+        // }}
         >
           <div className="mx-auto min-w-6xl w-full flex flex-col justify-center items-center gap-8 p-4 border-gray-200 transition-colors">
             <LiquidGlassContainer className="mr-auto flex justify-start w-full px-8 bg-gray-100/30">
@@ -91,7 +91,11 @@ export const FirstPlaceChartEntry = (entry: SongChartEntryType) => {
                   <div className="text-xl text-gray-900 font-semibold tracking-tighter uppercase">
                     Last
                   </div>
-                  <div className="font-bold">{entry.last_week || "—"}</div>
+                  <div className="font-bold">
+                    {entry.last_week && entry.last_week <= 100
+                      ? entry.last_week
+                      : "—"}
+                  </div>
                 </div>
 
                 {/* Peak */}
@@ -113,11 +117,9 @@ export const FirstPlaceChartEntry = (entry: SongChartEntryType) => {
                 {/* Plays */}
                 <div className="text-center min-w-[60px]">
                   <div className="text-xl text-gray-900 font-semibold tracking-tighter uppercase">
-                    Plays
+                    PTS
                   </div>
-                  <div className="font-bold">
-                    {formatNumber(entry.plays_since_last_week)}
-                  </div>
+                  <div className="font-bold">{formatNumber(entry.points)}</div>
                 </div>
               </div>
             </div>

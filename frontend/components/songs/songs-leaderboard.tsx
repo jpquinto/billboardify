@@ -1,4 +1,5 @@
 import { LeaderboardSummary, SongLeaderboardEntry } from "@/types/leaderboard";
+import { Trophy } from "lucide-react";
 
 interface SongsLeaderboardProps {
   leaderboard: SongLeaderboardEntry[];
@@ -18,10 +19,18 @@ export const SongsLeaderboard = ({ leaderboard }: SongsLeaderboardProps) => {
 
   return (
     <div className="rounded-lg shadow-xl border border-gray-200 flex flex-col overflow-hidden">
-      <div className="px-6 py-8 border-b border-gray-200 bg-gradient-to-r from-[#fb64b6]/30 to-[#8200db]/30">
-        <h2 className="text-2xl font-bold text-black z-20">
-          Songs Leaderboard
-        </h2>
+      <div className="px-6 py-6 border-b border-gray-200 bg-gradient-to-r from-transparent to-gray-200/50">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-gradient-to-br from-purple-500/70 to-pink-500/70 rounded-lg">
+            <Trophy className="w-5 h-5 text-white" />
+          </div>
+          <div>
+            <h2 className="text-xl font-bold text-gray-900">
+              Songs Leaderboard
+            </h2>
+            <p className="text-sm text-gray-600">Top tracks by total plays in the last 30 days</p>
+          </div>
+        </div>
       </div>
 
       <div className="divide-y divide-gray-200">
@@ -36,7 +45,7 @@ export const SongsLeaderboard = ({ leaderboard }: SongsLeaderboardProps) => {
             >
               {/* Background gradient */}
               <div
-                className="absolute inset-0 bg-gradient-to-r from-[#fb64b6] to-[#8200db] opacity-[8%]"
+                className="absolute inset-0 bg-gradient-to-r from-gray-100/50 to-gray-200/50"
                 style={{ width: `${percentage}%` }}
               />
 
@@ -73,9 +82,15 @@ export const SongsLeaderboard = ({ leaderboard }: SongsLeaderboardProps) => {
                 </div>
 
                 {/* Song and Album Info */}
+                {/* Song and Album Info */}
                 <div className="flex-grow min-w-0">
                   <h3 className="text-lg text-gray-900 font-bold truncate">
-                    {entry.track_name}
+                    <a
+                      href={`/tracks/${entry.track_id}`}
+                      className="hover:text-purple-500 transition-colors"
+                    >
+                      {entry.track_name}
+                    </a>
                   </h3>
                   <p className="text-sm text-gray-500 truncate">
                     {entry.artist_name}

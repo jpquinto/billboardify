@@ -16,6 +16,12 @@ export const SongChart = ({
   timestamp: string;
 }) => {
   const { chartData: chartEntries, chartSummary, banners } = chartData;
+
+  // Sort chart entries by position
+  const sortedEntries = [...chartEntries].sort(
+    (a, b) => a.position - b.position
+  );
+
   return (
     <div className="flex justify-center flex-col mx-auto px-4 pt-30">
       <ChartHeader
@@ -29,9 +35,9 @@ export const SongChart = ({
 
       <section className="relative max-w-8xl" id="1">
         <BannerScroller banners={banners.map((banner) => banner.banner_url)} />
-        <FirstPlaceChartEntry {...chartEntries[0]} />
+        <FirstPlaceChartEntry {...sortedEntries[0]} />
         <div className="pt-5">
-          {chartEntries.slice(1, 40).map((entry) => (
+          {sortedEntries.slice(1, 40).map((entry) => (
             <TopTenChartEntry key={entry.track_id} {...entry} />
           ))}
         </div>
@@ -56,7 +62,7 @@ export const SongChart = ({
 
           {/* Chart Entries */}
           <div className="divide-y divide-gray-200">
-            {chartEntries.slice(40).map((entry) => (
+            {sortedEntries.slice(40).map((entry) => (
               <SongChartEntry key={entry.track_id} {...entry} />
             ))}
           </div>

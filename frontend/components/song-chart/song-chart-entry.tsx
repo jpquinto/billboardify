@@ -61,7 +61,7 @@ export const SongChartEntry = (entry: SongChartEntryType) => {
         {/* Last Week */}
         <div className="text-center min-w-[40px]">
           <div className="text-xs text-gray-400 uppercase">Last</div>
-          <div className="font-medium">{entry.last_week || "—"}</div>
+          <div className="font-medium">{(entry.last_week && entry.last_week <= 100) ? entry.last_week : "—"}</div>
         </div>
 
         {/* Peak */}
@@ -78,9 +78,9 @@ export const SongChartEntry = (entry: SongChartEntryType) => {
 
         {/* Plays */}
         <div className="text-center min-w-[60px]">
-          <div className="text-xs text-gray-400 uppercase">Plays</div>
+          <div className="text-xs text-gray-400 uppercase">PTS</div>
           <div className="font-medium">
-            {formatNumber(entry.plays_since_last_week)}
+            {formatNumber(entry.points)}
           </div>
         </div>
       </div>

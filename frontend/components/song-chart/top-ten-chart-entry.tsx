@@ -13,9 +13,9 @@ export const TopTenChartEntry = (entry: SongChartEntryType) => {
 
     const positionAdjustment = entry.position - (entry.last_week || 0);
 
-    if (positionAdjustment > 0) {
+    if (positionAdjustment < 0) {
       return <span className="text-green-500 text-xl">▲</span>;
-    } else if (positionAdjustment < 0) {
+    } else if (positionAdjustment > 0) {
       return <span className="text-red-500 text-xl">▼</span>;
     } else {
       return <span className="text-gray-400 text-xl">—</span>;
@@ -106,7 +106,11 @@ export const TopTenChartEntry = (entry: SongChartEntryType) => {
               {/* Last Week */}
               <div className="text-center min-w-[40px]">
                 <div className="text-xs text-gray-400 uppercase">Last</div>
-                <div className="font-medium">{entry.last_week || "—"}</div>
+                <div className="font-medium">
+                  {entry.last_week && entry.last_week <= 100
+                    ? entry.last_week
+                    : "—"}
+                </div>
               </div>
 
               {/* Peak */}
@@ -123,10 +127,8 @@ export const TopTenChartEntry = (entry: SongChartEntryType) => {
 
               {/* Plays */}
               <div className="text-center min-w-[60px]">
-                <div className="text-xs text-gray-400 uppercase">Plays</div>
-                <div className="font-medium">
-                  {formatNumber(entry.plays_since_last_week)}
-                </div>
+                <div className="text-xs text-gray-400 uppercase">PTS</div>
+                <div className="font-medium">{formatNumber(entry.points)}</div>
               </div>
             </div>
           </div>

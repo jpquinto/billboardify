@@ -56,7 +56,7 @@ export const BannerScroller = ({ banners }: { banners: string[] }) => {
       />
 
       <div
-        className="flex flex-col items-center leading-none opacity-40 relative"
+        className="flex flex-col items-center leading-none opacity-20 relative"
         style={{ filter: `blur(1.5px)` }}
       >
         {/* First Banner */}

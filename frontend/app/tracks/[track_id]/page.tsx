@@ -9,6 +9,7 @@ import { ListeningHistoryChart } from "@/components/listening-history-chart/list
 import Container from "@/components/ui/container";
 import { SongHero } from "@/components/songs/song-hero";
 import { parseColorToRgb } from "@/utils/parse-rgb";
+import { SongMetadataCard } from "@/components/songs/song-metadata-card";
 
 export default function SongPage({ params }: { params: { track_id: string } }) {
   const resolvedParams = params instanceof Promise ? use(params) : params;
@@ -120,14 +121,20 @@ export default function SongPage({ params }: { params: { track_id: string } }) {
           album_name={songMetadata?.album_name || "Unknown Album"}
         />
         <Container className="-translate-y-10 pt-20 relative">
-          <div className="grid grid-cols-2 gap-x-10">
-            <div></div>
+          <div className="grid grid-cols-2 gap-x-5">
             <ListeningHistoryChart
               type={"song"}
               id={resolvedParams.track_id}
               primaryColor={primaryColor}
               secondaryColor={secondaryColor}
             />
+            <div>
+              <SongMetadataCard
+                songMetadata={songMetadata!}
+                primaryColor={primaryColor}
+                secondaryColor={secondaryColor}
+              />
+            </div>
           </div>
         </Container>
       </div>

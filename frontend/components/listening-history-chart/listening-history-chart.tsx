@@ -154,13 +154,13 @@ export const ListeningHistoryChart = ({
         </p>
       </div>
 
-      <ChartContainer config={chartConfig} className="w-full">
+      <ChartContainer config={chartConfig} className="w-full h-[30rem]">
         <BarChart
           layout="vertical"
           data={chartData}
           margin={{
             top: 10,
-            right: 10,
+            right: 25,
             left: 10,
             bottom: 10,
           }}
@@ -176,12 +176,12 @@ export const ListeningHistoryChart = ({
               <stop
                 offset="0%"
                 stopColor={primaryColor || "#8200db"}
-                stopOpacity="0.7"
+                stopOpacity="0.5"
               />
               <stop
                 offset="100%"
                 stopColor={secondaryColor || "#fb64b6"}
-                stopOpacity="0.7"
+                stopOpacity="0.5"
               />
             </linearGradient>
           </defs>
@@ -222,7 +222,7 @@ export const ListeningHistoryChart = ({
             dataKey="plays"
             fill="url(#blueToPurpleGradient)"
             radius={[2, 8, 8, 2]}
-            barSize={40}
+            barSize={70}
           >
             <LabelList
               position="right"
