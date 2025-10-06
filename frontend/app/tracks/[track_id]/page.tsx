@@ -11,7 +11,7 @@ import { SongHero } from "@/components/songs/song-hero";
 import { parseColorToRgb } from "@/utils/parse-rgb";
 import { SongMetadataCard } from "@/components/songs/song-metadata-card";
 
-export default function SongPage({ params }: { params: { track_id: string } }) {
+export default function SongPage({ params }: { params: Promise<{ track_id: string }> }) {
   const resolvedParams = params instanceof Promise ? use(params) : params;
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
