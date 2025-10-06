@@ -28,7 +28,7 @@ export const PodiumAlbumChartEntry = (entry: AlbumChartEntryType) => {
 
   return (
     <div className="py-5">
-      <LiquidGlassContainer innerClassName="relative">
+      <LiquidGlassContainer>
         <div className="max-w-8xl mx-auto min-w-6xl w-full flex items-center gap-8 p-4 py-15 border-gray-200 transition-colors">
           {/* Position */}
           <div className="flex items-center gap-2 min-w-[60px]">

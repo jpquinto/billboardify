@@ -31,14 +31,6 @@ export const FirstPlaceAlbumChartEntry = (entry: AlbumChartEntryType) => {
     <div className="pt-[10rem] pb-20">
       <LiquidGlassContainer
         className="scale-[1.04] hover:scale-[1.08] transition-all opacity-100"
-        innerStyle={{
-          boxShadow: `inset 0px -5px 10px -5px #B91C1C, 
-              inset 0px -6px 7px -3px #F97316,
-              inset 0px -8px 5px -1px #FCD34D,
-              0px 4px 12px rgba(0, 0, 0, 0.1),
-              0px 2px 6px rgba(255, 255, 255, 0.2)`,
-        }}
-        innerClassName="relative"
       >
         <div className="max-w-8xl mx-auto min-w-6xl w-full flex items-center gap-8 p-4 py-15 border-gray-200 transition-colors">
           {/* Position */}
