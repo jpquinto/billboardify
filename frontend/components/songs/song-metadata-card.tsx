@@ -149,7 +149,7 @@ export const SongMetadataCard = ({
           <div className="space-y-1">
             <p className="text-xs text-muted-foreground flex items-center gap-1">
               <PlayCircle className="w-3 h-3" />
-              Play Count
+              Recent Play Count
             </p>
             <p className="text-lg font-semibold">
               {formatNumber(songMetadata.play_count)}

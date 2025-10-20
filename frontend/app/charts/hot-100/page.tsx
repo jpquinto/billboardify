@@ -23,10 +23,9 @@ export default function Hot100() {
         setError(null);
 
         // Step 1: Check cache first for chart list
-        // let chartsData = chartCache.get<{
-        //   charts: Array<{ timestamp: string }>;
-        // }>("charts_list");
-        let chartsData = undefined
+        let chartsData = chartCache.get<{
+          charts: Array<{ timestamp: string }>;
+        }>("charts_list");
 
         if (!chartsData) {
           // Cache miss - fetch from API

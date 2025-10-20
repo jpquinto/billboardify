@@ -52,6 +52,8 @@ export const handler = async (event: any) => {
       };
     }
 
+    console.log(`Fetching leaderboards: type=${type}, granularity=${granularity}, offset=${offset}, start_date=${start_date}, end_date=${end_date}`);
+
     // Call the leaderboards function
     const leaderboardData = await getLeaderboards(
       type,
@@ -60,6 +62,8 @@ export const handler = async (event: any) => {
       start_date,
       end_date
     );
+
+    console.log("Fetched leaderboard data:", leaderboardData);
 
     return {
       statusCode: 200,

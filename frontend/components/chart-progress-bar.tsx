@@ -46,7 +46,7 @@ export const ChartProgressBar = ({
   const activeSection = Math.ceil(scrollPercent / 10) || 1; // 1-10%, 11-20%, etc.
 
   return (
-    <div className="fixed top-1/2 right-0 -translate-y-1/2 z-50 p-4">
+    <div className="hidden 2xl:block fixed top-1/2 right-0 -translate-y-1/2 z-50 p-4">
       <div className="flex flex-col w-12 gap-y-[10px] items-end">
         {sections.map((section) => {
           const sectionNum = parseInt(section);

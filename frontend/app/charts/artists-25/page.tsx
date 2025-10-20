@@ -24,14 +24,14 @@ export default function Artist25() {
         // Step 1: Check cache for charts list
         let chartsData = chartCache.get<{
           charts: Array<{ timestamp: string }>;
-        }>("artist-charts-list");
+        }>("artist_charts_list");
 
         if (!chartsData) {
           // Cache miss - fetch from API
           chartsData = await listCharts({
             chartType: "artists",
           });
-          chartCache.set("artist-charts-list", chartsData);
+          chartCache.set("artist_charts_list", chartsData, 0.5);
         }
 
         if (chartsData.charts.length === 0) {
@@ -52,13 +52,13 @@ export default function Artist25() {
         );
 
         // Step 2: Check cache for chart data
-        const cacheKey = `artist-chart-${timestamp}`;
+        const cacheKey = `artist_chart_${timestamp}`;
         let chartData = chartCache.get<ArtistChartType>(cacheKey);
 
         if (!chartData) {
           // Cache miss - fetch from API
           chartData = await getArtistChart(timestamp);
-          chartCache.set(cacheKey, chartData);
+          chartCache.set(cacheKey, chartData, 2);
         }
 
         setLatestChartData(chartData);
