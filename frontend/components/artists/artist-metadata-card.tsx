@@ -8,27 +8,27 @@ import {
   Calendar,
   PlayCircle,
 } from "lucide-react";
-import { SongMetadata } from "@/types/song-metadata";
+import { ArtistMetadata } from "@/types/artist-metadata";
 
-interface SongMetadataCardProps {
-  songMetadata: SongMetadata;
+interface ArtistMetadataCardProps {
+  artistMetadata: ArtistMetadata;
   primaryColor?: string;
   secondaryColor?: string;
 }
 
-export const SongMetadataCard = ({
-  songMetadata,
+export const ArtistMetadataCard = ({
+  artistMetadata,
   primaryColor,
   secondaryColor,
-}: SongMetadataCardProps) => {
+}: ArtistMetadataCardProps) => {
   const getPositionChange = () => {
     if (
-      songMetadata.last_week_position === null ||
-      songMetadata.position === null
+      artistMetadata.last_week_position === null ||
+      artistMetadata.position === null
     ) {
       return null;
     }
-    const change = songMetadata.last_week_position - songMetadata.position;
+    const change = artistMetadata.last_week_position - artistMetadata.position;
     if (change > 0) return { value: change, trend: "up" };
     if (change < 0) return { value: Math.abs(change), trend: "down" };
     return { value: 0, trend: "same" };
@@ -36,9 +36,9 @@ export const SongMetadataCard = ({
 
   const positionChange = getPositionChange();
   const usePrimaryColor =
-    primaryColor || songMetadata.cover_primary_color || "#8B5CF6";
+    primaryColor || artistMetadata.cover_primary_color || "#8B5CF6";
   const useSecondaryColor =
-    secondaryColor || songMetadata.cover_secondary_color || "#EC4899";
+    secondaryColor || artistMetadata.cover_secondary_color || "#EC4899";
 
   const formatNumber = (num: number | null) => {
     if (num === null) return "N/A";
@@ -60,12 +60,8 @@ export const SongMetadataCard = ({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Music className="w-4 h-4 text-muted-foreground" />
-            <span className="text-sm text-muted-foreground">Album:</span>
-            <span className="text-sm font-medium">
-              {songMetadata.album_name}
-            </span>
           </div>
-          <Badge variant="secondary">{songMetadata.genre}</Badge>
+          <Badge variant="secondary">{artistMetadata.genre}</Badge>
         </div>
 
         <div className="grid grid-cols-3 gap-4 pt-4 border-t">
@@ -76,8 +72,8 @@ export const SongMetadataCard = ({
                 className="text-2xl font-bold"
                 style={{ color: usePrimaryColor }}
               >
-                {songMetadata.position !== null
-                  ? `#${songMetadata.position}`
+                {artistMetadata.position !== null
+                  ? `#${artistMetadata.position}`
                   : "N/A"}
               </p>
               {positionChange && positionChange.trend === "up" && (
@@ -107,8 +103,8 @@ export const SongMetadataCard = ({
           <div className="space-y-1">
             <p className="text-xs text-muted-foreground">Last Week</p>
             <p className="text-2xl font-bold text-muted-foreground">
-              {songMetadata.last_week_position !== null
-                ? `#${songMetadata.last_week_position}`
+              {artistMetadata.last_week_position !== null
+                ? `#${artistMetadata.last_week_position}`
                 : "N/A"}
             </p>
           </div>
@@ -119,8 +115,8 @@ export const SongMetadataCard = ({
               className="text-2xl font-bold"
               style={{ color: useSecondaryColor }}
             >
-              {songMetadata.peak_position !== null
-                ? `#${songMetadata.peak_position}`
+              {artistMetadata.peak_position !== null
+                ? `#${artistMetadata.peak_position}`
                 : "N/A"}
             </p>
           </div>
@@ -133,23 +129,23 @@ export const SongMetadataCard = ({
               Recent Play Count
             </p>
             <p className="text-lg font-semibold">
-              {formatNumber(songMetadata.play_count)}
+              {formatNumber(artistMetadata.play_count)}
             </p>
           </div>
 
           <div className="space-y-1">
             <p className="text-xs text-muted-foreground">Weeks on Chart</p>
             <p className="text-lg font-semibold">
-              {formatNumber(songMetadata.weeks_on_chart)}
+              {formatNumber(artistMetadata.weeks_on_chart)}
             </p>
           </div>
         </div>
 
-        {songMetadata.last_charted_at && (
+        {artistMetadata.last_charted_at && (
           <div className="flex items-center gap-2 pt-4 border-t text-sm text-muted-foreground">
             <Calendar className="w-4 h-4" />
             <span>
-              Last charted: {formatDate(songMetadata.last_charted_at)}
+              Last charted: {formatDate(artistMetadata.last_charted_at)}
             </span>
           </div>
         )}

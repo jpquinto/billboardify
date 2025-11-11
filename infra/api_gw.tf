@@ -13,7 +13,7 @@ module "spotify-project-api" {
       lambda_invoke_arn    = module.get_chart_lambda.invoke_arn
       lambda_function_name = module.get_chart_lambda.name
       enable_cors_all      = true
-      use_authorizer       = false # TODO: Enable when auth is ready
+      use_authorizer       = false
       # cache_key_parameters = [
       #   "method.request.querystring.type",
       #   "method.request.querystring.timestamp"
@@ -30,7 +30,7 @@ module "spotify-project-api" {
       lambda_invoke_arn    = module.list_charts_lambda.invoke_arn
       lambda_function_name = module.list_charts_lambda.name
       enable_cors_all      = true
-      use_authorizer       = false # TODO: Enable when auth is ready
+      use_authorizer       = false
     },
     {
       http_method          = "GET"
@@ -39,7 +39,7 @@ module "spotify-project-api" {
       lambda_invoke_arn    = module.get_access_token_lambda.invoke_arn
       lambda_function_name = module.get_access_token_lambda.name
       enable_cors_all      = true
-      use_authorizer       = false # TODO: Enable when auth is ready
+      use_authorizer       = false
     },
     {
       http_method          = "GET"
@@ -48,7 +48,7 @@ module "spotify-project-api" {
       lambda_invoke_arn    = module.get_song_metadata_lambda.invoke_arn
       lambda_function_name = module.get_song_metadata_lambda.name
       enable_cors_all      = true
-      use_authorizer       = false # TODO: Enable when auth is ready
+      use_authorizer       = false
     },
     {
       http_method          = "GET"
@@ -57,7 +57,7 @@ module "spotify-project-api" {
       lambda_invoke_arn    = module.get_listening_history_lambda.invoke_arn
       lambda_function_name = module.get_listening_history_lambda.name
       enable_cors_all      = true
-      use_authorizer       = false # TODO: Enable when auth is ready
+      use_authorizer       = false
     },
     {
       http_method          = "GET"
@@ -66,7 +66,7 @@ module "spotify-project-api" {
       lambda_invoke_arn    = module.get_leaderboards_lambda.invoke_arn
       lambda_function_name = module.get_leaderboards_lambda.name
       enable_cors_all      = true
-      use_authorizer       = false # TODO: Enable when auth is ready
+      use_authorizer       = false
     },
     {
       http_method          = "POST"
@@ -75,7 +75,25 @@ module "spotify-project-api" {
       lambda_invoke_arn    = module.add_training_data_lambda.invoke_arn
       lambda_function_name = module.add_training_data_lambda.name
       enable_cors_all      = true
-      use_authorizer       = false # TODO: Enable when auth is ready
+      use_authorizer       = false
+    },
+    {
+      http_method          = "GET"
+      path                 = "get-album-metadata"
+      integration_type     = "lambda"
+      lambda_invoke_arn    = module.get_album_metadata_lambda.invoke_arn
+      lambda_function_name = module.get_album_metadata_lambda.name
+      enable_cors_all      = true
+      use_authorizer       = false
+    },
+    {
+      http_method          = "GET"
+      path                 = "get-artist-metadata"
+      integration_type     = "lambda"
+      lambda_invoke_arn    = module.get_artist_metadata_lambda.invoke_arn
+      lambda_function_name = module.get_artist_metadata_lambda.name
+      enable_cors_all      = true
+      use_authorizer       = false
     },
   ]
   authorizer_type = "COGNITO_USER_POOLS"

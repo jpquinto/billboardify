@@ -1,28 +1,23 @@
 "use client";
 
 import { useEffect, useState, use } from "react";
-import { chartCache } from "@/hooks/useCache";
-import { SongMetadata } from "@/types/song-metadata";
-import { getSongMetadata } from "@/actions/get-song-metadata";
-import Image from "next/image";
+import { getAlbumMetadata } from "@/actions/get-album-metadata";
 import { ListeningHistoryChart } from "@/components/listening-history-chart/listening-history-chart";
 import Container from "@/components/ui/container";
-import { SongHero } from "@/components/songs/song-hero";
 import { parseColorToRgb } from "@/utils/parse-rgb";
-import { SongMetadataCard } from "@/components/songs/song-metadata-card";
 import { AlbumMetadata } from "@/types/album-metadata";
-import { ArtistMetadata } from "@/types/artist-metadata";
-import { getAlbumMetadata } from "@/actions/get-album-metadata";
 import { AlbumMetadataCard } from "@/components/albums/album-metadata-card";
-import { getArtistMetadata } from "@/actions/get-artist-metadata";
+import { AlbumHero } from "@/components/albums/album-hero";
 
-export default function SongPage({ params }: { params: Promise<{ track_id: string }> }) {
+export default function AlbumPage({
+  params,
+}: {
+  params: Promise<{ album_id: string }>;
+}) {
   const resolvedParams = params instanceof Promise ? use(params) : params;
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [songMetadata, setSongMetadata] = useState<SongMetadata | null>(null);
   const [albumMetadata, setAlbumMetadata] = useState<AlbumMetadata | null>(null);
-  const [artistMetadata, setArtistMetadata] = useState<ArtistMetadata | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -30,27 +25,12 @@ export default function SongPage({ params }: { params: Promise<{ track_id: strin
         setLoading(true);
         setError(null);
 
-        // Step 1: Check cache first for chart list
-        // let chartsData = chartCache.get<{
-        //   charts: Array<{ timestamp: string }>;
-        // }>("charts_list");
-        let songMetadata = null;
+        const albumMetadata = await getAlbumMetadata(resolvedParams.album_id);
 
-        if (!songMetadata) {
-          // Cache miss - fetch from API
-          songMetadata = await getSongMetadata(resolvedParams.track_id);
-          // chartCache.set("charts_list", songMetadata, 0.5); // Cache for 30 minutes
-        }
-
-        setSongMetadata(songMetadata);
-
-        const artistMetadata = await getArtistMetadata(songMetadata.artist_id);
-        setArtistMetadata(artistMetadata);
-        const albumMetadata = await getAlbumMetadata(songMetadata.album_id);
         setAlbumMetadata(albumMetadata);
       } catch (err) {
         setError(
-          err instanceof Error ? err.message : "Failed to load metadata"
+          err instanceof Error ? err.message : "Failed to load chart data"
         );
       } finally {
         setLoading(false);
@@ -58,7 +38,7 @@ export default function SongPage({ params }: { params: Promise<{ track_id: strin
     };
 
     fetchData();
-  }, [resolvedParams.track_id]);
+  }, [resolvedParams.album_id]);
 
   if (loading) {
     return (
@@ -90,7 +70,7 @@ export default function SongPage({ params }: { params: Promise<{ track_id: strin
       <main className="flex-1">
         <div className="max-w-6xl mx-auto px-4 py-8">
           <div className="text-center">
-            <div className="text-red-500 text-xl mb-4">Error loading metadata</div>
+            <div className="text-red-500 text-xl mb-4">Error loading chart</div>
             <p className="text-gray-600">{error}</p>
             <button
               onClick={() => window.location.reload()}
@@ -117,35 +97,29 @@ export default function SongPage({ params }: { params: Promise<{ track_id: strin
   //   }
 
   const primaryColor =
-    parseColorToRgb(songMetadata?.cover_primary_color) || undefined;
+    parseColorToRgb(albumMetadata?.cover_primary_color) || undefined;
   const secondaryColor =
-    parseColorToRgb(songMetadata?.cover_secondary_color) || undefined;
+    parseColorToRgb(albumMetadata?.cover_secondary_color) || undefined;
 
   return (
     <main className="flex-1">
       <div>
-        <SongHero
+        <AlbumHero
           album_cover_banner={
-            songMetadata?.album_cover_banner || "/banner-placeholder.png"
+            albumMetadata?.album_cover_banner || "/banner-placeholder.png"
           }
-          track_name={songMetadata?.track_name || "Unknown Track"}
-          artist_name={songMetadata?.artist_name || "Unknown Artist"}
-          album_name={songMetadata?.album_name || "Unknown Album"}
+          artist_name={albumMetadata?.artist_name || "Unknown Artist"}
+          album_name={albumMetadata?.album_name || "Unknown Album"}
         />
         <Container className="-translate-y-10 pt-20 relative">
           <div className="grid grid-cols-2 gap-x-5">
             <ListeningHistoryChart
-              type={"song"}
-              id={resolvedParams.track_id}
+              type={"album"}
+              id={resolvedParams.album_id}
               primaryColor={primaryColor}
               secondaryColor={secondaryColor}
             />
             <div>
-              <SongMetadataCard
-                songMetadata={songMetadata!}
-                primaryColor={primaryColor}
-                secondaryColor={secondaryColor}
-              />
               <AlbumMetadataCard
                 albumMetadata={albumMetadata!}
                 primaryColor={primaryColor}

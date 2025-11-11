@@ -1,4 +1,4 @@
-import { LeaderboardSummary, SongLeaderboardEntry } from "@/types/leaderboard";
+import { SongLeaderboardEntry } from "@/types/leaderboard";
 import { Trophy } from "lucide-react";
 
 interface SongsLeaderboardProps {
@@ -40,7 +40,7 @@ export const SongsLeaderboard = ({ leaderboard }: SongsLeaderboardProps) => {
 
           return (
             <div
-              key={entry.track_id}
+              key={`${entry.track_id}-${index}`}
               className="relative px-6 py-4 hover:bg-gray-50 transition-colors"
             >
               {/* Background gradient */}

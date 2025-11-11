@@ -10,7 +10,6 @@ import {
 import { getCurrentDate, getDateDaysAgo } from "@/utils/date";
 import { getLeaderboard } from "@/actions/get-leaderboard";
 import { LeaderboardSummary } from "@/components/leaderboards/leaderboard-summary";
-import { SongsLeaderboard } from "@/components/songs/songs-leaderboard";
 import { AlbumsLeaderboard } from "@/components/albums/albums-leaderboard";
 
 export default function Albums() {
